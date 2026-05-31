@@ -1607,38 +1607,8 @@ body.dark-theme .wizard-card {
     border-bottom: 1px solid var(--card-border);
     padding-bottom: 1.25rem;
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-@media (min-width: 768px) {
-    .wizard-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-}
-
-.wizard-logo {
-    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.75rem;
-}
-
-.wizard-logo h2 {
-    font-family: var(--font-heading);
-    font-size: 1.25rem;
-    font-weight: 800;
-    margin: 0;
-    letter-spacing: 0.5px;
-    background: linear-gradient(135deg, var(--accent-gold) 0%, var(--primary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.wizard-logo i {
-    font-size: 1.5rem;
-    color: var(--accent-gold);
 }
 
 /* Progress Tracker */
@@ -1877,3 +1847,56 @@ body.dark-theme .wizard-card {
     background: var(--card-border);
     border-radius: 3px;
 }
+
+/* Light Mode Specific Wizard Text Adjustments for High Contrast */
+body:not(.dark-theme) .wizard-card {
+    color: #0f172a !important; /* Force crisp slate-black */
+}
+
+body:not(.dark-theme) .wizard-card h3 {
+    color: #0f172a !important;
+}
+
+body:not(.dark-theme) .wizard-card .step-intro-wrapper p {
+    color: #1e293b !important; /* Extremely high contrast dark slate */
+}
+
+body:not(.dark-theme) .wizard-card .step-label {
+    color: #475569 !important; /* Muted dark slate */
+}
+
+body:not(.dark-theme) .wizard-card .progress-step.active .step-label {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+body:not(.dark-theme) .wizard-card .input-field label {
+    color: #1e293b !important;
+}
+
+body:not(.dark-theme) .wizard-card .wizard-submit-banner p {
+    color: #1e293b !important;
+}
+
+body:not(.dark-theme) .wizard-card .award-label {
+    color: #475569 !important;
+}
+
+body:not(.dark-theme) .wizard-card .award-value {
+    color: #0f172a !important;
+}
+
+body:not(.dark-theme) .wizard-card .wizard-submit-banner h3 {
+    color: #0f172a !important;
+}
+
+body:not(.dark-theme) .wizard-card .step-num {
+    border-color: rgba(15, 23, 42, 0.15) !important;
+    color: #475569 !important;
+}
+
+body:not(.dark-theme) .wizard-card .progress-step.active .step-num {
+    background-color: var(--primary) !important;
+    color: #ffffff !important;
+}
+
