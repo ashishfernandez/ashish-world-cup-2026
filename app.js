@@ -1030,23 +1030,23 @@ function setupOnboarding() {
             return;
         }
 
-        // If created but not submitted yet, route them to prediction steps
-        if (!STATE.userSubmitted) {
-            const p = STATE.participants.user;
-            const groupsCompleted = Object.keys(p.groupStandings).length > 0;
+        const p = STATE.participants.user;
 
-            if (!groupsCompleted) {
-                const groupTabBtn = document.querySelector('.nav-item[data-tab="groups"]');
-                if (groupTabBtn) groupTabBtn.click();
-                alert('Start by sorting your group standings! Drag or click teams to select the top 2 in each group.');
-            } else {
-                const bracketTabBtn = document.querySelector('.nav-item[data-tab="bracket"]');
-                if (bracketTabBtn) bracketTabBtn.click();
-                alert('Complete your predictions by choosing match winners in the bracket tree, up to the Champion!');
-            }
-        } else {
-            alert('You have already submitted your predictions! Review the standings leaderboard to see how you rank.');
-        }
+        // Perform instant submission & update predictions in state/localStorage
+        STATE.userSubmitted = true;
+        localStorage.setItem('wc-user-submitted', 'true');
+        if (p.champ) localStorage.setItem('wc-user-champ', p.champ);
+        localStorage.setItem('wc-user-bracket', JSON.stringify(p.bracketPicks));
+        localStorage.setItem('wc-user-standings', JSON.stringify(p.groupStandings));
+
+        updateSubmitButtonState();
+        renderAll();
+
+        alert(`🎉 Picks submitted successfully! Your standings are updated live on the Leaderboard.`);
+
+        // Auto transition to Leaderboard tab
+        const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
+        if (leaderboardTabBtn) leaderboardTabBtn.click();
     };
 
     if (sidebarBtn) sidebarBtn.addEventListener('click', handleMainSubmitClick);
@@ -1104,22 +1104,22 @@ function setupOnboarding() {
     const submitPicksBtn = document.getElementById('btn-submit-picks');
     submitPicksBtn.addEventListener('click', () => {
         const p = STATE.participants.user;
-        if (!p || !p.champ) {
-            alert('Please complete your bracket predictions by selecting your champion before submitting!');
+        if (!p) {
+            modal.classList.add('active');
             return;
         }
 
         // Set submitted flag
         STATE.userSubmitted = true;
         localStorage.setItem('wc-user-submitted', 'true');
-        localStorage.setItem('wc-user-champ', p.champ);
+        if (p.champ) localStorage.setItem('wc-user-champ', p.champ);
         localStorage.setItem('wc-user-bracket', JSON.stringify(p.bracketPicks));
         localStorage.setItem('wc-user-standings', JSON.stringify(p.groupStandings));
 
         updateSubmitButtonState();
         renderAll();
 
-        alert(`🎉 Congratulations ${p.name}! Your predictions have been submitted successfully. You are now entered into the leaderboard pool!`);
+        alert(`🎉 Picks submitted successfully! Your standings are updated live on the Leaderboard.`);
         
         // Auto transition to Leaderboard tab
         const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
@@ -1132,43 +1132,35 @@ function updateSubmitButtonState() {
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
     const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
 
-    if (STATE.userSubmitted) {
-        const successContent = `<i class="fa-solid fa-circle-check"></i> Picks Submitted!`;
-        
-        if (submitPicksBtn) {
-            submitPicksBtn.innerHTML = successContent;
-            submitPicksBtn.disabled = true;
-            submitPicksBtn.style.opacity = '0.75';
-            submitPicksBtn.classList.remove('glowing-btn');
-        }
-        [sidebarBtn, leaderboardBtn].forEach(btn => {
-            if (btn) {
-                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Picks Submitted`;
-                btn.disabled = true;
-                btn.style.opacity = '0.75';
-                btn.classList.remove('glowing-btn');
-            }
-        });
-    } else {
-        const onboarded = !!STATE.participants.user;
-        const labelText = onboarded ? 'Complete Picks' : 'Submit Picks';
-        const iconHtml = onboarded ? '<i class="fa-solid fa-user-pen"></i>' : '<i class="fa-solid fa-cloud-arrow-up"></i>';
+    const onboarded = !!STATE.participants.user;
+    const submitted = STATE.userSubmitted;
 
-        if (submitPicksBtn) {
-            submitPicksBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Submit My Picks`;
-            submitPicksBtn.disabled = false;
-            submitPicksBtn.style.opacity = '1';
-            submitPicksBtn.classList.add('glowing-btn');
-        }
-        [sidebarBtn, leaderboardBtn].forEach(btn => {
-            if (btn) {
-                btn.innerHTML = `${iconHtml} <span>${labelText}</span>`;
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.classList.add('glowing-btn');
-            }
-        });
+    // Dynamic text label based on state
+    let labelText = 'Submit Picks';
+    if (submitted) {
+        labelText = 'Update Submitted Picks';
+    } else if (onboarded) {
+        labelText = 'Submit Picks';
     }
+
+    const iconHtml = '<i class="fa-solid fa-cloud-arrow-up"></i>';
+
+    // Button remains fully enabled at all times so they can submit whenever they want
+    if (submitPicksBtn) {
+        submitPicksBtn.innerHTML = `${iconHtml} <span>Submit My Picks</span>`;
+        submitPicksBtn.disabled = false;
+        submitPicksBtn.style.opacity = '1';
+        submitPicksBtn.classList.add('glowing-btn');
+    }
+
+    [sidebarBtn, leaderboardBtn].forEach(btn => {
+        if (btn) {
+            btn.innerHTML = `${iconHtml} <span>${labelText}</span>`;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.classList.add('glowing-btn');
+        }
+    });
 
     // Only show submit button when editing "user" bracket
     if (submitPicksBtn) {
