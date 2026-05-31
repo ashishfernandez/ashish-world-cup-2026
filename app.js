@@ -837,7 +837,6 @@ function propagateWinner(participant, matchId, teamCode) {
     if (!schema || !schema.nextMatch) return;
 
     const nextId = schema.nextMatch;
-    const nextSlot = schema.slot;
 
     // Check if the participant's prediction for the next round is invalid
     const nextPick = participant.bracketPicks[nextId];
@@ -845,14 +844,6 @@ function propagateWinner(participant, matchId, teamCode) {
         // Clear all subsequent nodes that match the old parent
         clearChildMatchPicks(participant, nextId, nextPick);
     }
-    
-    // Automatically advance team to next round slot
-    // Wait: we don't force automatic advancement to avoid confusing user, but standard bracket builders do force it. Let's do it! It's premium.
-    // If the next slot is empty, or has an invalid selection, auto-advance it!
-    participant.bracketPicks[nextId] = teamCode;
-    if (nextId === 32) participant.champ = teamCode;
-
-    propagateWinner(participant, nextId, teamCode);
 }
 
 function clearChildMatchPicks(participant, matchId, oldTeamCode) {
@@ -1028,9 +1019,6 @@ function buildBracketFromStandings(username) {
     KNOCKOUTS_SCHEMA[15].awayTeamCode = groupThirds[6].code; // 3G
     KNOCKOUTS_SCHEMA[16].awayTeamCode = groupThirds[3].code; // 3D
 
-    // Mirror updates inside participant's bracket prediction object
-    p.bracketPicks[1] = p.bracketPicks[1] || KNOCKOUTS_SCHEMA[1].homeTeamCode;
-    p.bracketPicks[2] = p.bracketPicks[2] || KNOCKOUTS_SCHEMA[2].homeTeamCode;
 }
 
 // 11. Render Admin simulator matches panel
