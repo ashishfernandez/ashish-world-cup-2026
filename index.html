@@ -380,22 +380,22 @@
                         <h3>Select Top 8 Third-Place Teams</h3>
                         <p><i class="fa-solid fa-circle-info"></i> Choose exactly 8 of the 12 third-place teams below to advance to the knockout bracket. Click them in your preferred order of strength!</p>
                     </div>
-                    <div class="thirds-selection-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 1.5rem; height: calc(100vh - 350px); min-height: 400px; max-height: 480px;">
+                    <div class="thirds-selection-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 1.25rem; height: calc(100vh - 320px); min-height: 420px; max-height: 520px;">
                         
                         <!-- Left pane: Available 12 teams -->
-                        <div class="thirds-available-pane" style="display: flex; flex-direction: column; gap: 1rem; border-right: 1px solid var(--card-border); padding-right: 2rem; overflow-y: auto;">
+                        <div class="thirds-available-pane" style="display: flex; flex-direction: column; gap: 0.75rem; border-right: 1px solid var(--card-border); padding-right: 2rem; overflow-y: auto;">
                             <h4 style="font-family: var(--font-heading); font-weight: 700; margin: 0; color: var(--text-primary);">Predicted 3rd Place Teams</h4>
                             <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Click on a team to advance them to the next available slot.</p>
-                            <div class="thirds-available-grid" id="wizard-thirds-available" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="thirds-available-grid" id="wizard-thirds-available" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                                 <!-- Injected dynamically by JS -->
                             </div>
                         </div>
                         
                         <!-- Right pane: Selected 8 slots -->
-                        <div class="thirds-selected-pane" style="display: flex; flex-direction: column; gap: 1rem; overflow-y: auto;">
+                        <div class="thirds-selected-pane" style="display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto;">
                             <h4 style="font-family: var(--font-heading); font-weight: 700; margin: 0; color: var(--text-primary);">Selected 8 Advancing Teams</h4>
                             <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Click on a selected team to remove them from advancement.</p>
-                            <div class="thirds-slots-list" id="wizard-thirds-selected-slots" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div class="thirds-slots-list" id="wizard-thirds-selected-slots" style="display: flex; flex-direction: column; gap: 0.5rem;">
                                 <!-- 8 slots rendered dynamically by JS -->
                             </div>
                         </div>

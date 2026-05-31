@@ -2093,7 +2093,7 @@ function renderWizardThirds() {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.75rem 1.25rem;
+            padding: 0.5rem 1rem;
             border-radius: var(--radius-sm);
             transition: all 0.2s ease;
         `;
@@ -2108,25 +2108,34 @@ function renderWizardThirds() {
             slotEl.style.cssText += `
                 background: rgba(59, 130, 246, 0.04);
                 border: 1px solid var(--primary);
-                cursor: pointer;
             `;
+            
+            // Build dynamic sort actions + remove actions
+            const isFirst = i === 0;
+            const isLast = i === p.selectedThirds.length - 1;
+            
             slotEl.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
                     <span style="font-size: 0.78rem; font-weight: 800; color: var(--primary); background: rgba(59, 130, 246, 0.1); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
                     <div style="display: flex; flex-direction: column;">
                         <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">${groupLabel}</span>
-                        <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">${team.name}</span>
+                        <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary);">${team.name}</span>
                     </div>
                 </div>
-                <i class="fa-solid fa-circle-minus" style="color: var(--accent-crimson); font-size: 1.15rem;"></i>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="team-sort-actions" style="display: flex; gap: 0.25rem;">
+                        <button class="sort-btn btn-up" style="padding: 0; height: 24px; width: 24px; display: inline-flex; align-items: center; justify-content: center;" onclick="moveWizardThird(${i}, -1); event.stopPropagation();" ${isFirst ? 'disabled style="opacity: 0.25; cursor: not-allowed;"' : ''}>
+                            <i class="fa-solid fa-chevron-up" style="font-size: 0.72rem;"></i>
+                        </button>
+                        <button class="sort-btn btn-down" style="padding: 0; height: 24px; width: 24px; display: inline-flex; align-items: center; justify-content: center;" onclick="moveWizardThird(${i}, 1); event.stopPropagation();" ${isLast ? 'disabled style="opacity: 0.25; cursor: not-allowed;"' : ''}>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.72rem;"></i>
+                        </button>
+                    </div>
+                    <button class="sort-btn btn-remove" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--accent-crimson); padding: 0; height: 24px; width: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer;" onclick="removeWizardThird(${i}); event.stopPropagation();">
+                        <i class="fa-solid fa-circle-minus" style="font-size: 0.85rem;"></i>
+                    </button>
+                </div>
             `;
-            slotEl.addEventListener('click', () => {
-                p.selectedThirds.splice(i, 1);
-                // Invalidate subsequent picks that might depend on previous third places
-                resetSubsequentBracketPicks(p);
-                saveStateToStorage();
-                renderWizardThirds();
-            });
         } else {
             slotEl.className = 'slot-card-empty';
             slotEl.style.cssText += `
@@ -2135,17 +2144,47 @@ function renderWizardThirds() {
                 color: var(--text-dark);
             `;
             slotEl.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <span style="font-size: 0.78rem; font-weight: 800; color: var(--text-dark); border: 1px dashed var(--card-border); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
-                    <span style="font-size: 0.88rem; font-style: italic;">Slot ${i + 1} (Empty TBD)</span>
+                    <span style="font-size: 0.82rem; font-style: italic;">Slot ${i + 1} (Empty TBD)</span>
                 </div>
-                <span style="font-size: 0.78rem; color: var(--text-dark);">Click team to fill</span>
+                <span style="font-size: 0.72rem; color: var(--text-dark);">Click team to fill</span>
             `;
         }
         selectedContainer.appendChild(slotEl);
     }
     updateWizardNextButtonState();
 }
+
+window.moveWizardThird = function(currentIndex, direction) {
+    const p = STATE.participants.draft;
+    if (!p || !p.selectedThirds) return;
+
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= p.selectedThirds.length) return;
+
+    // Swap elements in selectedThirds array
+    const temp = p.selectedThirds[currentIndex];
+    p.selectedThirds[currentIndex] = p.selectedThirds[targetIndex];
+    p.selectedThirds[targetIndex] = temp;
+
+    // Invalidate subsequent picks since order changed
+    resetSubsequentBracketPicks(p);
+    saveStateToStorage();
+    renderWizardThirds();
+};
+
+window.removeWizardThird = function(index) {
+    const p = STATE.participants.draft;
+    if (!p || !p.selectedThirds) return;
+
+    p.selectedThirds.splice(index, 1);
+
+    // Invalidate subsequent picks since selected thirds set changed
+    resetSubsequentBracketPicks(p);
+    saveStateToStorage();
+    renderWizardThirds();
+};
 
 // Invalidate subsequent predicted predicted bracket picks that depend on third places
 function resetSubsequentBracketPicks(p) {
