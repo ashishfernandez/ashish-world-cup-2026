@@ -171,6 +171,7 @@ function init() {
     setupDropdownListeners();
     setupAdminReset();
     setupThemeToggle();
+    setupDragScroll();
     
     // Load predictions state from localStorage
     loadStateFromStorage();
@@ -1617,6 +1618,52 @@ function getPredictedAdvancers(username) {
         if (p.groupStandings[group]) list.push(p.groupStandings[group][2]);
     }
     return list;
+}
+
+function setupDragScroll() {
+    const mainBracketContainer = document.querySelector('#tab-bracket .bracket-scroll-container');
+    const wizardBracketContainer = document.querySelector('.wizard-bracket-scroll-area .bracket-scroll-container');
+    
+    makeContainerDraggable(mainBracketContainer);
+    makeContainerDraggable(wizardBracketContainer);
+}
+
+function makeContainerDraggable(container) {
+    if (!container) return;
+    
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    container.addEventListener('mousedown', (e) => {
+        // Prevent triggering scroll if clicking team slots, buttons, selects
+        if (e.target.closest('.team-slot') || e.target.closest('.sort-btn') || e.target.closest('button') || e.target.closest('select')) {
+            return;
+        }
+        
+        isDown = true;
+        container.style.cursor = 'grabbing';
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isDown = false;
+        container.style.cursor = 'grab';
+    });
+
+    container.addEventListener('mouseup', () => {
+        isDown = false;
+        container.style.cursor = 'grab';
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const walk = (x - startX) * 1.5; // scrolling speed multiplier
+        container.scrollLeft = scrollLeft - walk;
+    });
 }
 
 // Initialize on window load
