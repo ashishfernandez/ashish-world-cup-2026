@@ -135,12 +135,11 @@ const KNOCKOUTS_SCHEMA = {
     32: { round: 'F', label: 'Final Match', name: 'M32', venue: 'New York', date: 'Jul 19' }
 };
 
-// 3. Complete State: Contains Official Simulated Outcomes & Friends Predictions
+// 3. Complete State: Contains Official Simulated Outcomes & Predictions
 const STATE = {
     activeTab: 'leaderboard',
-    activeBracketUser: 'user',   // Current user selected on Bracket Tab
-    activeGroupUser: 'user',     // Current user selected on Groups Tab
-    userSubmitted: false,        // Tracks if the visitor has submitted their picks
+    activeBracketUser: 'draft',   // Current user selected on Bracket Tab
+    activeGroupUser: 'draft',     // Current user selected on Groups Tab
     
     // The administrative actual outcomes of the World Cup
     officialResults: {
@@ -165,24 +164,29 @@ const POINTS_SCALE = {
     goldenBoot: 100        // Predict the Golden Boot Winner (Max 100 pts)
 };
 
-// 5. Initialization: Load static configurations and pre-load mock predictions
+// 5. Initialization: Load static configurations and predictions state
 function init() {
     setupTabListeners();
     setupDropdownListeners();
     setupAdminReset();
     setupThemeToggle();
+    
+    // Load predictions state from localStorage
+    loadStateFromStorage();
+    
     setupOnboarding();
     populateUserDropdowns();
     
-    // Set default initial standings for all users
+    // Set default initial standings for all users (if any aren't set)
     for (const username in STATE.participants) {
         const user = STATE.participants[username];
-        for (const group in GROUPS_DATA) {
-            // By default, copy the static group order into their prediction state
-            user.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
+        if (!user.groupStandings || Object.keys(user.groupStandings).length === 0) {
+            user.groupStandings = {};
+            for (const group in GROUPS_DATA) {
+                user.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
+            }
+            buildBracketFromStandings(username);
         }
-        // Build the bracket based on default standings
-        buildBracketFromStandings(username);
     }
     
     // Set initial official admin results (some simulated match values)
@@ -190,6 +194,59 @@ function init() {
     
     // Initial Render of UI
     renderAll();
+}
+
+function loadStateFromStorage() {
+    // 1. Load submissions array
+    const savedSubs = localStorage.getItem('wc-submissions');
+    if (savedSubs) {
+        const subs = JSON.parse(savedSubs);
+        subs.forEach(sub => {
+            STATE.participants[sub.id] = sub;
+        });
+    }
+
+    // 2. Load draft or initialize a fresh one
+    const savedDraft = localStorage.getItem('wc-draft');
+    if (savedDraft) {
+        STATE.participants.draft = JSON.parse(savedDraft);
+    } else {
+        resetDraft();
+    }
+}
+
+function saveStateToStorage() {
+    // 1. Save submissions
+    const subs = [];
+    for (const username in STATE.participants) {
+        if (username !== 'draft' && STATE.participants[username].submitted) {
+            subs.push(STATE.participants[username]);
+        }
+    }
+    localStorage.setItem('wc-submissions', JSON.stringify(subs));
+
+    // 2. Save draft
+    if (STATE.participants.draft) {
+        localStorage.setItem('wc-draft', JSON.stringify(STATE.participants.draft));
+    }
+}
+
+function resetDraft() {
+    STATE.participants.draft = {
+        id: 'draft',
+        name: 'Guest Player',
+        avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Guest',
+        goldenBoot: 'Kylian Mbappé',
+        champ: '',
+        groupStandings: {},
+        bracketPicks: {},
+        submitted: false,
+        onboarded: false
+    };
+    for (const group in GROUPS_DATA) {
+        STATE.participants.draft.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
+    }
+    buildBracketFromStandings('draft');
 }
 
 // Simulate initial tournament results (e.g. up to Quarterfinals played)
@@ -335,8 +392,9 @@ function calculateParticipantScores() {
     const results = STATE.officialResults;
 
     for (const username in STATE.participants) {
-        if (username === 'user' && !STATE.userSubmitted) continue; // Skip unsubmitted visitor
+        if (username === 'draft') continue; // Skip active draft in leaderboard scores
         const p = STATE.participants[username];
+        if (!p.submitted) continue; // Skip unsubmitted profiles
         let groupPts = 0;
         let koPts = 0;
         let bootPts = 0;
@@ -456,8 +514,8 @@ function updateActivePlayersCount() {
     if (!countEl) return;
     
     const count = Object.keys(STATE.participants).filter(username => {
-        if (username === 'user' && !STATE.userSubmitted) return false;
-        return true;
+        if (username === 'draft') return false;
+        return STATE.participants[username].submitted;
     }).length;
     
     countEl.innerText = `${count} Player${count !== 1 ? 's' : ''}`;
@@ -507,8 +565,8 @@ function renderRankingsTable(scores) {
 
     scores.forEach((player, index) => {
         const tr = document.createElement('tr');
-        if (player.id === 'user') tr.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
-
+        tr.style.cursor = 'pointer';
+        
         tr.innerHTML = `
             <td>
                 <div class="rank-badge">${index + 1}</div>
@@ -516,7 +574,12 @@ function renderRankingsTable(scores) {
             <td>
                 <div class="player-cell">
                     <img src="${player.avatar}" alt="" class="player-avatar">
-                    <span class="player-name">${player.name}</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span class="player-name" style="font-weight: 600; color: var(--text-primary);">${player.name}</span>
+                        <span style="font-size: 0.72rem; color: var(--text-dark); display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem;">
+                            <i class="fa-solid fa-eye" style="font-size: 0.7rem;"></i> Click to view picks
+                        </span>
+                    </div>
                 </div>
             </td>
             <td>
@@ -530,6 +593,23 @@ function renderRankingsTable(scores) {
             <td class="text-center font-heading">${player.bootPts} <span style="font-size:0.75rem; color:var(--text-dark)">/100</span></td>
             <td class="text-right points-emphasis">${player.totalScore} Pts</td>
         `;
+
+        // Row click switches to the Bracket sheet view for this specific participant
+        tr.addEventListener('click', () => {
+            STATE.activeBracketUser = player.id;
+            STATE.activeGroupUser = player.id;
+            
+            populateUserDropdowns();
+            renderBracket();
+            renderGroups();
+            
+            const bracketTabBtn = document.querySelector('.nav-item[data-tab="bracket"]');
+            if (bracketTabBtn) {
+                bracketTabBtn.click();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
         tbody.appendChild(tr);
     });
 }
@@ -558,6 +638,24 @@ function renderBracket() {
         `;
         canvas.appendChild(emptyDiv);
         return;
+    }
+
+    // Render status badge
+    const badgeEl = document.getElementById('bracket-status-badge');
+    if (badgeEl) {
+        if (p.submitted) {
+            badgeEl.innerHTML = `
+                <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: var(--accent-crimson); border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(239, 68, 68, 0.05); margin-right: 1rem;">
+                    <i class="fa-solid fa-lock"></i> Frozen Prediction
+                </span>
+            `;
+        } else {
+            badgeEl.innerHTML = `
+                <span class="badge" style="background: rgba(59, 130, 246, 0.12); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; margin-right: 1rem;">
+                    <i class="fa-solid fa-pen-to-square"></i> Draft
+                </span>
+            `;
+        }
     }
 
     // Define the rounds columns to draw
@@ -632,14 +730,14 @@ function renderBracket() {
                         <span>${matchSchema.label}</span>
                         <span>${matchSchema.date} - ${matchSchema.venue}</span>
                     </div>
-                    <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}">
+                    <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="${p.submitted ? 'cursor: default !important;' : 'cursor: pointer;'}">
                         <div class="team-slot-info">
                             <span class="team-flag">${homeTeam.flag}</span>
                             <span class="team-name-text">${homeTeam.name}</span>
                         </div>
                         <span class="team-score">${homeCode && officialWinner === homeCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
                     </div>
-                    <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}">
+                    <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="${p.submitted ? 'cursor: default !important;' : 'cursor: pointer;'}">
                         <div class="team-slot-info">
                             <span class="team-flag">${awayTeam.flag}</span>
                             <span class="team-name-text">${awayTeam.name}</span>
@@ -649,26 +747,28 @@ function renderBracket() {
                 `;
 
                 // Set interactive click event for advancement selection
-                matchCard.querySelectorAll('.team-slot').forEach(slot => {
-                    slot.addEventListener('click', () => {
-                        const mId = parseInt(slot.getAttribute('data-match'));
-                        const team = slot.getAttribute('data-team');
-                        
-                        if (!team || team === 'TBD') return;
+                if (!p.submitted) {
+                    matchCard.querySelectorAll('.team-slot').forEach(slot => {
+                        slot.addEventListener('click', () => {
+                            const mId = parseInt(slot.getAttribute('data-match'));
+                            const team = slot.getAttribute('data-team');
+                            
+                            if (!team || team === 'TBD') return;
 
-                        // Set participant pick
-                        p.bracketPicks[mId] = team;
-                        if (mId === 32) {
-                            p.champ = team; // Set global predicted champ
-                        }
+                            // Set participant pick
+                            p.bracketPicks[mId] = team;
+                            if (mId === 32) {
+                                p.champ = team; // Set global predicted champ
+                            }
 
-                        // Recursively propagate and clear children to keep tree logically correct
-                        propagateWinner(p, mId, team);
-                        
-                        renderBracket();
-                        renderLeaderboard();
+                            // Recursively propagate and clear children to keep tree logically correct
+                            propagateWinner(p, mId, team);
+                            
+                            renderBracket();
+                            renderLeaderboard();
+                        });
                     });
-                });
+                }
 
                 col.appendChild(matchCard);
             });
@@ -751,6 +851,24 @@ function renderGroups() {
         return;
     }
 
+    // Render status badge
+    const badgeEl = document.getElementById('groups-status-badge');
+    if (badgeEl) {
+        if (p.submitted) {
+            badgeEl.innerHTML = `
+                <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: var(--accent-crimson); border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(239, 68, 68, 0.05); margin-right: 1rem;">
+                    <i class="fa-solid fa-lock"></i> Frozen Prediction
+                </span>
+            `;
+        } else {
+            badgeEl.innerHTML = `
+                <span class="badge" style="background: rgba(59, 130, 246, 0.12); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; margin-right: 1rem;">
+                    <i class="fa-solid fa-pen-to-square"></i> Draft
+                </span>
+            `;
+        }
+    }
+
     for (const groupName in GROUPS_DATA) {
         const groupCard = document.createElement('div');
         groupCard.className = 'group-card';
@@ -760,17 +878,21 @@ function renderGroups() {
         let teamRowsHtml = '';
         orderedCodes.forEach((code, index) => {
             const team = getTeamByCode(code);
+            const sortActionsHtml = !p.submitted ? `
+                <div class="team-sort-actions">
+                    <button class="sort-btn btn-up" onclick="moveTeam('${groupName}', ${index}, -1)"><i class="fa-solid fa-chevron-up"></i></button>
+                    <button class="sort-btn btn-down" onclick="moveTeam('${groupName}', ${index}, 1)"><i class="fa-solid fa-chevron-down"></i></button>
+                </div>
+            ` : '';
+
             teamRowsHtml += `
-                <div class="draggable-team-row" data-group="${groupName}" data-code="${code}" data-idx="${index}">
+                <div class="draggable-team-row" data-group="${groupName}" data-code="${code}" data-idx="${index}" style="${p.submitted ? 'padding-right: 1rem;' : ''}">
                     <div class="team-row-left">
                         <div class="team-position-marker">${index + 1}</div>
                         <span class="team-flag">${team.flag}</span>
                         <span>${team.name}</span>
                     </div>
-                    <div class="team-sort-actions">
-                        <button class="sort-btn btn-up" onclick="moveTeam('${groupName}', ${index}, -1)"><i class="fa-solid fa-chevron-up"></i></button>
-                        <button class="sort-btn btn-down" onclick="moveTeam('${groupName}', ${index}, 1)"><i class="fa-solid fa-chevron-down"></i></button>
-                    </div>
+                    ${sortActionsHtml}
                 </div>
             `;
         });
@@ -899,9 +1021,9 @@ function renderAdminSimulator() {
             listContainer.appendChild(div);
         }
 
-        // Pull simulated team options (Uses Ashish's current view brackets as structural option references)
-        const homeCode = getKnockoutParticipant(STATE.participants.user, matchId, 'home');
-        const awayCode = getKnockoutParticipant(STATE.participants.user, matchId, 'away');
+        // Pull simulated team options (Uses active draft as structural option references)
+        const homeCode = getKnockoutParticipant(STATE.participants.draft, matchId, 'home');
+        const awayCode = getKnockoutParticipant(STATE.participants.draft, matchId, 'away');
         
         const homeTeam = getTeamByCode(homeCode);
         const awayTeam = getTeamByCode(awayCode);
@@ -975,77 +1097,65 @@ function setupOnboarding() {
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
     const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
 
-    // 1. Check if user already exists
-    const savedProfile = localStorage.getItem('wc-user-profile');
-    const savedSubmitted = localStorage.getItem('wc-user-submitted') === 'true';
-
-    if (savedProfile) {
-        const profile = JSON.parse(savedProfile);
-        
-        // Re-inject user to state
-        STATE.participants.user = {
-            name: profile.name,
-            avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${profile.name}`,
-            goldenBoot: profile.goldenBoot,
-            champ: localStorage.getItem('wc-user-champ') || '',
-            groupStandings: JSON.parse(localStorage.getItem('wc-user-standings') || '{}'),
-            bracketPicks: JSON.parse(localStorage.getItem('wc-user-bracket') || '{}')
-        };
-        
-        STATE.userSubmitted = savedSubmitted;
-        modal.classList.remove('active');
-        
-        STATE.activeBracketUser = 'user';
-        STATE.activeGroupUser = 'user';
-    } else {
-        // Brand new visitor - do NOT show onboarding popup modal on load! Keep it hidden.
-        modal.classList.remove('active');
-        STATE.userSubmitted = false;
-        
-        // Initialize a guest profile so the page elements can render without crash
-        STATE.participants.user = {
-            name: 'Guest Player',
-            avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=Guest`,
-            goldenBoot: 'Kylian Mbappé',
-            champ: '',
-            groupStandings: {},
-            bracketPicks: {}
-        };
-        
-        // Initialize their predictions with default group order and R32 matchups
-        for (const group in GROUPS_DATA) {
-            STATE.participants.user.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
-        }
-        buildBracketFromStandings('user');
-        
-        STATE.activeBracketUser = 'user';
-        STATE.activeGroupUser = 'user';
-    }
-
     // Toggle Submit Button visibility
     updateSubmitButtonState();
 
     // 2. Reusable handler for the main "Submit Picks" buttons
     const handleMainSubmitClick = () => {
-        // If user profile is not customized/onboarded yet, trigger name/boot welcome modal!
-        if (!localStorage.getItem('wc-user-profile')) {
+        // If the active user is a frozen submitted entry, clicking "Submit Picks" starts a NEW entry!
+        if (STATE.activeBracketUser !== 'draft') {
+            resetDraft();
+            STATE.activeBracketUser = 'draft';
+            STATE.activeGroupUser = 'draft';
+            populateUserDropdowns();
+            renderAll();
+            
+            // Open onboarding modal if not onboarded yet
+            modal.classList.add('active');
+            nameInput.value = '';
+            return;
+        }
+
+        const draft = STATE.participants.draft;
+
+        // If the draft is not customized/onboarded yet, trigger name/boot welcome modal!
+        if (!draft.onboarded) {
             modal.classList.add('active');
             return;
         }
 
-        const p = STATE.participants.user;
+        // Commit the draft as a permanent submission
+        const subId = `sub_${Date.now()}`;
+        const newSubmission = {
+            id: subId,
+            name: draft.name,
+            avatar: draft.avatar,
+            goldenBoot: draft.goldenBoot,
+            champ: draft.champ,
+            groupStandings: JSON.parse(JSON.stringify(draft.groupStandings)),
+            bracketPicks: JSON.parse(JSON.stringify(draft.bracketPicks)),
+            submitted: true,
+            onboarded: true
+        };
 
-        // Perform instant submission & update predictions in state/localStorage
-        STATE.userSubmitted = true;
-        localStorage.setItem('wc-user-submitted', 'true');
-        if (p.champ) localStorage.setItem('wc-user-champ', p.champ);
-        localStorage.setItem('wc-user-bracket', JSON.stringify(p.bracketPicks));
-        localStorage.setItem('wc-user-standings', JSON.stringify(p.groupStandings));
+        // Inject to participants list
+        STATE.participants[subId] = newSubmission;
 
+        // Reset draft so they can start fresh next time
+        resetDraft();
+
+        // Save states
+        saveStateToStorage();
+
+        // Set active view to the newly submitted frozen entry
+        STATE.activeBracketUser = subId;
+        STATE.activeGroupUser = subId;
+
+        populateUserDropdowns();
         updateSubmitButtonState();
         renderAll();
 
-        alert(`🎉 Picks submitted successfully! Your standings are updated live on the Leaderboard.`);
+        alert(`🎉 Picks submitted successfully and locked forever! You can click "Submit Picks" at any time to start a new submission.`);
 
         // Auto transition to Leaderboard tab
         const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
@@ -1059,26 +1169,24 @@ function setupOnboarding() {
     startBtn.addEventListener('click', () => {
         const nameVal = nameInput.value.trim();
         if (!nameVal) {
-            alert('Please enter your name to join the pool!');
+            alert('Please enter your name to start predictions!');
             return;
         }
 
         const bootVal = bootSelect.value;
+        const draft = STATE.participants.draft;
 
-        // Customize the visitor's participant state
-        STATE.participants.user.name = nameVal;
-        STATE.participants.user.avatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${nameVal}`;
-        STATE.participants.user.goldenBoot = bootVal;
+        // Customize the draft state
+        draft.name = nameVal;
+        draft.avatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${nameVal}`;
+        draft.goldenBoot = bootVal;
+        draft.onboarded = true;
 
-        // Save profile locally
-        localStorage.setItem('wc-user-profile', JSON.stringify({
-            name: nameVal,
-            goldenBoot: bootVal
-        }));
-
+        saveStateToStorage();
         modal.classList.remove('active');
-        STATE.activeBracketUser = 'user';
-        STATE.activeGroupUser = 'user';
+
+        STATE.activeBracketUser = 'draft';
+        STATE.activeGroupUser = 'draft';
 
         populateUserDropdowns();
         updateSubmitButtonState();
@@ -1106,27 +1214,11 @@ function updateSubmitButtonState() {
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
     const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
 
-    const onboarded = !!localStorage.getItem('wc-user-profile');
-    const submitted = STATE.userSubmitted;
-
-    // Dynamic text label based on state
+    // Button always says "Submit Picks" since once submitted, it's locked forever.
     let labelText = 'Submit Picks';
-    if (submitted) {
-        labelText = 'Update Submitted Picks';
-    } else if (onboarded) {
-        labelText = 'Submit Picks';
-    }
-
     const iconHtml = '<i class="fa-solid fa-cloud-arrow-up"></i>';
 
-    // Button remains fully enabled at all times so they can submit whenever they want
-    if (submitPicksBtn) {
-        submitPicksBtn.innerHTML = `${iconHtml} <span>Submit My Picks</span>`;
-        submitPicksBtn.disabled = false;
-        submitPicksBtn.style.opacity = '1';
-        submitPicksBtn.classList.add('glowing-btn');
-    }
-
+    // Sidebar and Leaderboard buttons are always fully active
     [sidebarBtn, leaderboardBtn].forEach(btn => {
         if (btn) {
             btn.innerHTML = `${iconHtml} <span>${labelText}</span>`;
@@ -1136,10 +1228,12 @@ function updateSubmitButtonState() {
         }
     });
 
-    // Only show submit button when editing "user" bracket
+    // Only show submit button inside Bracket Sheet tab when editing active draft
     if (submitPicksBtn) {
-        if (STATE.activeBracketUser === 'user') {
+        if (STATE.activeBracketUser === 'draft') {
+            submitPicksBtn.innerHTML = `${iconHtml} <span>Submit My Picks</span>`;
             submitPicksBtn.style.display = 'inline-flex';
+            submitPicksBtn.classList.add('glowing-btn');
         } else {
             submitPicksBtn.style.display = 'none';
         }
@@ -1159,11 +1253,14 @@ function populateUserDropdowns() {
 
     for (const username in STATE.participants) {
         const p = STATE.participants[username];
-        const isUser = username === 'user';
+        const isDraft = username === 'draft';
         
-        // Show "You" or their name
-        const displayName = (isUser && !localStorage.getItem('wc-user-profile')) ? 'Guest Player' : p.name;
-        const label = isUser ? `${displayName} (You)` : displayName;
+        let label = p.name;
+        if (isDraft) {
+            label = p.onboarded ? `${p.name} (In Progress)` : 'Start New Prediction';
+        } else {
+            label = `${p.name} (Submitted)`;
+        }
         
         const opt1 = document.createElement('option');
         opt1.value = username;
@@ -1180,15 +1277,15 @@ function populateUserDropdowns() {
     if (STATE.participants[currentBracketVal]) {
         selectBracket.value = currentBracketVal;
     } else {
-        selectBracket.value = Object.keys(STATE.participants)[0] || '';
-        STATE.activeBracketUser = selectBracket.value;
+        selectBracket.value = 'draft';
+        STATE.activeBracketUser = 'draft';
     }
 
     if (STATE.participants[currentGroupVal]) {
         selectGroup.value = currentGroupVal;
     } else {
-        selectGroup.value = Object.keys(STATE.participants)[0] || '';
-        STATE.activeGroupUser = selectGroup.value;
+        selectGroup.value = 'draft';
+        STATE.activeGroupUser = 'draft';
     }
 }
 
