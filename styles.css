@@ -774,6 +774,8 @@ tr:first-child .points-emphasis {
     overflow-y: hidden;
     padding-bottom: 2rem;
     cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .bracket-scroll-container:active {

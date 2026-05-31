@@ -336,8 +336,8 @@ function setupTabListeners() {
             // Dynamic header labels
             const titleMap = {
                 leaderboard: { title: "Leaderboard Standings", desc: "Track scores, predictions, and real-time rank movements among friends." },
-                bracket: { title: "Interactive Bracket Sheet", desc: "Toggle between participants to view predicted paths. Click teams to advance them." },
-                groups: { title: "Group Standings Builder", desc: "Sort teams in groups A to L to populate the Round of 32 knockout grid." },
+                bracket: { title: "Knock-Out Stages View", desc: "Use the dropdown to view different knock-out stages selections." },
+                groups: { title: "Group Stages Viewer", desc: "Use the dropdown to view different group stages selections." },
                 admin: { title: "Admin Match Simulator", desc: "Enter official outcomes and award golden boot predictions to recalculate rankings." }
             };
             
@@ -592,7 +592,6 @@ function renderRankingsTable(scores) {
             </td>
             <td>
                 <div class="player-cell">
-                    <img src="${player.avatar}" alt="" class="player-avatar">
                     <div style="display: flex; flex-direction: column;">
                         <span class="player-name" style="font-weight: 600; color: var(--text-primary);">${player.name}</span>
                         <span style="font-size: 0.72rem; color: var(--text-dark); display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem;">
@@ -677,11 +676,7 @@ function renderBracket() {
                 </span>
             `;
         } else if (p.submitted) {
-            badgeEl.innerHTML = `
-                <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: var(--accent-crimson); border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(239, 68, 68, 0.05); margin-right: 1rem;">
-                    <i class="fa-solid fa-lock"></i> Frozen Prediction
-                </span>
-            `;
+            badgeEl.innerHTML = ``;
         } else {
             badgeEl.innerHTML = `
                 <span class="badge" style="background: rgba(59, 130, 246, 0.12); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; margin-right: 1rem;">
@@ -902,11 +897,7 @@ function renderGroups() {
                 </span>
             `;
         } else if (p.submitted) {
-            badgeEl.innerHTML = `
-                <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: var(--accent-crimson); border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(239, 68, 68, 0.05); margin-right: 1rem;">
-                    <i class="fa-solid fa-lock"></i> Frozen Prediction
-                </span>
-            `;
+            badgeEl.innerHTML = ``;
         } else {
             badgeEl.innerHTML = `
                 <span class="badge" style="background: rgba(59, 130, 246, 0.12); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; margin-right: 1rem;">
@@ -1708,11 +1699,13 @@ function setupDragScroll() {
     const mainBracketContainer = document.querySelector('#tab-bracket .bracket-scroll-container');
     const wizardBracketContainer = document.querySelector('.wizard-bracket-scroll-area .bracket-scroll-container');
     
-    makeContainerDraggable(mainBracketContainer);
-    makeContainerDraggable(wizardBracketContainer);
+    // Main bracket tab is read-only, allow dragging everywhere (including team slots)
+    makeContainerDraggable(mainBracketContainer, false);
+    // Wizard bracket selection is interactive, prevent dragging on team slots
+    makeContainerDraggable(wizardBracketContainer, true);
 }
 
-function makeContainerDraggable(container) {
+function makeContainerDraggable(container, isInteractive = false) {
     if (!container) return;
     
     let isDown = false;
@@ -1720,8 +1713,12 @@ function makeContainerDraggable(container) {
     let scrollLeft;
 
     container.addEventListener('mousedown', (e) => {
-        // Prevent triggering scroll if clicking team slots, buttons, selects
-        if (e.target.closest('.team-slot') || e.target.closest('.sort-btn') || e.target.closest('button') || e.target.closest('select')) {
+        // Prevent triggering scroll if clicking buttons, selects, or sort buttons
+        if (e.target.closest('.sort-btn') || e.target.closest('button') || e.target.closest('select')) {
+            return;
+        }
+        // If interactive (wizard selector), also prevent drag scroll on team slots so click advances works cleanly
+        if (isInteractive && e.target.closest('.team-slot')) {
             return;
         }
         
