@@ -1149,6 +1149,10 @@ function setupOnboarding() {
     // Toggle Submit Button visibility
     updateSubmitButtonState();
 
+    if (nameInput) {
+        nameInput.addEventListener('input', updateWizardNextButtonState);
+    }
+
     // 1. Wizard Open Trigger
     const openWizard = () => {
         const draft = STATE.participants.draft;
@@ -1346,11 +1350,75 @@ function goToWizardStep(step) {
         if (reviewChamp) {
             reviewChamp.innerText = champCode ? `${champTeam.flag} ${champTeam.name}` : 'TBD';
         }
+
+        // Silver is the loser of the Final Match (Match 32)
+        const homeCode32 = getKnockoutParticipant(draft, 32, 'home');
+        const awayCode32 = getKnockoutParticipant(draft, 32, 'away');
+        let silverCode = 'TBD';
+        if (champCode) {
+            silverCode = (champCode === homeCode32) ? awayCode32 : homeCode32;
+        }
+        const silverTeam = getTeamByCode(silverCode);
+        const reviewSilver = document.getElementById('wizard-review-silver');
+        if (reviewSilver) {
+            reviewSilver.innerText = (silverCode && silverCode !== 'TBD') ? `${silverTeam.flag} ${silverTeam.name}` : 'TBD';
+        }
+
+        // Bronze is the winner of 3rd Place (Match 31)
+        const bronzeCode = draft.bracketPicks[31] || '';
+        const bronzeTeam = getTeamByCode(bronzeCode);
+        const reviewBronze = document.getElementById('wizard-review-bronze');
+        if (reviewBronze) {
+            reviewBronze.innerText = bronzeCode ? `${bronzeTeam.flag} ${bronzeTeam.name}` : 'TBD';
+        }
         
         const reviewBoot = document.getElementById('wizard-review-boot');
         if (reviewBoot) {
             reviewBoot.innerText = draft.goldenBoot || 'TBD';
         }
+    }
+    
+    // Update Next button unlit/disabled state reactively on step entry
+    updateWizardNextButtonState();
+}
+
+function updateWizardNextButtonState() {
+    const nextBtn = document.getElementById('btn-wizard-next');
+    if (!nextBtn) return;
+    
+    const step = STATE.wizardStep;
+    const draft = STATE.participants.draft;
+    
+    let isEnabled = true;
+    
+    if (step === 1) {
+        // Name field must not be empty
+        const nameInput = document.getElementById('visitor-name');
+        isEnabled = nameInput && nameInput.value.trim().length > 0;
+    } else if (step === 2) {
+        // Groups are always populated (pre-loaded list)
+        isEnabled = true;
+    } else if (step === 3) {
+        // All 32 bracket picks must be complete
+        let picksCount = 0;
+        for (let i = 1; i <= 32; i++) {
+            if (draft.bracketPicks[i]) {
+                picksCount++;
+            }
+        }
+        isEnabled = (picksCount === 32);
+    }
+    
+    if (isEnabled) {
+        nextBtn.disabled = false;
+        nextBtn.style.opacity = '1';
+        nextBtn.style.pointerEvents = 'auto';
+        nextBtn.classList.remove('disabled-btn');
+    } else {
+        nextBtn.disabled = true;
+        nextBtn.style.opacity = '0.4';
+        nextBtn.style.pointerEvents = 'none';
+        nextBtn.classList.add('disabled-btn');
     }
 }
 
@@ -1532,6 +1600,9 @@ function renderWizardBracket() {
 
         canvas.appendChild(col);
     });
+    
+    // Reactively update Wizard Next button lit/disabled state on pick selection changes
+    updateWizardNextButtonState();
 }
 
 function updateSubmitButtonState() {

@@ -1765,6 +1765,16 @@ body.dark-theme .wizard-card {
     filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.4));
 }
 
+.silver-award i {
+    color: #e2e8f0;
+    filter: drop-shadow(0 0 10px rgba(226, 232, 240, 0.4));
+}
+
+.bronze-award i {
+    color: #cd7f32;
+    filter: drop-shadow(0 0 10px rgba(205, 127, 50, 0.4));
+}
+
 .boot-award i {
     color: var(--primary);
     filter: drop-shadow(0 0 10px var(--primary-glow));
@@ -1898,5 +1908,22 @@ body:not(.dark-theme) .wizard-card .step-num {
 body:not(.dark-theme) .wizard-card .progress-step.active .step-num {
     background-color: var(--primary) !important;
     color: #ffffff !important;
+}
+
+/* Disabled/Unlit Stepper button styles */
+.disabled-btn {
+    opacity: 0.35 !important;
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    background: rgba(120, 130, 140, 0.15) !important;
+    border-color: rgba(120, 130, 140, 0.2) !important;
+    color: var(--text-dark) !important;
+}
+
+body.dark-theme .disabled-btn {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-dark) !important;
 }
 
