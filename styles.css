@@ -1412,3 +1412,143 @@ tr:first-child .points-emphasis {
         grid-template-columns: 1fr;
     }
 }
+
+/* Onboarding Journey Styles */
+.onboarding-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(10, 12, 22, 0.7);
+    backdrop-filter: blur(15px);
+    z-index: 1000;
+    display: none; /* Controlled by active class */
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    transition: var(--transition-smooth);
+}
+
+.onboarding-overlay.active {
+    display: flex;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.onboarding-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+}
+
+body.dark-theme .onboarding-card {
+    background: rgba(22, 28, 54, 0.8);
+}
+
+.onboarding-trophy {
+    font-size: 3.5rem;
+    color: var(--accent-gold);
+    filter: drop-shadow(0 0 12px var(--accent-gold-glow));
+    margin-bottom: 1.5rem;
+    animation: floating 3s ease-in-out infinite;
+}
+
+.onboarding-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-muted) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.onboarding-card p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+.onboarding-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: left;
+}
+
+.input-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-field label {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.input-field input[type="text"] {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    outline: none;
+    font-size: 0.95rem;
+    transition: var(--transition-smooth);
+}
+
+.input-field input[type="text"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.onboarding-select {
+    width: 100%;
+}
+
+.onboarding-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.95rem;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}
+
+/* Submit My Picks Pulse Glowing Animation */
+.btn-submit-picks {
+    background-color: var(--accent-emerald);
+    box-shadow: 0 4px 15px var(--accent-emerald-glow);
+    animation: pulseGlow 2.5s infinite;
+}
+
+.btn-submit-picks:hover {
+    background-color: #059669;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    transform: translateY(-2px);
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}

@@ -140,6 +140,7 @@ const STATE = {
     activeTab: 'leaderboard',
     activeBracketUser: 'user',   // Current user selected on Bracket Tab
     activeGroupUser: 'user',     // Current user selected on Groups Tab
+    userSubmitted: false,        // Tracks if the visitor has submitted their picks
     
     // The administrative actual outcomes of the World Cup
     officialResults: {
@@ -150,14 +151,7 @@ const STATE = {
 
     // User profiles & predicted selections (Brackets, Groups, Golden Boot)
     participants: {
-        user: {
-            name: "Ashish (You)",
-            avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Ashish",
-            goldenBoot: "Lionel Messi",
-            champ: "ARG",
-            groupStandings: {}, // Custom group ranks (Group: Array of codes)
-            bracketPicks: {}    // Match predictions (matchId: winningTeamCode)
-        },
+        // Will be populated dynamically for 'user' upon onboarding
         alex: {
             name: "Alex",
             avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Alex",
@@ -211,6 +205,8 @@ function init() {
     setupDropdownListeners();
     setupAdminReset();
     setupThemeToggle();
+    setupOnboarding();
+    populateUserDropdowns();
     
     // Set default initial standings for all users
     for (const username in STATE.participants) {
@@ -262,13 +258,6 @@ function populateMockFriendsPicks() {
     forceAdvance(morgan, 'NED', 32);
     morgan.bracketPicks[32] = 'NOR'; // Norway Champion
     morgan.champ = 'NOR';
-
-    // Ashish (You): Argentina Champion
-    const user = STATE.participants.user;
-    forceAdvance(user, 'ARG', 32);
-    forceAdvance(user, 'BRA', 32);
-    user.bracketPicks[32] = 'ARG';
-    user.champ = 'ARG';
 }
 
 // Force a team to reach a specific match node for mock setups
@@ -370,6 +359,7 @@ function setupDropdownListeners() {
     document.getElementById('bracket-user-select').addEventListener('change', (e) => {
         STATE.activeBracketUser = e.target.value;
         renderBracket();
+        updateSubmitButtonState();
     });
 
     // Group standings user switcher
@@ -437,6 +427,7 @@ function calculateParticipantScores() {
     const results = STATE.officialResults;
 
     for (const username in STATE.participants) {
+        if (username === 'user' && !STATE.userSubmitted) continue; // Skip unsubmitted visitor
         const p = STATE.participants[username];
         let groupPts = 0;
         let koPts = 0;
@@ -1021,9 +1012,183 @@ function updateSimStats() {
 }
 
 // Return advancing list for group standings
+function setupOnboarding() {
+    const modal = document.getElementById('onboarding-modal');
+    const startBtn = document.getElementById('btn-start-onboarding');
+    const nameInput = document.getElementById('visitor-name');
+    const bootSelect = document.getElementById('visitor-boot');
+
+    // 1. Check if user already exists
+    const savedProfile = localStorage.getItem('wc-user-profile');
+    const savedSubmitted = localStorage.getItem('wc-user-submitted') === 'true';
+
+    if (savedProfile) {
+        const profile = JSON.parse(savedProfile);
+        
+        // Re-inject user to state
+        STATE.participants.user = {
+            name: profile.name,
+            avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${profile.name}`,
+            goldenBoot: profile.goldenBoot,
+            champ: localStorage.getItem('wc-user-champ') || '',
+            groupStandings: JSON.parse(localStorage.getItem('wc-user-standings') || '{}'),
+            bracketPicks: JSON.parse(localStorage.getItem('wc-user-bracket') || '{}')
+        };
+        
+        STATE.userSubmitted = savedSubmitted;
+        modal.classList.remove('active');
+    } else {
+        // Brand new visitor - trigger modal onboarding Overlay
+        modal.classList.add('active');
+        STATE.userSubmitted = false;
+        
+        // Default select target to alex initially so rendering works while onboarding
+        STATE.activeBracketUser = 'alex';
+        STATE.activeGroupUser = 'alex';
+    }
+
+    // Toggle Submit Button visibility
+    updateSubmitButtonState();
+
+    // 2. Handle onboarding welcome start click
+    startBtn.addEventListener('click', () => {
+        const nameVal = nameInput.value.trim();
+        if (!nameVal) {
+            alert('Please enter your name to join the pool!');
+            return;
+        }
+
+        const bootVal = bootSelect.value;
+
+        // Dynamically instantiate the participant's user state
+        STATE.participants.user = {
+            name: nameVal,
+            avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${nameVal}`,
+            goldenBoot: bootVal,
+            champ: '',
+            groupStandings: {},
+            bracketPicks: {}
+        };
+
+        // Initialize their predictions with default group order and R32 matchups
+        for (const group in GROUPS_DATA) {
+            STATE.participants.user.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
+        }
+        buildBracketFromStandings('user');
+
+        // Save profile locally
+        localStorage.setItem('wc-user-profile', JSON.stringify({
+            name: nameVal,
+            goldenBoot: bootVal
+        }));
+
+        modal.classList.remove('active');
+        STATE.activeBracketUser = 'user';
+        STATE.activeGroupUser = 'user';
+
+        populateUserDropdowns();
+        updateSubmitButtonState();
+        renderAll();
+    });
+
+    // 3. Handle Submit Picks Click
+    const submitPicksBtn = document.getElementById('btn-submit-picks');
+    submitPicksBtn.addEventListener('click', () => {
+        const p = STATE.participants.user;
+        if (!p || !p.champ) {
+            alert('Please complete your bracket predictions by selecting your champion before submitting!');
+            return;
+        }
+
+        // Set submitted flag
+        STATE.userSubmitted = true;
+        localStorage.setItem('wc-user-submitted', 'true');
+        localStorage.setItem('wc-user-champ', p.champ);
+        localStorage.setItem('wc-user-bracket', JSON.stringify(p.bracketPicks));
+        localStorage.setItem('wc-user-standings', JSON.stringify(p.groupStandings));
+
+        updateSubmitButtonState();
+        renderAll();
+
+        alert(`🎉 Congratulations ${p.name}! Your predictions have been submitted successfully. You are now entered into the leaderboard pool!`);
+        
+        // Auto transition to Leaderboard tab
+        const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
+        if (leaderboardTabBtn) leaderboardTabBtn.click();
+    });
+}
+
+function updateSubmitButtonState() {
+    const submitPicksBtn = document.getElementById('btn-submit-picks');
+    if (!submitPicksBtn) return;
+
+    if (STATE.userSubmitted) {
+        submitPicksBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Submitted Successfully!`;
+        submitPicksBtn.disabled = true;
+        submitPicksBtn.style.opacity = '0.75';
+        submitPicksBtn.classList.remove('glowing-btn');
+    } else {
+        submitPicksBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Submit My Picks`;
+        submitPicksBtn.disabled = false;
+        submitPicksBtn.style.opacity = '1';
+        submitPicksBtn.classList.add('glowing-btn');
+    }
+
+    // Only show submit button when editing "user" bracket
+    if (STATE.activeBracketUser === 'user') {
+        submitPicksBtn.style.display = 'inline-flex';
+    } else {
+        submitPicksBtn.style.display = 'none';
+    }
+}
+
+function populateUserDropdowns() {
+    const selectBracket = document.getElementById('bracket-user-select');
+    const selectGroup = document.getElementById('groups-user-select');
+    if (!selectBracket || !selectGroup) return;
+
+    const currentBracketVal = selectBracket.value || STATE.activeBracketUser;
+    const currentGroupVal = selectGroup.value || STATE.activeGroupUser;
+
+    selectBracket.innerHTML = '';
+    selectGroup.innerHTML = '';
+
+    for (const username in STATE.participants) {
+        const p = STATE.participants[username];
+        const isUser = username === 'user';
+        const label = isUser ? `${p.name} (You)` : p.name;
+        
+        const opt1 = document.createElement('option');
+        opt1.value = username;
+        opt1.innerText = label;
+        selectBracket.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = username;
+        opt2.innerText = label;
+        selectGroup.appendChild(opt2);
+    }
+
+    // Restore values if available, else fallback
+    if (STATE.participants[currentBracketVal]) {
+        selectBracket.value = currentBracketVal;
+    } else {
+        selectBracket.value = Object.keys(STATE.participants)[0];
+        STATE.activeBracketUser = selectBracket.value;
+    }
+
+    if (STATE.participants[currentGroupVal]) {
+        selectGroup.value = currentGroupVal;
+    } else {
+        selectGroup.value = Object.keys(STATE.participants)[0];
+        STATE.activeGroupUser = selectGroup.value;
+    }
+}
+
 function getPredictedAdvancers(username) {
     const p = STATE.participants[username];
     const list = [];
+    if (!p || !p.groupStandings) return list;
     for (const group in p.groupStandings) {
         list.push(p.groupStandings[group][0]); // 1st
         list.push(p.groupStandings[group][1]); // 2nd

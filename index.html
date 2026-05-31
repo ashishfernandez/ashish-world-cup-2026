@@ -83,13 +83,6 @@
                         <i class="fa-solid fa-moon"></i>
                         <span>Dark Mode</span>
                     </button>
-                    <div class="user-profile-badge">
-                        <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Ashish" alt="User Avatar" class="user-avatar">
-                        <div class="user-info">
-                            <span class="user-name">Ashish (You)</span>
-                            <span class="user-rank">Loading...</span>
-                        </div>
-                    </div>
                 </div>
             </header>
 
@@ -138,15 +131,15 @@
                 <section class="tab-panel" id="tab-bracket">
                     <div class="bracket-controls">
                         <div class="view-selector-container">
-                            <label for="bracket-user-select"><i class="fa-solid fa-user-pen"></i> Editing Bracket For:</label>
+                            <label for="bracket-user-select"><i class="fa-solid fa-user-pen"></i> Predictions For:</label>
                             <select id="bracket-user-select" class="custom-select">
-                                <option value="user">Ashish (You)</option>
-                                <option value="alex">Alex</option>
-                                <option value="jordan">Jordan</option>
-                                <option value="taylor">Taylor</option>
-                                <option value="morgan">Morgan</option>
+                                <!-- Populated dynamically by JavaScript -->
                             </select>
                         </div>
+                        <button id="btn-submit-picks" class="btn btn-primary glowing-btn btn-submit-picks">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Submit My Picks</span>
+                        </button>
                         <div class="bracket-legend">
                             <span class="legend-item"><span class="legend-dot correct"></span> Correct Matchup</span>
                             <span class="legend-item"><span class="legend-dot incorrect"></span> Incorrect Matchup</span>
@@ -258,6 +251,36 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- Onboarding Modal Overlay -->
+    <div id="onboarding-modal" class="onboarding-overlay">
+        <div class="onboarding-card">
+            <i class="fa-solid fa-trophy onboarding-trophy"></i>
+            <h2>World Cup 2026 Friends Pool</h2>
+            <p>Welcome! Enter your name and predict the Golden Boot winner to start filling out your tournament bracket sheet.</p>
+            
+            <div class="onboarding-form">
+                <div class="input-field">
+                    <label for="visitor-name"><i class="fa-solid fa-user-tag"></i> Your Name</label>
+                    <input type="text" id="visitor-name" placeholder="e.g. Ashish, Sarah, Chris" required autocomplete="off">
+                </div>
+                <div class="input-field">
+                    <label for="visitor-boot"><i class="fa-solid fa-shoe-prints"></i> Golden Boot Prediction</label>
+                    <select id="visitor-boot" class="custom-select onboarding-select">
+                        <option value="Kylian Mbappé">Kylian Mbappé (FRA)</option>
+                        <option value="Erling Haaland">Erling Haaland (NOR)</option>
+                        <option value="Vinícius Júnior">Vinícius Júnior (BRA)</option>
+                        <option value="Harry Kane">Harry Kane (ENG)</option>
+                        <option value="Lionel Messi">Lionel Messi (ARG)</option>
+                        <option value="Jude Bellingham">Jude Bellingham (ENG)</option>
+                    </select>
+                </div>
+                <button id="btn-start-onboarding" class="btn btn-primary onboarding-btn">
+                    <span>Start My Predictions</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Script imports -->
