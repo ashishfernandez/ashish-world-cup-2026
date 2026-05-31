@@ -883,6 +883,14 @@ function renderBracket() {
 // Logic to pull which team code occupies a home/away knockout slot based on user's parent predictions
 function getKnockoutParticipant(participant, matchId, slot) {
     if (!participant || !participant.bracketPicks) return '';
+
+    // If viewing official results and third-place choices are incomplete, force all R32 teams to TBD
+    if (participant.isActuals && (!participant.selectedThirds || participant.selectedThirds.length < 8)) {
+        if (KNOCKOUTS_SCHEMA[matchId].round === 'R32') {
+            return '';
+        }
+    }
+
     const schema = KNOCKOUTS_SCHEMA[matchId];
     if (schema.round === 'R32') {
         return slot === 'home' ? schema.homeTeamCode || schema.defaultHome : slot === 'away' ? schema.awayTeamCode || schema.defaultAway : '';
