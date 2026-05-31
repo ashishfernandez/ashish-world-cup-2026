@@ -150,41 +150,7 @@ const STATE = {
     },
 
     // User profiles & predicted selections (Brackets, Groups, Golden Boot)
-    participants: {
-        // Will be populated dynamically for 'user' upon onboarding
-        alex: {
-            name: "Alex",
-            avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Alex",
-            goldenBoot: "Kylian Mbappé",
-            champ: "FRA",
-            groupStandings: {},
-            bracketPicks: {}
-        },
-        jordan: {
-            name: "Jordan",
-            avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Jordan",
-            goldenBoot: "Vinícius Júnior",
-            champ: "BRA",
-            groupStandings: {},
-            bracketPicks: {}
-        },
-        taylor: {
-            name: "Taylor",
-            avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Taylor",
-            goldenBoot: "Harry Kane",
-            champ: "ENG",
-            groupStandings: {},
-            bracketPicks: {}
-        },
-        morgan: {
-            name: "Morgan",
-            avatar: "https://api.dicebear.com/7.x/adventurer/svg?seed=Morgan",
-            goldenBoot: "Erling Haaland",
-            champ: "NOR",
-            groupStandings: {},
-            bracketPicks: {}
-        }
-    }
+    participants: {}
 };
 
 // 4. Progressive Point Constants
@@ -219,60 +185,11 @@ function init() {
         buildBracketFromStandings(username);
     }
     
-    // Inject specific mock variants for friends so they don't have identical predictions
-    populateMockFriendsPicks();
-
     // Set initial official admin results (some simulated match values)
     prepopulateSimulatedResults();
     
     // Initial Render of UI
     renderAll();
-}
-
-// Custom mock variants to make the leaderboard interesting
-function populateMockFriendsPicks() {
-    // Alex: heavily favors France, Germany, Belgium
-    const alex = STATE.participants.alex;
-    forceAdvance(alex, 'FRA', 32); // Finalist
-    forceAdvance(alex, 'GER', 32); // Finalist
-    alex.bracketPicks[32] = 'FRA'; // French Champion
-    alex.champ = 'FRA';
-    
-    // Jordan: heavily favors Brazil, Spain, USA
-    const jordan = STATE.participants.jordan;
-    forceAdvance(jordan, 'BRA', 32);
-    forceAdvance(jordan, 'ESP', 32);
-    jordan.bracketPicks[32] = 'BRA'; // Brazil Champion
-    jordan.champ = 'BRA';
-    
-    // Taylor: favors England, Portugal, Argentina
-    const taylor = STATE.participants.taylor;
-    forceAdvance(taylor, 'ENG', 32);
-    forceAdvance(taylor, 'POR', 32);
-    taylor.bracketPicks[32] = 'ENG'; // England Champion
-    taylor.champ = 'ENG';
-    
-    // Morgan: favors Norway (Erling Haaland!), Netherlands
-    const morgan = STATE.participants.morgan;
-    forceAdvance(morgan, 'NOR', 32);
-    forceAdvance(morgan, 'NED', 32);
-    morgan.bracketPicks[32] = 'NOR'; // Norway Champion
-    morgan.champ = 'NOR';
-}
-
-// Force a team to reach a specific match node for mock setups
-function forceAdvance(participant, teamCode, matchId) {
-    // Check backwards from the final matches and select the path
-    participant.bracketPicks[matchId] = teamCode;
-    const match = KNOCKOUTS_SCHEMA[matchId];
-    if (match && match.round !== 'R32') {
-        // Backtrace parent slots
-        const previousRounds = Object.values(KNOCKOUTS_SCHEMA).filter(m => m.nextMatch === matchId);
-        if (previousRounds.length > 0) {
-            // Randomly or logically push through first slot
-            forceAdvance(participant, teamCode, previousRounds[0].name.replace('M',''));
-        }
-    }
 }
 
 // Simulate initial tournament results (e.g. up to Quarterfinals played)
@@ -531,13 +448,29 @@ function renderLeaderboard() {
     const scores = calculateParticipantScores();
     renderRankingsTable(scores);
     renderUserBadge(scores);
+    updateActivePlayersCount();
+}
+
+function updateActivePlayersCount() {
+    const countEl = document.getElementById('active-players-count');
+    if (!countEl) return;
+    
+    const count = Object.keys(STATE.participants).filter(username => {
+        if (username === 'user' && !STATE.userSubmitted) return false;
+        return true;
+    }).length;
+    
+    countEl.innerText = `${count} Player${count !== 1 ? 's' : ''}`;
 }
 
 function renderUserBadge(scores) {
+    const badge = document.querySelector('.user-rank');
+    if (!badge) return; // Safeguard if user rank badge doesn't exist in HTML
+
     if (!scores) scores = calculateParticipantScores();
     const userRow = scores.find(s => s.id === 'user');
     if (!userRow) {
-        document.querySelector('.user-rank').innerText = 'Join the Pool!';
+        badge.innerText = 'Join the Pool!';
         return;
     }
     const myRank = scores.findIndex(s => s.id === 'user') + 1;
@@ -546,12 +479,31 @@ function renderUserBadge(scores) {
     // Add ordinal suffix (1st, 2nd, 3rd...)
     const ordinal = (n) => n + (['st', 'nd', 'rd'][((n + 90) % 100 % 10 - 1)] || 'th');
     
-    document.querySelector('.user-rank').innerText = `${ordinal(myRank)} Place - ${myScore} Pts`;
+    badge.innerText = `${ordinal(myRank)} Place - ${myScore} Pts`;
 }
 
 function renderRankingsTable(scores) {
     const tbody = document.getElementById('leaderboard-rows');
     tbody.innerHTML = '';
+
+    if (scores.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td colspan="8" class="text-center" style="padding: 4rem 1rem; color: var(--text-dark);">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.6; color: var(--accent-gold);">
+                    <i class="fa-solid fa-users-slash"></i>
+                </div>
+                <div style="font-weight: 600; font-size: 1.15rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+                    No Active Predictions Yet
+                </div>
+                <div style="font-size: 0.9rem; max-width: 440px; margin: 0 auto; line-height: 1.6; color: var(--text-dark);">
+                    Be the first to submit your predictions! Click the <strong>Submit Picks</strong> button to customize your profile and submit your predictions to the leaderboard.
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+        return;
+    }
 
     scores.forEach((player, index) => {
         const tr = document.createElement('tr');
@@ -589,6 +541,24 @@ function renderBracket() {
 
     const p = STATE.participants[STATE.activeBracketUser];
     const results = STATE.officialResults;
+
+    if (!p) {
+        // Render a premium empty/prompt state if no active participant predictions are selected
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-bracket-state';
+        emptyDiv.style = 'grid-column: span 6; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem 1rem; color: var(--text-dark); text-align: center;';
+        emptyDiv.innerHTML = `
+            <div style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.3));">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Start Your Predictions Journey!</h3>
+            <p style="font-size: 0.95rem; max-width: 420px; margin: 0 auto; line-height: 1.6;">
+                Fill out the group stages and predict your World Cup bracket. Click <strong>Submit Picks</strong> to get started!
+            </p>
+        `;
+        canvas.appendChild(emptyDiv);
+        return;
+    }
 
     // Define the rounds columns to draw
     const roundsList = [
@@ -710,6 +680,7 @@ function renderBracket() {
 
 // Logic to pull which team code occupies a home/away knockout slot based on user's parent predictions
 function getKnockoutParticipant(participant, matchId, slot) {
+    if (!participant || !participant.bracketPicks) return '';
     const schema = KNOCKOUTS_SCHEMA[matchId];
     if (schema.round === 'R32') {
         return slot === 'home' ? schema.homeTeamCode || schema.defaultHome : slot === 'away' ? schema.awayTeamCode || schema.defaultAway : '';
@@ -769,6 +740,16 @@ function renderGroups() {
     wrapper.innerHTML = '';
 
     const p = STATE.participants[STATE.activeGroupUser];
+    if (!p || !p.groupStandings) {
+        wrapper.innerHTML = `
+            <div class="empty-groups-state" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-dark);">
+                <i class="fa-solid fa-table-cells-large" style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--primary);"></i>
+                <div style="font-weight: 600; color: var(--text-primary);">No User Selected</div>
+                <div>Please submit your picks to build your group predictions.</div>
+            </div>
+        `;
+        return;
+    }
 
     for (const groupName in GROUPS_DATA) {
         const groupCard = document.createElement('div');
@@ -809,7 +790,10 @@ function renderGroups() {
 
 window.moveTeam = function(groupName, currentIndex, direction) {
     const p = STATE.participants[STATE.activeGroupUser];
+    if (!p || !p.groupStandings) return;
+    
     const standings = p.groupStandings[groupName];
+    if (!standings) return;
     
     const targetIndex = currentIndex + direction;
     if (targetIndex < 0 || targetIndex >= standings.length) return;
@@ -828,6 +812,7 @@ window.moveTeam = function(groupName, currentIndex, direction) {
 // Map standings choices to Round of 32 slots when save is clicked
 function buildBracketFromStandings(username) {
     const p = STATE.participants[username];
+    if (!p || !p.groupStandings) return;
     
     // Group first place and second place slots mapped to standard layout
     // A1, A2, B1, B2 ... L1, L2
@@ -1009,14 +994,32 @@ function setupOnboarding() {
         
         STATE.userSubmitted = savedSubmitted;
         modal.classList.remove('active');
+        
+        STATE.activeBracketUser = 'user';
+        STATE.activeGroupUser = 'user';
     } else {
         // Brand new visitor - do NOT show onboarding popup modal on load! Keep it hidden.
         modal.classList.remove('active');
         STATE.userSubmitted = false;
         
-        // Default select target to alex initially so rendering works while onboarding
-        STATE.activeBracketUser = 'alex';
-        STATE.activeGroupUser = 'alex';
+        // Initialize a guest profile so the page elements can render without crash
+        STATE.participants.user = {
+            name: 'Guest Player',
+            avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=Guest`,
+            goldenBoot: 'Kylian Mbappé',
+            champ: '',
+            groupStandings: {},
+            bracketPicks: {}
+        };
+        
+        // Initialize their predictions with default group order and R32 matchups
+        for (const group in GROUPS_DATA) {
+            STATE.participants.user.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
+        }
+        buildBracketFromStandings('user');
+        
+        STATE.activeBracketUser = 'user';
+        STATE.activeGroupUser = 'user';
     }
 
     // Toggle Submit Button visibility
@@ -1024,8 +1027,8 @@ function setupOnboarding() {
 
     // 2. Reusable handler for the main "Submit Picks" buttons
     const handleMainSubmitClick = () => {
-        // If user profile is not onboarding yet, trigger name/boot welcome modal!
-        if (!STATE.participants.user) {
+        // If user profile is not customized/onboarded yet, trigger name/boot welcome modal!
+        if (!localStorage.getItem('wc-user-profile')) {
             modal.classList.add('active');
             return;
         }
@@ -1062,21 +1065,10 @@ function setupOnboarding() {
 
         const bootVal = bootSelect.value;
 
-        // Dynamically instantiate the participant's user state
-        STATE.participants.user = {
-            name: nameVal,
-            avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${nameVal}`,
-            goldenBoot: bootVal,
-            champ: '',
-            groupStandings: {},
-            bracketPicks: {}
-        };
-
-        // Initialize their predictions with default group order and R32 matchups
-        for (const group in GROUPS_DATA) {
-            STATE.participants.user.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
-        }
-        buildBracketFromStandings('user');
+        // Customize the visitor's participant state
+        STATE.participants.user.name = nameVal;
+        STATE.participants.user.avatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${nameVal}`;
+        STATE.participants.user.goldenBoot = bootVal;
 
         // Save profile locally
         localStorage.setItem('wc-user-profile', JSON.stringify({
@@ -1102,29 +1094,11 @@ function setupOnboarding() {
 
     // 4. Handle Bracket Sheet Submit Picks Click
     const submitPicksBtn = document.getElementById('btn-submit-picks');
-    submitPicksBtn.addEventListener('click', () => {
-        const p = STATE.participants.user;
-        if (!p) {
-            modal.classList.add('active');
-            return;
-        }
-
-        // Set submitted flag
-        STATE.userSubmitted = true;
-        localStorage.setItem('wc-user-submitted', 'true');
-        if (p.champ) localStorage.setItem('wc-user-champ', p.champ);
-        localStorage.setItem('wc-user-bracket', JSON.stringify(p.bracketPicks));
-        localStorage.setItem('wc-user-standings', JSON.stringify(p.groupStandings));
-
-        updateSubmitButtonState();
-        renderAll();
-
-        alert(`🎉 Picks submitted successfully! Your standings are updated live on the Leaderboard.`);
-        
-        // Auto transition to Leaderboard tab
-        const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
-        if (leaderboardTabBtn) leaderboardTabBtn.click();
-    });
+    if (submitPicksBtn) {
+        submitPicksBtn.addEventListener('click', () => {
+            handleMainSubmitClick();
+        });
+    }
 }
 
 function updateSubmitButtonState() {
@@ -1132,7 +1106,7 @@ function updateSubmitButtonState() {
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
     const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
 
-    const onboarded = !!STATE.participants.user;
+    const onboarded = !!localStorage.getItem('wc-user-profile');
     const submitted = STATE.userSubmitted;
 
     // Dynamic text label based on state
@@ -1186,7 +1160,10 @@ function populateUserDropdowns() {
     for (const username in STATE.participants) {
         const p = STATE.participants[username];
         const isUser = username === 'user';
-        const label = isUser ? `${p.name} (You)` : p.name;
+        
+        // Show "You" or their name
+        const displayName = (isUser && !localStorage.getItem('wc-user-profile')) ? 'Guest Player' : p.name;
+        const label = isUser ? `${displayName} (You)` : displayName;
         
         const opt1 = document.createElement('option');
         opt1.value = username;
@@ -1203,14 +1180,14 @@ function populateUserDropdowns() {
     if (STATE.participants[currentBracketVal]) {
         selectBracket.value = currentBracketVal;
     } else {
-        selectBracket.value = Object.keys(STATE.participants)[0];
+        selectBracket.value = Object.keys(STATE.participants)[0] || '';
         STATE.activeBracketUser = selectBracket.value;
     }
 
     if (STATE.participants[currentGroupVal]) {
         selectGroup.value = currentGroupVal;
     } else {
-        selectGroup.value = Object.keys(STATE.participants)[0];
+        selectGroup.value = Object.keys(STATE.participants)[0] || '';
         STATE.activeGroupUser = selectGroup.value;
     }
 }
