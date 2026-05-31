@@ -420,14 +420,14 @@ function setupThemeToggle() {
     const btn = document.getElementById('btn-theme-toggle');
     if (!btn) return;
 
-    // Load initial preference from localStorage (default to light mode, no class on body)
+    // Load initial preference from localStorage (default to dark mode)
     const savedTheme = localStorage.getItem('wc-theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme');
-        btn.innerHTML = `<i class="fa-solid fa-sun"></i> <span>Light Mode</span>`;
-    } else {
+    if (savedTheme === 'light') {
         document.body.classList.remove('dark-theme');
         btn.innerHTML = `<i class="fa-solid fa-moon"></i> <span>Dark Mode</span>`;
+    } else {
+        document.body.classList.add('dark-theme');
+        btn.innerHTML = `<i class="fa-solid fa-sun"></i> <span>Light Mode</span>`;
     }
 
     btn.addEventListener('click', () => {
