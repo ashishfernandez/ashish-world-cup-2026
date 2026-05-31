@@ -370,7 +370,10 @@ function setupDropdownListeners() {
 
 function setupAdminReset() {
     document.getElementById('btn-reset-simulator').addEventListener('click', () => {
-        STATE.officialResults.matches = {};
+        // Clear the existing matches object to maintain reference integrity with the actuals profile
+        for (const key in STATE.officialResults.matches) {
+            delete STATE.officialResults.matches[key];
+        }
         renderAll();
     });
 }
