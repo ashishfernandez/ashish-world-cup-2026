@@ -29,33 +29,33 @@
     
     /* Layout Variables */
     --sidebar-width: 280px;
-    --radius-sm: 8px;
-    --radius-md: 14px;
-    --radius-lg: 24px;
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    --radius-lg: 0px;
     --shadow-premium: 0 10px 30px rgba(15, 23, 42, 0.04);
     --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 body.dark-theme {
     /* Color Palette - Premium Dark Theme Override */
-    --bg-main: #0a0c16;
-    --bg-sidebar: #0f1225;
-    --card-bg: rgba(22, 28, 54, 0.45);
-    --card-bg-match: rgba(22, 28, 54, 0.65);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --card-glow: rgba(38, 107, 237, 0.1);
+    --bg-main: #000000;
+    --bg-sidebar: #121212;
+    --card-bg: #1e1e1e;
+    --card-bg-match: #242424;
+    --card-border: rgba(255, 255, 255, 0.1);
+    --card-glow: rgba(255, 255, 255, 0.02);
     
-    --text-primary: #f1f3f9;
-    --text-muted: #8b9bb4;
-    --text-dark: #4d5b7c;
+    --text-primary: #ffffff;
+    --text-muted: #a0aec0;
+    --text-dark: #718096;
     
     /* Functional Colors */
-    --primary-glow: rgba(59, 130, 246, 0.35);
-    --accent-emerald-glow: rgba(16, 185, 129, 0.25);
+    --primary-glow: rgba(255, 255, 255, 0.15);
+    --accent-emerald-glow: rgba(255, 255, 255, 0.15);
     --accent-gold: #f59e0b;
-    --accent-gold-glow: rgba(245, 158, 11, 0.25);
+    --accent-gold-glow: rgba(245, 158, 11, 0.2);
     
-    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 }
 
 /* Reset & Base Rules */
@@ -63,6 +63,7 @@ body.dark-theme {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    border-radius: 0 !important;
 }
 
 body {
@@ -1927,5 +1928,23 @@ body.dark-theme .disabled-btn {
     background: rgba(255, 255, 255, 0.05) !important;
     border-color: rgba(255, 255, 255, 0.05) !important;
     color: var(--text-dark) !important;
+}
+
+body.dark-theme .btn {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #ffffff !important;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-theme .btn:hover {
+    background-color: #e2e8f0 !important;
+    color: #000000 !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 6px 18px rgba(255, 255, 255, 0.2) !important;
+}
+
+body.dark-theme .btn i {
+    color: #000000 !important;
 }
 
