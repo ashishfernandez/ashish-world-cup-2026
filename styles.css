@@ -309,7 +309,7 @@ body.dark-theme .ambient-glow {
 .main-content {
     margin-left: var(--sidebar-width);
     flex-grow: 1;
-    padding: 2.5rem 3.5rem 2.5rem 4.5rem;
+    padding: 2.5rem 3.5rem 2.5rem 9rem;
     min-height: 100vh;
 }
 
