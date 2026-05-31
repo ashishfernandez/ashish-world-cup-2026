@@ -386,6 +386,15 @@ body.dark-theme .ambient-glow {
     display: block;
 }
 
+/* Points Outline Card Titles */
+.points-title {
+    color: #000000 !important;
+}
+
+body.dark-theme .points-title {
+    color: #ffffff !important;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
