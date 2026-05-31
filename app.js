@@ -819,6 +819,20 @@ function getKnockoutParticipant(participant, matchId, slot) {
         return slot === 'home' ? schema.homeTeamCode || schema.defaultHome : slot === 'away' ? schema.awayTeamCode || schema.defaultAway : '';
     }
 
+    // Special Case: 3rd Place Match (Match 31) participants are the losers of the Semifinals
+    if (matchId === 31) {
+        const sfMatchId = slot === 'home' ? 29 : 30;
+        const sfWinner = participant.bracketPicks[sfMatchId];
+        if (!sfWinner) return '';
+        
+        const sfHome = getKnockoutParticipant(participant, sfMatchId, 'home');
+        const sfAway = getKnockoutParticipant(participant, sfMatchId, 'away');
+        
+        if (sfWinner === sfHome) return sfAway;
+        if (sfWinner === sfAway) return sfHome;
+        return '';
+    }
+
     // Knockout rounds: derive teams dynamically from the winners of parent matches
     const parentMatches = Object.values(KNOCKOUTS_SCHEMA).filter(m => m.nextMatch === matchId);
     
@@ -1194,7 +1208,18 @@ function setupOnboarding() {
                 // Group standings complete - proceed to bracket tree
                 goToWizardStep(3);
             } else if (step === 3) {
-                // Bracket tree complete - proceed to summary
+                // Bracket tree complete - validate all 32 matches are picked before proceeding to summary
+                const draft = STATE.participants.draft;
+                const incomplete = [];
+                for (let i = 1; i <= 32; i++) {
+                    if (!draft.bracketPicks[i]) {
+                        incomplete.push(i);
+                    }
+                }
+                if (incomplete.length > 0) {
+                    alert(`Please complete all 32 bracket picks before proceeding! You have ${incomplete.length} unselected matchup${incomplete.length > 1 ? 's' : ''} left.`);
+                    return;
+                }
                 goToWizardStep(4);
             }
         });
