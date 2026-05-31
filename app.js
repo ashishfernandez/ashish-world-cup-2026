@@ -535,50 +535,27 @@ function getPicksForRound(participant, roundName) {
     return picks;
 }
 
-// 8. Render Leaderboard & Podium Ranks
+// 8. Render Leaderboard & Rankings Table
 function renderLeaderboard() {
     const scores = calculateParticipantScores();
-    renderPodium(scores.slice(0, 3));
     renderRankingsTable(scores);
     renderUserBadge(scores);
 }
 
 function renderUserBadge(scores) {
     if (!scores) scores = calculateParticipantScores();
+    const userRow = scores.find(s => s.id === 'user');
+    if (!userRow) {
+        document.querySelector('.user-rank').innerText = 'Join the Pool!';
+        return;
+    }
     const myRank = scores.findIndex(s => s.id === 'user') + 1;
-    const myScore = scores.find(s => s.id === 'user').totalScore;
+    const myScore = userRow.totalScore;
     
     // Add ordinal suffix (1st, 2nd, 3rd...)
     const ordinal = (n) => n + (['st', 'nd', 'rd'][((n + 90) % 100 % 10 - 1)] || 'th');
     
     document.querySelector('.user-rank').innerText = `${ordinal(myRank)} Place - ${myScore} Pts`;
-}
-
-function renderPodium(top3) {
-    const wrapper = document.getElementById('podium-wrapper');
-    wrapper.innerHTML = '';
-
-    const podiumOrder = [1, 0, 2]; // Render 2nd place first, then 1st, then 3rd for proper standard visual structure
-
-    podiumOrder.forEach(idx => {
-        const player = top3[idx];
-        if (!player) return;
-
-        const rankNumber = idx + 1;
-        const podiumCard = document.createElement('div');
-        podiumCard.className = `podium-card rank-${rankNumber}`;
-
-        podiumCard.innerHTML = `
-            ${rankNumber === 1 ? '<i class="fa-solid fa-crown crown-badge"></i>' : ''}
-            <img src="${player.avatar}" alt="${player.name}" class="podium-avatar">
-            <span class="podium-name">${player.name}</span>
-            <span class="badge badge-gold">${player.champ.flag} ${player.champ.code}</span>
-            <span class="podium-points">${player.totalScore} <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted)">pts</span></span>
-            <span class="podium-meta">Boot: ${player.goldenBoot}</span>
-            <div class="podium-number">${rankNumber}</div>
-        `;
-        wrapper.appendChild(podiumCard);
-    });
 }
 
 function renderRankingsTable(scores) {
