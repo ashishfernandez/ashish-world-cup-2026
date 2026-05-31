@@ -228,12 +228,51 @@
                 <!-- 4. Admin Simulator Panel -->
                 <section class="tab-panel" id="tab-admin">
                     <div class="admin-grid">
-                        <!-- Left column: Match Simulator & Group Stages Editor -->
+                        <!-- Left column: Final Standing & 3rd Place & Match Results Editor -->
                         <div class="admin-left-col" style="display: flex; flex-direction: column; gap: 2rem;">
-                            <!-- Score Entry Controller -->
+                            
+                            <!-- 1. Final Group Standings Editor -->
+                            <div class="premium-card admin-groups-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-table-cells-large text-primary"></i> Final Group Standings Editor</h3>
+                                    <p>Adjust team rankings to set official group advancement outcomes. Top 2 and best 3rd-places advance automatically.</p>
+                                </div>
+                                <div class="admin-groups-scroll" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem; margin-top: 1.5rem;">
+                                    <div class="groups-grid" id="admin-groups-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                        <!-- Populated dynamically by JS -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Final Top-8 3rd place Editor -->
+                            <div class="premium-card admin-thirds-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-ranking-star" style="color: var(--accent-gold);"></i> Final Top-8 3rd place Editor</h3>
+                                    <p>Select exactly 8 of the 12 third-place finishers to advance to the official Round of 32 matches. Click and reorder as needed.</p>
+                                </div>
+                                <div class="admin-thirds-selection-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                                    <!-- Left pane: Available 12 teams -->
+                                    <div class="admin-thirds-available-pane" style="display: flex; flex-direction: column; gap: 0.5rem; border-right: 1px solid var(--card-border); padding-right: 1rem; max-height: 360px; overflow-y: auto;">
+                                        <h4 style="font-size: 0.85rem; font-family: var(--font-heading); font-weight: 700; margin: 0; color: var(--text-primary);">Official 3rd Place Teams</h4>
+                                        <div class="admin-thirds-available-grid" id="admin-thirds-available" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                            <!-- Populated dynamically by JS -->
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right pane: Selected 8 slots -->
+                                    <div class="admin-thirds-selected-pane" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 360px; overflow-y: auto;">
+                                        <h4 style="font-size: 0.85rem; font-family: var(--font-heading); font-weight: 700; margin: 0; color: var(--text-primary);">Selected 8 Advancing</h4>
+                                        <div class="admin-thirds-slots-list" id="admin-thirds-selected-slots" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                            <!-- Populated dynamically by JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Final Rounds Editor -->
                             <div class="premium-card admin-control-card">
                                 <div class="card-header">
-                                    <h3><i class="fa-solid fa-trophy gold-text"></i> World Cup Match Simulator</h3>
+                                    <h3><i class="fa-solid fa-trophy gold-text"></i> Final Rounds Editor</h3>
                                 </div>
                                 <div class="admin-options-row">
                                     <button id="btn-reset-simulator" class="btn btn-secondary">
@@ -248,18 +287,6 @@
                                 </div>
                             </div>
 
-                            <!-- Official Group Standings Editor -->
-                            <div class="premium-card admin-groups-card">
-                                <div class="card-header">
-                                    <h3><i class="fa-solid fa-table-cells-large text-primary"></i> Official Group Standings Editor</h3>
-                                    <p>Adjust team rankings to set official group advancement outcomes. Top 2 and best 3rd-places advance automatically.</p>
-                                </div>
-                                <div class="admin-groups-scroll" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem; margin-top: 1.5rem;">
-                                    <div class="groups-grid" id="admin-groups-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                                        <!-- Populated dynamically by JS -->
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Right column: Metrics & Management -->

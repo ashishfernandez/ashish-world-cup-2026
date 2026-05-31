@@ -202,11 +202,13 @@ function loadStateFromStorage() {
     // 1. Load official results first if they exist
     const savedResults = localStorage.getItem('wc-official-results');
     let loadedGroupStandings = null;
+    let loadedSelectedThirds = null;
     if (savedResults) {
         const parsed = JSON.parse(savedResults);
         STATE.officialResults.matches = parsed.matches || {};
         STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
         loadedGroupStandings = parsed.groupStandings || null;
+        loadedSelectedThirds = parsed.selectedThirds || null;
     }
 
     // Initialize official actuals profile
@@ -216,6 +218,7 @@ function loadStateFromStorage() {
         avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=FIFA',
         champ: '',
         groupStandings: {},
+        selectedThirds: loadedSelectedThirds || [],
         bracketPicks: STATE.officialResults.matches,
         submitted: true,
         onboarded: true,
@@ -274,7 +277,8 @@ function saveStateToStorage() {
     localStorage.setItem('wc-official-results', JSON.stringify({
         matches: STATE.officialResults.matches,
         advancingTeams: STATE.officialResults.advancingTeams,
-        groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {}
+        groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
+        selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
     }));
 }
 
@@ -377,7 +381,7 @@ function setupTabListeners() {
                 bracket: { title: "Knock-Out Stages View", desc: "Use the dropdown to view different knock-out stages selections." },
                 groups: { title: "Group Stages Viewer", desc: "Use the dropdown to view different group stages selections." },
                 points: { title: "Points Outline", desc: "Understand how points are scored for your predictions." },
-                admin: { title: "Admin Match Simulator", desc: "Enter official outcomes to recalculate rankings." }
+                admin: { title: "Admin Control Panel", desc: "Enter official outcomes to recalculate rankings." }
             };
             
             document.getElementById('current-tab-title').innerText = titleMap[tabName].title;
@@ -1318,6 +1322,149 @@ function renderAdminSimulator() {
     }
 
     updateSimStats();
+
+    // 2.5. Render Admin Top-8 3rd Place Editor
+    const adminThirdsAvailable = document.getElementById('admin-thirds-available');
+    const adminThirdsSelected = document.getElementById('admin-thirds-selected-slots');
+    if (adminThirdsAvailable && adminThirdsSelected) {
+        adminThirdsAvailable.innerHTML = '';
+        adminThirdsSelected.innerHTML = '';
+        
+        const act = STATE.participants.actuals;
+        if (act && act.groupStandings) {
+            // Get the 3rd place team from each of the 12 groups A to L
+            const allThirds = [];
+            for (const groupName in GROUPS_DATA) {
+                const standings = act.groupStandings[groupName] || GROUPS_DATA[groupName].map(t => t.code);
+                const thirdPlaceCode = standings[2]; // 3rd place team
+                const team = getTeamByCode(thirdPlaceCode);
+                allThirds.push({ group: groupName, code: thirdPlaceCode, team: team });
+            }
+
+            if (!act.selectedThirds) {
+                act.selectedThirds = [];
+            }
+
+            // Invalidate and filter out selected third-place teams that are no longer 3rd place in their groups due to standings changes
+            const currentThirds = allThirds.map(item => item.code);
+            const originalLen = act.selectedThirds.length;
+            act.selectedThirds = act.selectedThirds.filter(code => currentThirds.includes(code));
+            if (act.selectedThirds.length !== originalLen) {
+                resetSubsequentBracketPicks(act);
+                saveStateToStorage();
+            }
+
+            // Render available official 3rd place teams
+            allThirds.forEach(item => {
+                const isSelected = act.selectedThirds.includes(item.code);
+                
+                const card = document.createElement('div');
+                card.className = `premium-card third-team-card ${isSelected ? 'selected' : ''}`;
+                card.style = `
+                    padding: 0.6rem 1rem;
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: ${isSelected ? 'rgba(59, 130, 246, 0.08)' : 'var(--card-bg-match)'};
+                    border: 1px solid ${isSelected ? 'var(--primary)' : 'var(--card-border)'};
+                    opacity: ${isSelected ? '0.6' : '1'};
+                    cursor: ${isSelected ? 'default' : 'pointer'};
+                    transition: all 0.2s ease;
+                    font-size: 0.8rem;
+                `;
+                card.innerHTML = `
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Group ${item.group}</span>
+                        <span style="font-weight: 700; color: var(--text-primary); font-size: 0.88rem;">${item.team.name}</span>
+                    </div>
+                    ${!isSelected ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary); font-size: 1rem;"></i>' : '<i class="fa-solid fa-circle-check" style="color: var(--accent-emerald); font-size: 1rem;"></i>'}
+                `;
+
+                if (!isSelected) {
+                    card.addEventListener('click', () => {
+                        if (act.selectedThirds.length >= 8) {
+                            alert('You have already selected 8 teams! Please remove a team first to select another.');
+                            return;
+                        }
+                        act.selectedThirds.push(item.code);
+                        resetSubsequentBracketPicks(act);
+                        buildBracketFromStandings('actuals');
+                        saveStateToStorage();
+                        renderAll();
+                    });
+                }
+                adminThirdsAvailable.appendChild(card);
+            });
+
+            // Render selected 8 slots
+            for (let i = 0; i < 8; i++) {
+                const teamCode = act.selectedThirds[i];
+                const slotEl = document.createElement('div');
+                slotEl.style = `
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0.5rem 0.75rem;
+                    border-radius: var(--radius-sm);
+                    transition: all 0.2s ease;
+                    font-size: 0.8rem;
+                `;
+
+                if (teamCode) {
+                    const team = getTeamByCode(teamCode);
+                    const originItem = allThirds.find(item => item.code === teamCode);
+                    const groupLabel = originItem ? `Group ${originItem.group}` : '';
+
+                    slotEl.className = 'premium-card slot-card-selected';
+                    slotEl.style.cssText += `
+                        background: rgba(59, 130, 246, 0.04);
+                        border: 1px solid var(--primary);
+                    `;
+                    
+                    const isFirst = i === 0;
+                    const isLast = i === act.selectedThirds.length - 1;
+
+                    slotEl.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
+                            <span style="font-size: 0.7rem; font-weight: 800; color: var(--primary); background: rgba(59, 130, 246, 0.1); width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">${groupLabel}</span>
+                                <span style="font-weight: 700; color: var(--text-primary); font-size: 0.88rem;">${team.name}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <div class="team-sort-actions" style="display: flex; gap: 0.15rem;">
+                                <button class="sort-btn btn-up" style="padding: 0; height: 20px; width: 20px; display: inline-flex; align-items: center; justify-content: center;" onclick="moveAdminThird(${i}, -1); event.stopPropagation();" ${isFirst ? 'disabled style="opacity: 0.25; cursor: not-allowed;"' : ''}>
+                                    <i class="fa-solid fa-chevron-up" style="font-size: 0.65rem;"></i>
+                                </button>
+                                <button class="sort-btn btn-down" style="padding: 0; height: 20px; width: 20px; display: inline-flex; align-items: center; justify-content: center;" onclick="moveAdminThird(${i}, 1); event.stopPropagation();" ${isLast ? 'disabled style="opacity: 0.25; cursor: not-allowed;"' : ''}>
+                                    <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem;"></i>
+                                </button>
+                            </div>
+                            <button class="sort-btn btn-remove" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--accent-crimson); padding: 0; height: 20px; width: 20px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer;" onclick="removeAdminThird(${i}); event.stopPropagation();">
+                                <i class="fa-solid fa-circle-minus" style="font-size: 0.75rem;"></i>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    slotEl.className = 'slot-card-empty';
+                    slotEl.style.cssText += `
+                        background: transparent;
+                        border: 1px dashed var(--card-border);
+                        color: var(--text-dark);
+                    `;
+                    slotEl.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 0.7rem; font-weight: 800; color: var(--text-dark); border: 1px dashed var(--card-border); width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
+                            <span style="font-size: 0.72rem; font-style: italic;">Slot ${i + 1} Empty</span>
+                        </div>
+                    `;
+                }
+                adminThirdsSelected.appendChild(slotEl);
+            }
+        }
+    }
 }
 
 function updateSimStats() {
@@ -2195,6 +2342,38 @@ function resetSubsequentBracketPicks(p) {
     });
     p.champ = '';
 }
+
+window.moveAdminThird = function(currentIndex, direction) {
+    const act = STATE.participants.actuals;
+    if (!act || !act.selectedThirds) return;
+
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= act.selectedThirds.length) return;
+
+    // Swap elements in selectedThirds array
+    const temp = act.selectedThirds[currentIndex];
+    act.selectedThirds[currentIndex] = act.selectedThirds[targetIndex];
+    act.selectedThirds[targetIndex] = temp;
+
+    // Invalidate subsequent picks since order changed
+    resetSubsequentBracketPicks(act);
+    buildBracketFromStandings('actuals');
+    saveStateToStorage();
+    renderAll();
+};
+
+window.removeAdminThird = function(index) {
+    const act = STATE.participants.actuals;
+    if (!act || !act.selectedThirds) return;
+
+    act.selectedThirds.splice(index, 1);
+
+    // Invalidate subsequent picks since selected thirds set changed
+    resetSubsequentBracketPicks(act);
+    buildBracketFromStandings('actuals');
+    saveStateToStorage();
+    renderAll();
+};
 
 // Initialize on window load
 window.addEventListener('load', init);
