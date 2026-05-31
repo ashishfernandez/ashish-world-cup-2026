@@ -1153,85 +1153,84 @@ function renderAdminSimulator() {
                     </div>
                 </div>
             `;
-            return;
-        }
+        } else {
+            const results = STATE.officialResults;
+            const roundTitles = {
+                'R32': 'Round of 32 Matches',
+                'R16': 'Round of 16 Matches',
+                'QF': 'Quarterfinal Matches',
+                'SF': 'Semifinal Matches',
+                '3RD': '3rd Place Match',
+                'F': 'World Cup Championship Final'
+            };
 
-        const results = STATE.officialResults;
-        const roundTitles = {
-            'R32': 'Round of 32 Matches',
-            'R16': 'Round of 16 Matches',
-            'QF': 'Quarterfinal Matches',
-            'SF': 'Semifinal Matches',
-            '3RD': '3rd Place Match',
-            'F': 'World Cup Championship Final'
-        };
+            let currentRound = '';
 
-        let currentRound = '';
+            for (const matchId in KNOCKOUTS_SCHEMA) {
+                const m = KNOCKOUTS_SCHEMA[matchId];
+                
+                // Add round dividers
+                if (m.round !== currentRound) {
+                    currentRound = m.round;
+                    const div = document.createElement('div');
+                    div.className = 'admin-simulator-round-divider';
+                    div.innerText = roundTitles[currentRound];
+                    listContainer.appendChild(div);
+                }
 
-        for (const matchId in KNOCKOUTS_SCHEMA) {
-            const m = KNOCKOUTS_SCHEMA[matchId];
-            
-            // Add round dividers
-            if (m.round !== currentRound) {
-                currentRound = m.round;
-                const div = document.createElement('div');
-                div.className = 'admin-simulator-round-divider';
-                div.innerText = roundTitles[currentRound];
-                listContainer.appendChild(div);
-            }
+                // Pull simulated team options (Uses active actuals or fallback to defaults)
+                const homeCode = getKnockoutParticipant(STATE.participants.actuals, matchId, 'home');
+                const awayCode = getKnockoutParticipant(STATE.participants.actuals, matchId, 'away');
+                
+                const homeTeam = getTeamByCode(homeCode);
+                const awayTeam = getTeamByCode(awayCode);
 
-            // Pull simulated team options (Uses active actuals or fallback to defaults)
-            const homeCode = getKnockoutParticipant(STATE.participants.actuals, matchId, 'home');
-            const awayCode = getKnockoutParticipant(STATE.participants.actuals, matchId, 'away');
-            
-            const homeTeam = getTeamByCode(homeCode);
-            const awayTeam = getTeamByCode(awayCode);
+                const currentOfficialWinner = results.matches[matchId] || '';
 
-            const currentOfficialWinner = results.matches[matchId] || '';
+                const row = document.createElement('div');
+                row.className = 'admin-match-row';
 
-            const row = document.createElement('div');
-            row.className = 'admin-match-row';
+                row.innerHTML = `
+                    <div class="admin-teams-wrapper">
+                        <button class="admin-team-button ${currentOfficialWinner === homeCode && homeCode ? 'selected-winner' : ''}" data-match="${matchId}" data-team="${homeCode}">
+                            <span>${homeTeam.flag}</span>
+                            <span>${homeTeam.name}</span>
+                        </button>
+                        <span class="admin-vs-label">VS</span>
+                        <button class="admin-team-button ${currentOfficialWinner === awayCode && awayCode ? 'selected-winner' : ''}" data-match="${matchId}" data-team="${awayCode}">
+                            <span>${awayTeam.flag}</span>
+                            <span>${awayTeam.name}</span>
+                        </button>
+                    </div>
+                    <div class="admin-match-details">
+                        <div style="font-weight: 700; color: var(--text-primary)">${m.label}</div>
+                        <div>${m.venue}</div>
+                    </div>
+                `;
 
-            row.innerHTML = `
-                <div class="admin-teams-wrapper">
-                    <button class="admin-team-button ${currentOfficialWinner === homeCode && homeCode ? 'selected-winner' : ''}" data-match="${matchId}" data-team="${homeCode}">
-                        <span>${homeTeam.flag}</span>
-                        <span>${homeTeam.name}</span>
-                    </button>
-                    <span class="admin-vs-label">VS</span>
-                    <button class="admin-team-button ${currentOfficialWinner === awayCode && awayCode ? 'selected-winner' : ''}" data-match="${matchId}" data-team="${awayCode}">
-                        <span>${awayTeam.flag}</span>
-                        <span>${awayTeam.name}</span>
-                    </button>
-                </div>
-                <div class="admin-match-details">
-                    <div style="font-weight: 700; color: var(--text-primary)">${m.label}</div>
-                    <div>${m.venue}</div>
-                </div>
-            `;
+                row.querySelectorAll('.admin-team-button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const team = btn.getAttribute('data-team');
+                        const mid = btn.getAttribute('data-match');
+                        
+                        if (!team || team === 'TBD') return;
 
-            row.querySelectorAll('.admin-team-button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const team = btn.getAttribute('data-team');
-                    const mid = btn.getAttribute('data-match');
-                    
-                    if (!team || team === 'TBD') return;
+                        if (results.matches[mid] === team) {
+                            delete results.matches[mid];
+                        } else {
+                            results.matches[mid] = team;
+                        }
 
-                    if (results.matches[mid] === team) {
-                        delete results.matches[mid];
-                    } else {
-                        results.matches[mid] = team;
-                    }
-
-                    saveStateToStorage();
-                    renderLeaderboard();
-                    renderBracket();
-                    renderAdminSimulator();
-                    updateSimStats();
+                        saveStateToStorage();
+                        renderLeaderboard();
+                        renderBracket();
+                        renderAdminSimulator();
+                        updateSimStats();
+                    });
                 });
-            });
 
-            listContainer.appendChild(row);
+                listContainer.appendChild(row);
+            }
         }
     }
 
