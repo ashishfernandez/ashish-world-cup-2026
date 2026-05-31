@@ -197,6 +197,23 @@ function init() {
 }
 
 function loadStateFromStorage() {
+    // Initialize official actuals profile
+    STATE.participants.actuals = {
+        id: 'actuals',
+        name: 'Official Actuals',
+        avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=FIFA',
+        goldenBoot: 'TBD',
+        champ: '',
+        groupStandings: {},
+        bracketPicks: STATE.officialResults.matches,
+        submitted: true,
+        onboarded: true,
+        isActuals: true
+    };
+    for (const group in GROUPS_DATA) {
+        STATE.participants.actuals.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
+    }
+
     // 1. Load submissions array
     const savedSubs = localStorage.getItem('wc-submissions');
     if (savedSubs) {
@@ -392,7 +409,7 @@ function calculateParticipantScores() {
     const results = STATE.officialResults;
 
     for (const username in STATE.participants) {
-        if (username === 'draft') continue; // Skip active draft in leaderboard scores
+        if (username === 'draft' || username === 'actuals') continue; // Skip draft and official actuals in leaderboard scores
         const p = STATE.participants[username];
         if (!p.submitted) continue; // Skip unsubmitted profiles
         let groupPts = 0;
@@ -619,6 +636,9 @@ function renderBracket() {
     const canvas = document.getElementById('bracket-tree');
     canvas.innerHTML = '';
 
+    // Rebuild bracket slots based on the active user standings before drawing
+    buildBracketFromStandings(STATE.activeBracketUser);
+
     const p = STATE.participants[STATE.activeBracketUser];
     const results = STATE.officialResults;
 
@@ -640,10 +660,21 @@ function renderBracket() {
         return;
     }
 
+    // Sync official champ
+    if (p.isActuals) {
+        p.champ = results.matches[32] || '';
+    }
+
     // Render status badge
     const badgeEl = document.getElementById('bracket-status-badge');
     if (badgeEl) {
-        if (p.submitted) {
+        if (p.isActuals) {
+            badgeEl.innerHTML = `
+                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold); border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(245, 158, 11, 0.1); margin-right: 1rem;">
+                    <i class="fa-solid fa-trophy"></i> Official Actuals
+                </span>
+            `;
+        } else if (p.submitted) {
             badgeEl.innerHTML = `
                 <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: var(--accent-crimson); border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(239, 68, 68, 0.05); margin-right: 1rem;">
                     <i class="fa-solid fa-lock"></i> Frozen Prediction
@@ -839,6 +870,9 @@ function renderGroups() {
     const wrapper = document.getElementById('groups-grid-wrapper');
     wrapper.innerHTML = '';
 
+    // Rebuild bracket slots based on the active user standings before drawing
+    buildBracketFromStandings(STATE.activeGroupUser);
+
     const p = STATE.participants[STATE.activeGroupUser];
     if (!p || !p.groupStandings) {
         wrapper.innerHTML = `
@@ -854,7 +888,13 @@ function renderGroups() {
     // Render status badge
     const badgeEl = document.getElementById('groups-status-badge');
     if (badgeEl) {
-        if (p.submitted) {
+        if (p.isActuals) {
+            badgeEl.innerHTML = `
+                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold); border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(245, 158, 11, 0.1); margin-right: 1rem;">
+                    <i class="fa-solid fa-trophy"></i> Official Actuals
+                </span>
+            `;
+        } else if (p.submitted) {
             badgeEl.innerHTML = `
                 <span class="badge" style="background: rgba(239, 68, 68, 0.12); color: var(--accent-crimson); border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(239, 68, 68, 0.05); margin-right: 1rem;">
                     <i class="fa-solid fa-lock"></i> Frozen Prediction
@@ -1251,26 +1291,36 @@ function populateUserDropdowns() {
     selectBracket.innerHTML = '';
     selectGroup.innerHTML = '';
 
-    for (const username in STATE.participants) {
-        const p = STATE.participants[username];
-        const isDraft = username === 'draft';
-        
-        let label = p.name;
-        if (isDraft) {
-            label = p.onboarded ? `${p.name} (In Progress)` : 'Start New Prediction';
-        } else {
-            label = `${p.name} (Submitted)`;
-        }
-        
+    // Helper to add the same option to both dropdowns
+    const addOptionToBoth = (val, labelText) => {
         const opt1 = document.createElement('option');
-        opt1.value = username;
-        opt1.innerText = label;
+        opt1.value = val;
+        opt1.innerText = labelText;
         selectBracket.appendChild(opt1);
 
         const opt2 = document.createElement('option');
-        opt2.value = username;
-        opt2.innerText = label;
+        opt2.value = val;
+        opt2.innerText = labelText;
         selectGroup.appendChild(opt2);
+    };
+
+    // 1. Add "🏆 Official Actuals" at the very top of both dropdowns
+    if (STATE.participants.actuals) {
+        addOptionToBoth('actuals', '🏆 Official Actuals');
+    }
+
+    // 2. Add Draft in-progress next
+    if (STATE.participants.draft) {
+        const d = STATE.participants.draft;
+        const draftLabel = d.onboarded ? `📝 ${d.name} (In Progress)` : '📝 Start New Prediction';
+        addOptionToBoth('draft', draftLabel);
+    }
+
+    // 3. Add all submitted entries in order
+    for (const username in STATE.participants) {
+        if (username === 'actuals' || username === 'draft') continue;
+        const p = STATE.participants[username];
+        addOptionToBoth(username, `👤 ${p.name} (Submitted)`);
     }
 
     // Restore values if available, else fallback
