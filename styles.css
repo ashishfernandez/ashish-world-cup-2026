@@ -989,9 +989,14 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     transition: var(--transition-smooth);
     position: relative;
     overflow: visible;
-    width: 250px;
-    height: 250px;
-    box-sizing: border-box;
+    width: 250px !important;
+    height: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+    min-height: 250px !important;
+    max-height: 250px !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
