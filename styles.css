@@ -1514,7 +1514,7 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
 }
 
 body.dark-theme .onboarding-card {
-    background: rgba(22, 28, 54, 0.8);
+    background: rgba(26, 26, 26, 0.95);
 }
 
 .onboarding-trophy {
@@ -1639,7 +1639,7 @@ body.dark-theme .onboarding-card {
 }
 
 body.dark-theme .wizard-card {
-    background: rgba(18, 22, 45, 0.85);
+    background: rgba(26, 26, 26, 0.95);
     box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
 }
 
