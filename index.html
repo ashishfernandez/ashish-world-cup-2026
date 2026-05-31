@@ -49,6 +49,11 @@
                 </button>
             </nav>
 
+            <button id="sidebar-submit-btn" class="btn btn-primary glowing-btn sidebar-submit-btn" style="width: 100%; margin-bottom: 1.25rem; justify-content: center;">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Submit Picks</span>
+            </button>
+
             <div class="pool-meta-card">
                 <div class="meta-row">
                     <span class="label">Total Points Pool:</span>
@@ -96,6 +101,10 @@
                         <div class="card-header">
                             <h3>Full Rankings Table</h3>
                             <div class="header-filters">
+                                <button id="leaderboard-submit-btn" class="btn btn-primary glowing-btn" style="margin-right: 1.5rem; font-size: 0.8rem; padding: 0.45rem 1rem;">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Submit Picks</span>
+                                </button>
                                 <span class="badge badge-info">Option A System</span>
                                 <span class="badge badge-warning">+100 Golden Boot</span>
                             </div>
@@ -157,17 +166,10 @@
                             <i class="fa-solid fa-circle-info"></i> Drag or use arrow keys to sort teams. The top 2 from each group plus the 8 best 3rd-place teams advance to the Round of 32!
                         </p>
                         <div class="group-actions">
-                            <label for="groups-user-select">Select Bracket Standings:</label>
+                            <label for="groups-user-select">Predictions For:</label>
                             <select id="groups-user-select" class="custom-select">
-                                <option value="user">Ashish (You)</option>
-                                <option value="alex">Alex</option>
-                                <option value="jordan">Jordan</option>
-                                <option value="taylor">Taylor</option>
-                                <option value="morgan">Morgan</option>
+                                <!-- Populated dynamically by JavaScript -->
                             </select>
-                            <button id="btn-save-standings" class="btn btn-primary">
-                                <i class="fa-solid fa-floppy-disk"></i> Apply Standings to Bracket
-                            </button>
                         </div>
                     </div>
 

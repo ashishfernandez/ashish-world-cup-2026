@@ -367,15 +367,6 @@ function setupDropdownListeners() {
         STATE.activeGroupUser = e.target.value;
         renderGroups();
     });
-
-    // Group apply button
-    document.getElementById('btn-save-standings').addEventListener('click', () => {
-        buildBracketFromStandings(STATE.activeGroupUser);
-        if (STATE.activeGroupUser === STATE.activeBracketUser) {
-            renderBracket();
-        }
-        alert(`Standings applied to ${STATE.participants[STATE.activeGroupUser].name}'s bracket!`);
-    });
 }
 
 function setupAdminReset() {
@@ -816,7 +807,6 @@ function renderGroups() {
     }
 }
 
-// Interactive arrow clicks to sort team standings rows
 window.moveTeam = function(groupName, currentIndex, direction) {
     const p = STATE.participants[STATE.activeGroupUser];
     const standings = p.groupStandings[groupName];
@@ -828,6 +818,9 @@ window.moveTeam = function(groupName, currentIndex, direction) {
     const temp = standings[currentIndex];
     standings[currentIndex] = standings[targetIndex];
     standings[targetIndex] = temp;
+
+    // Automatically synchronize standings with bracket in real-time
+    buildBracketFromStandings(STATE.activeGroupUser);
 
     renderGroups();
 };
@@ -988,12 +981,14 @@ function updateSimStats() {
     document.getElementById('sim-highest-score').innerText = `${highest} pts`;
 }
 
-// Return advancing list for group standings
 function setupOnboarding() {
     const modal = document.getElementById('onboarding-modal');
     const startBtn = document.getElementById('btn-start-onboarding');
     const nameInput = document.getElementById('visitor-name');
     const bootSelect = document.getElementById('visitor-boot');
+
+    const sidebarBtn = document.getElementById('sidebar-submit-btn');
+    const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
 
     // 1. Check if user already exists
     const savedProfile = localStorage.getItem('wc-user-profile');
@@ -1015,8 +1010,8 @@ function setupOnboarding() {
         STATE.userSubmitted = savedSubmitted;
         modal.classList.remove('active');
     } else {
-        // Brand new visitor - trigger modal onboarding Overlay
-        modal.classList.add('active');
+        // Brand new visitor - do NOT show onboarding popup modal on load! Keep it hidden.
+        modal.classList.remove('active');
         STATE.userSubmitted = false;
         
         // Default select target to alex initially so rendering works while onboarding
@@ -1027,7 +1022,37 @@ function setupOnboarding() {
     // Toggle Submit Button visibility
     updateSubmitButtonState();
 
-    // 2. Handle onboarding welcome start click
+    // 2. Reusable handler for the main "Submit Picks" buttons
+    const handleMainSubmitClick = () => {
+        // If user profile is not onboarding yet, trigger name/boot welcome modal!
+        if (!STATE.participants.user) {
+            modal.classList.add('active');
+            return;
+        }
+
+        // If created but not submitted yet, route them to prediction steps
+        if (!STATE.userSubmitted) {
+            const p = STATE.participants.user;
+            const groupsCompleted = Object.keys(p.groupStandings).length > 0;
+
+            if (!groupsCompleted) {
+                const groupTabBtn = document.querySelector('.nav-item[data-tab="groups"]');
+                if (groupTabBtn) groupTabBtn.click();
+                alert('Start by sorting your group standings! Drag or click teams to select the top 2 in each group.');
+            } else {
+                const bracketTabBtn = document.querySelector('.nav-item[data-tab="bracket"]');
+                if (bracketTabBtn) bracketTabBtn.click();
+                alert('Complete your predictions by choosing match winners in the bracket tree, up to the Champion!');
+            }
+        } else {
+            alert('You have already submitted your predictions! Review the standings leaderboard to see how you rank.');
+        }
+    };
+
+    if (sidebarBtn) sidebarBtn.addEventListener('click', handleMainSubmitClick);
+    if (leaderboardBtn) leaderboardBtn.addEventListener('click', handleMainSubmitClick);
+
+    // 3. Handle onboarding welcome start click
     startBtn.addEventListener('click', () => {
         const nameVal = nameInput.value.trim();
         if (!nameVal) {
@@ -1065,10 +1090,17 @@ function setupOnboarding() {
 
         populateUserDropdowns();
         updateSubmitButtonState();
+        
+        // Dynamic switch to Group stages tab
+        const groupTabBtn = document.querySelector('.nav-item[data-tab="groups"]');
+        if (groupTabBtn) groupTabBtn.click();
+
         renderAll();
+        
+        alert(`Welcome ${nameVal}! We have loaded the groups tab. Arrange each group's standings to populate your R32 bracket automatically in real-time.`);
     });
 
-    // 3. Handle Submit Picks Click
+    // 4. Handle Bracket Sheet Submit Picks Click
     const submitPicksBtn = document.getElementById('btn-submit-picks');
     submitPicksBtn.addEventListener('click', () => {
         const p = STATE.participants.user;
@@ -1097,25 +1129,54 @@ function setupOnboarding() {
 
 function updateSubmitButtonState() {
     const submitPicksBtn = document.getElementById('btn-submit-picks');
-    if (!submitPicksBtn) return;
+    const sidebarBtn = document.getElementById('sidebar-submit-btn');
+    const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
 
     if (STATE.userSubmitted) {
-        submitPicksBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Submitted Successfully!`;
-        submitPicksBtn.disabled = true;
-        submitPicksBtn.style.opacity = '0.75';
-        submitPicksBtn.classList.remove('glowing-btn');
+        const successContent = `<i class="fa-solid fa-circle-check"></i> Picks Submitted!`;
+        
+        if (submitPicksBtn) {
+            submitPicksBtn.innerHTML = successContent;
+            submitPicksBtn.disabled = true;
+            submitPicksBtn.style.opacity = '0.75';
+            submitPicksBtn.classList.remove('glowing-btn');
+        }
+        [sidebarBtn, leaderboardBtn].forEach(btn => {
+            if (btn) {
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Picks Submitted`;
+                btn.disabled = true;
+                btn.style.opacity = '0.75';
+                btn.classList.remove('glowing-btn');
+            }
+        });
     } else {
-        submitPicksBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Submit My Picks`;
-        submitPicksBtn.disabled = false;
-        submitPicksBtn.style.opacity = '1';
-        submitPicksBtn.classList.add('glowing-btn');
+        const onboarded = !!STATE.participants.user;
+        const labelText = onboarded ? 'Complete Picks' : 'Submit Picks';
+        const iconHtml = onboarded ? '<i class="fa-solid fa-user-pen"></i>' : '<i class="fa-solid fa-cloud-arrow-up"></i>';
+
+        if (submitPicksBtn) {
+            submitPicksBtn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Submit My Picks`;
+            submitPicksBtn.disabled = false;
+            submitPicksBtn.style.opacity = '1';
+            submitPicksBtn.classList.add('glowing-btn');
+        }
+        [sidebarBtn, leaderboardBtn].forEach(btn => {
+            if (btn) {
+                btn.innerHTML = `${iconHtml} <span>${labelText}</span>`;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.classList.add('glowing-btn');
+            }
+        });
     }
 
     // Only show submit button when editing "user" bracket
-    if (STATE.activeBracketUser === 'user') {
-        submitPicksBtn.style.display = 'inline-flex';
-    } else {
-        submitPicksBtn.style.display = 'none';
+    if (submitPicksBtn) {
+        if (STATE.activeBracketUser === 'user') {
+            submitPicksBtn.style.display = 'inline-flex';
+        } else {
+            submitPicksBtn.style.display = 'none';
+        }
     }
 }
 
