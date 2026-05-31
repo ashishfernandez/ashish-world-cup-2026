@@ -1958,3 +1958,37 @@ body.dark-theme .nav-item.active i {
     color: #000000 !important;
 }
 
+/* Bracket Connector Lines */
+.round-column:not(:last-of-type) .match-card::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -1.75rem;
+    width: 1.75rem;
+    height: 2px;
+    background-color: var(--card-border);
+    z-index: -1;
+}
+
+.round-column:not(:first-of-type) .match-card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -1.75rem;
+    width: 1.75rem;
+    height: 2px;
+    background-color: var(--card-border);
+    z-index: -1;
+}
+
+.champ-card::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -1.75rem;
+    width: 1.75rem;
+    height: 2px;
+    background-color: var(--card-border);
+    z-index: -1;
+}
+

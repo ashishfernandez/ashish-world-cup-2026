@@ -687,17 +687,13 @@ function renderBracket() {
         p.champ = results.matches[32] || '';
     }
 
-    // Render status badge
+    // Render status badge (Official Actuals has no status badge anymore)
     const badgeEl = document.getElementById('bracket-status-badge');
     if (badgeEl) {
         if (p.isActuals) {
-            badgeEl.innerHTML = `
-                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold); border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(245, 158, 11, 0.1); margin-right: 1rem;">
-                    <i class="fa-solid fa-trophy"></i> Official Actuals
-                </span>
-            `;
+            badgeEl.innerHTML = '';
         } else if (p.submitted) {
-            badgeEl.innerHTML = ``;
+            badgeEl.innerHTML = '';
         } else {
             badgeEl.innerHTML = `
                 <span class="badge" style="background: rgba(59, 130, 246, 0.12); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; margin-right: 1rem;">
@@ -709,11 +705,11 @@ function renderBracket() {
 
     // Define the rounds columns to draw
     const roundsList = [
-        { key: 'R32', title: 'Round 1 (R32)', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
-        { key: 'R16', title: 'Round 2 (R16)', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
-        { key: 'QF', title: 'Round 3 (QF)', matches: [25, 26, 27, 28] },
-        { key: 'SF', title: 'Round 4 (SF)', matches: [29, 30] },
-        { key: 'F', title: 'Round 5 (Finals & 3rd)', matches: [32, 31] }, // Render Final above 3rd Place Match
+        { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
+        { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
+        { key: 'QF', title: 'Round of 8', matches: [25, 26, 27, 28] },
+        { key: 'SF', title: 'Round of 4', matches: [29, 30] },
+        { key: 'F', title: 'Round of 2', matches: [32, 31] }, 
         { key: 'CHAMP', title: 'Champion' }
     ];
 
@@ -749,6 +745,45 @@ function renderBracket() {
                 </div>
             `;
             col.appendChild(champCard);
+
+            // Silver Card (2nd Place)
+            let silverCode = '';
+            const homeCode32 = getKnockoutParticipant(p, 32, 'home');
+            const awayCode32 = getKnockoutParticipant(p, 32, 'away');
+            if (champCode && homeCode32 && awayCode32) {
+                silverCode = (champCode === homeCode32) ? awayCode32 : homeCode32;
+            }
+            const silverTeam = getTeamByCode(silverCode);
+            const silverCard = document.createElement('div');
+            silverCard.className = 'finalist-card silver-finalist';
+            silverCard.style = 'margin-top: 1.5rem; text-align: center; background: var(--card-bg-match); border: 1px solid var(--card-border); padding: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 250px; position: relative;';
+            silverCard.innerHTML = `
+                <div class="finalist-badge" style="background: rgba(226, 232, 240, 0.15); color: #cbd5e1; border: 1px solid rgba(226, 232, 240, 0.3); font-size: 0.72rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;">
+                    <i class="fa-solid fa-medal"></i> 2nd Place / Silver
+                </div>
+                <div class="finalist-team-spot" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
+                    <span class="team-flag" style="font-size: 1.25rem;">${silverTeam.flag}</span>
+                    <span class="team-name-text">${silverTeam.name}</span>
+                </div>
+            `;
+            col.appendChild(silverCard);
+
+            // Bronze Card (3rd Place)
+            const bronzeCode = p.bracketPicks[31] || '';
+            const bronzeTeam = getTeamByCode(bronzeCode);
+            const bronzeCard = document.createElement('div');
+            bronzeCard.className = 'finalist-card bronze-finalist';
+            bronzeCard.style = 'margin-top: 1rem; text-align: center; background: var(--card-bg-match); border: 1px solid var(--card-border); padding: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 250px; position: relative;';
+            bronzeCard.innerHTML = `
+                <div class="finalist-badge" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24; border: 1px solid rgba(217, 119, 6, 0.3); font-size: 0.72rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;">
+                    <i class="fa-solid fa-medal"></i> 3rd Place / Bronze
+                </div>
+                <div class="finalist-team-spot" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
+                    <span class="team-flag" style="font-size: 1.25rem;">${bronzeTeam.flag}</span>
+                    <span class="team-name-text">${bronzeTeam.name}</span>
+                </div>
+            `;
+            col.appendChild(bronzeCard);
         } else {
             round.matches.forEach(matchId => {
                 const matchSchema = KNOCKOUTS_SCHEMA[matchId];
@@ -908,17 +943,13 @@ function renderGroups() {
         return;
     }
 
-    // Render status badge
+    // Render status badge (Official Actuals has no status badge anymore)
     const badgeEl = document.getElementById('groups-status-badge');
     if (badgeEl) {
         if (p.isActuals) {
-            badgeEl.innerHTML = `
-                <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-gold); border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; box-shadow: 0 0 12px rgba(245, 158, 11, 0.1); margin-right: 1rem;">
-                    <i class="fa-solid fa-trophy"></i> Official Actuals
-                </span>
-            `;
+            badgeEl.innerHTML = '';
         } else if (p.submitted) {
-            badgeEl.innerHTML = ``;
+            badgeEl.innerHTML = '';
         } else {
             badgeEl.innerHTML = `
                 <span class="badge" style="background: rgba(59, 130, 246, 0.12); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.25); font-size: 0.82rem; padding: 0.4rem 0.85rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; margin-right: 1rem;">
@@ -1633,11 +1664,11 @@ function renderWizardBracket() {
     if (!p) return;
 
     const roundsList = [
-        { key: 'R32', title: 'Round 1 (R32)', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
-        { key: 'R16', title: 'Round 2 (R16)', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
-        { key: 'QF', title: 'Round 3 (QF)', matches: [25, 26, 27, 28] },
-        { key: 'SF', title: 'Round 4 (SF)', matches: [29, 30] },
-        { key: 'F', title: 'Round 5 (Finals & 3rd)', matches: [32, 31] },
+        { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
+        { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
+        { key: 'QF', title: 'Round of 8', matches: [25, 26, 27, 28] },
+        { key: 'SF', title: 'Round of 4', matches: [29, 30] },
+        { key: 'F', title: 'Round of 2', matches: [32, 31] },
         { key: 'CHAMP', title: 'Champion' }
     ];
 
@@ -1666,6 +1697,45 @@ function renderWizardBracket() {
                 </div>
             `;
             col.appendChild(champCard);
+
+            // Silver Card (2nd Place)
+            let silverCode = '';
+            const homeCode32 = getKnockoutParticipant(p, 32, 'home');
+            const awayCode32 = getKnockoutParticipant(p, 32, 'away');
+            if (champCode && homeCode32 && awayCode32) {
+                silverCode = (champCode === homeCode32) ? awayCode32 : homeCode32;
+            }
+            const silverTeam = getTeamByCode(silverCode);
+            const silverCard = document.createElement('div');
+            silverCard.className = 'finalist-card silver-finalist';
+            silverCard.style = 'margin-top: 1.5rem; text-align: center; background: var(--card-bg-match); border: 1px solid var(--card-border); padding: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 250px; position: relative;';
+            silverCard.innerHTML = `
+                <div class="finalist-badge" style="background: rgba(226, 232, 240, 0.15); color: #cbd5e1; border: 1px solid rgba(226, 232, 240, 0.3); font-size: 0.72rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;">
+                    <i class="fa-solid fa-medal"></i> 2nd Place / Silver
+                </div>
+                <div class="finalist-team-spot" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
+                    <span class="team-flag" style="font-size: 1.25rem;">${silverTeam.flag}</span>
+                    <span class="team-name-text">${silverTeam.name}</span>
+                </div>
+            `;
+            col.appendChild(silverCard);
+
+            // Bronze Card (3rd Place)
+            const bronzeCode = p.bracketPicks[31] || '';
+            const bronzeTeam = getTeamByCode(bronzeCode);
+            const bronzeCard = document.createElement('div');
+            bronzeCard.className = 'finalist-card bronze-finalist';
+            bronzeCard.style = 'margin-top: 1rem; text-align: center; background: var(--card-bg-match); border: 1px solid var(--card-border); padding: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 250px; position: relative;';
+            bronzeCard.innerHTML = `
+                <div class="finalist-badge" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24; border: 1px solid rgba(217, 119, 6, 0.3); font-size: 0.72rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;">
+                    <i class="fa-solid fa-medal"></i> 3rd Place / Bronze
+                </div>
+                <div class="finalist-team-spot" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
+                    <span class="team-flag" style="font-size: 1.25rem;">${bronzeTeam.flag}</span>
+                    <span class="team-name-text">${bronzeTeam.name}</span>
+                </div>
+            `;
+            col.appendChild(bronzeCard);
         } else {
             round.matches.forEach(matchId => {
                 const matchSchema = KNOCKOUTS_SCHEMA[matchId];
@@ -1859,6 +1929,7 @@ function makeContainerDraggable(container, isInteractive = false) {
         container.style.cursor = 'grabbing';
         startX = e.pageX - container.offsetLeft;
         scrollLeft = container.scrollLeft;
+        e.preventDefault(); // Enforce smooth drag-to-scroll without browser selection interference
     });
 
     container.addEventListener('mouseleave', () => {
