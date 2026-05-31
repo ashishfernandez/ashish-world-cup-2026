@@ -983,19 +983,26 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     background: linear-gradient(185deg, var(--card-bg) 0%, var(--accent-gold-glow) 100%);
     border: 2px solid rgba(245, 158, 11, 0.4);
     border-radius: var(--radius-lg);
-    padding: 2.25rem 1.5rem;
+    padding: 1.75rem 1.25rem;
     text-align: center;
     box-shadow: 0 10px 30px var(--accent-gold-glow);
     transition: var(--transition-smooth);
     position: relative;
     overflow: visible;
+    width: 250px;
+    height: 250px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .champ-card .crown-icon {
-    font-size: 2.75rem;
+    font-size: 2.5rem;
     color: var(--accent-gold);
     filter: drop-shadow(0 0 12px var(--accent-gold-glow));
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     animation: floating 3s ease-in-out infinite;
 }
 
@@ -1003,20 +1010,27 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     font-family: var(--font-heading);
     font-weight: 800;
     text-transform: uppercase;
-    font-size: 0.95rem;
-    letter-spacing: 2px;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
     color: var(--accent-gold);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
+    white-space: nowrap;
 }
 
 .champ-team-spot {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1rem;
     border-radius: var(--radius-md);
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
 }
 
 /* Group Stage Tab Cards Layout */
