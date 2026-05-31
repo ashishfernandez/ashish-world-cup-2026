@@ -744,7 +744,7 @@ function renderBracket() {
 function getKnockoutParticipant(participant, matchId, slot) {
     const schema = KNOCKOUTS_SCHEMA[matchId];
     if (schema.round === 'R32') {
-        return slot === 'home' ? schema.homeTeamCode || schema.defaultHome : slot === 'away' ? schema.awayTeamCode || schema.defaultAway;
+        return slot === 'home' ? schema.homeTeamCode || schema.defaultHome : slot === 'away' ? schema.awayTeamCode || schema.defaultAway : '';
     }
 
     // Knockout rounds: derive teams dynamically from the winners of parent matches
