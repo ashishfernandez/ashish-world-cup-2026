@@ -285,6 +285,7 @@ function resetDraft() {
         avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Guest',
         champ: '',
         groupStandings: {},
+        selectedThirds: [],
         bracketPicks: {},
         submitted: false,
         onboarded: false
@@ -1079,16 +1080,31 @@ function buildBracketFromStandings(username) {
     KNOCKOUTS_SCHEMA[15].homeTeamCode = groupFirsts['B']; // 1B
     KNOCKOUTS_SCHEMA[16].homeTeamCode = groupFirsts['K']; // 1K
 
-    // Determine 3rd place advancers (Default: select first 8 groups' 3rd places A to H)
-    KNOCKOUTS_SCHEMA[1].awayTeamCode = groupThirds[0].code; // 3A
-    KNOCKOUTS_SCHEMA[2].awayTeamCode = groupThirds[2].code; // 3C
-    KNOCKOUTS_SCHEMA[7].awayTeamCode = groupThirds[1].code; // 3B
-    KNOCKOUTS_SCHEMA[8].awayTeamCode = groupThirds[4].code; // 3E
-    KNOCKOUTS_SCHEMA[11].awayTeamCode = groupThirds[5].code; // 3F
-    KNOCKOUTS_SCHEMA[12].awayTeamCode = groupThirds[7].code; // 3H
-    KNOCKOUTS_SCHEMA[15].awayTeamCode = groupThirds[6].code; // 3G
-    KNOCKOUTS_SCHEMA[16].awayTeamCode = groupThirds[3].code; // 3D
+    // Invalidate and filter out selected third-place teams that are no longer 3rd place in their groups due to standings changes
+    if (p.selectedThirds) {
+        const currentThirds = groupThirds.map(item => item.code);
+        const originalLen = p.selectedThirds.length;
+        p.selectedThirds = p.selectedThirds.filter(code => currentThirds.includes(code));
+        if (p.selectedThirds.length !== originalLen) {
+            // Reset subsequent bracket picks since third-place participants changed
+            resetSubsequentBracketPicks(p);
+        }
+    }
 
+    // Determine 3rd place advancers based on user's selection, fallback to A-H defaults
+    let selectedThirds = p.selectedThirds;
+    if (!selectedThirds || selectedThirds.length !== 8) {
+        selectedThirds = groupThirds.slice(0, 8).map(item => item.code);
+    }
+
+    KNOCKOUTS_SCHEMA[1].awayTeamCode = selectedThirds[0] || ''; // 1st choice
+    KNOCKOUTS_SCHEMA[2].awayTeamCode = selectedThirds[1] || ''; // 2nd choice
+    KNOCKOUTS_SCHEMA[7].awayTeamCode = selectedThirds[2] || ''; // 3rd choice
+    KNOCKOUTS_SCHEMA[8].awayTeamCode = selectedThirds[3] || ''; // 4th choice
+    KNOCKOUTS_SCHEMA[11].awayTeamCode = selectedThirds[4] || ''; // 5th choice
+    KNOCKOUTS_SCHEMA[12].awayTeamCode = selectedThirds[5] || ''; // 6th choice
+    KNOCKOUTS_SCHEMA[15].awayTeamCode = selectedThirds[6] || ''; // 7th choice
+    KNOCKOUTS_SCHEMA[16].awayTeamCode = selectedThirds[7] || ''; // 8th choice
 }
 
 // 11. Render Admin simulator matches panel
@@ -1383,9 +1399,17 @@ function setupOnboarding() {
                 saveStateToStorage();
                 goToWizardStep(2);
             } else if (step === 2) {
-                // Group standings complete - proceed to bracket tree
+                // Group standings complete - proceed to 3rd places select
                 goToWizardStep(3);
             } else if (step === 3) {
+                // Validate 3rd places selection (exactly 8 chosen)
+                const draft = STATE.participants.draft;
+                if (!draft.selectedThirds || draft.selectedThirds.length !== 8) {
+                    alert('Please select exactly 8 third-place teams to advance to the knockout rounds!');
+                    return;
+                }
+                goToWizardStep(4);
+            } else if (step === 4) {
                 // Bracket tree complete - validate all 32 matches are picked before proceeding to summary
                 const draft = STATE.participants.draft;
                 const incomplete = [];
@@ -1398,7 +1422,7 @@ function setupOnboarding() {
                     alert(`Please complete all 32 bracket picks before proceeding! You have ${incomplete.length} unselected matchup${incomplete.length > 1 ? 's' : ''} left.`);
                     return;
                 }
-                goToWizardStep(4);
+                goToWizardStep(5);
             }
         });
     }
@@ -1410,8 +1434,8 @@ function setupOnboarding() {
             const draft = STATE.participants.draft;
             
             if (!draft.champ) {
-                alert('Please complete your knockout bracket and predict a tournament Champion in Step 3 before submitting!');
-                goToWizardStep(3);
+                alert('Please complete your knockout bracket and predict a tournament Champion in Step 4 before submitting!');
+                goToWizardStep(4);
                 return;
             }
 
@@ -1423,6 +1447,7 @@ function setupOnboarding() {
                 avatar: draft.avatar,
                 champ: draft.champ,
                 groupStandings: JSON.parse(JSON.stringify(draft.groupStandings)),
+                selectedThirds: JSON.parse(JSON.stringify(draft.selectedThirds || [])),
                 bracketPicks: JSON.parse(JSON.stringify(draft.bracketPicks)),
                 submitted: true,
                 onboarded: true
@@ -1489,11 +1514,11 @@ function goToWizardStep(step) {
     // Dynamically adjust modal scaling sizes
     const wizardCard = document.querySelector('.wizard-card');
     if (wizardCard) {
-        wizardCard.classList.remove('step-1-active', 'step-4-active');
+        wizardCard.classList.remove('step-1-active', 'step-5-active');
         if (step === 1) {
             wizardCard.classList.add('step-1-active');
-        } else if (step === 4) {
-            wizardCard.classList.add('step-4-active');
+        } else if (step === 5) {
+            wizardCard.classList.add('step-5-active');
         }
     }
 
@@ -1506,15 +1531,17 @@ function goToWizardStep(step) {
     // Toggle Next button visibility
     const nextBtn = document.getElementById('btn-wizard-next');
     if (nextBtn) {
-        nextBtn.style.display = (step === 4) ? 'none' : 'inline-flex';
+        nextBtn.style.display = (step === 5) ? 'none' : 'inline-flex';
     }
 
     // Trigger step-specific renders or details binding
     if (step === 2) {
         renderWizardGroups();
     } else if (step === 3) {
-        renderWizardBracket();
+        renderWizardThirds();
     } else if (step === 4) {
+        renderWizardBracket();
+    } else if (step === 5) {
         const draft = STATE.participants.draft;
         const champCode = draft.champ || '';
         const champTeam = getTeamByCode(champCode);
@@ -1567,7 +1594,10 @@ function updateWizardNextButtonState() {
         // Groups are always populated (pre-loaded list)
         isEnabled = true;
     } else if (step === 3) {
-        // All 32 bracket picks must be complete
+        // Step 3 is 3rd places selection - exactly 8 chosen
+        isEnabled = (draft.selectedThirds && draft.selectedThirds.length === 8);
+    } else if (step === 4) {
+        // Step 4 is bracket filling - all 32 bracket picks must be complete
         let picksCount = 0;
         for (let i = 1; i <= 32; i++) {
             if (draft.bracketPicks[i]) {
@@ -1985,6 +2015,146 @@ function makeContainerDraggable(container, isInteractive = false) {
             e.stopPropagation();
         }
     }, true); // Use capture phase to intercept click before child listeners
+}
+
+// Render available and selected 3rd place teams inside predictions wizard
+function renderWizardThirds() {
+    const availableContainer = document.getElementById('wizard-thirds-available');
+    const selectedContainer = document.getElementById('wizard-thirds-selected-slots');
+    if (!availableContainer || !selectedContainer) return;
+
+    availableContainer.innerHTML = '';
+    selectedContainer.innerHTML = '';
+
+    const p = STATE.participants.draft;
+    if (!p || !p.groupStandings) return;
+
+    // Get the 3rd place team from each of the 12 groups A to L
+    const allThirds = [];
+    for (const groupName in GROUPS_DATA) {
+        const standings = p.groupStandings[groupName] || GROUPS_DATA[groupName].map(t => t.code);
+        const thirdPlaceCode = standings[2]; // 3rd place team
+        const team = getTeamByCode(thirdPlaceCode);
+        allThirds.push({ group: groupName, code: thirdPlaceCode, team: team });
+    }
+
+    // Ensure selectedThirds array is initialized
+    if (!p.selectedThirds) {
+        p.selectedThirds = [];
+    }
+
+    // A. Render Available 3rd Place Teams on the Left
+    allThirds.forEach(item => {
+        const isSelected = p.selectedThirds.includes(item.code);
+        
+        const card = document.createElement('div');
+        card.className = `premium-card third-team-card ${isSelected ? 'selected' : ''}`;
+        card.style = `
+            padding: 0.85rem 1.25rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: ${isSelected ? 'rgba(59, 130, 246, 0.08)' : 'var(--card-bg-match)'};
+            border: 1px solid ${isSelected ? 'var(--primary)' : 'var(--card-border)'};
+            opacity: ${isSelected ? '0.6' : '1'};
+            cursor: ${isSelected ? 'default' : 'pointer'};
+            transition: all 0.2s ease;
+        `;
+        card.innerHTML = `
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600;">Group ${item.group}</span>
+                <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">${item.team.name}</span>
+            </div>
+            ${!isSelected ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary); font-size: 1.15rem;"></i>' : '<i class="fa-solid fa-circle-check" style="color: var(--accent-emerald); font-size: 1.15rem;"></i>'}
+        `;
+
+        if (!isSelected) {
+            card.addEventListener('click', () => {
+                if (p.selectedThirds.length >= 8) {
+                    alert('You have already selected 8 teams! Please remove a team first to select another.');
+                    return;
+                }
+                p.selectedThirds.push(item.code);
+                // Invalidate subsequent picks that might depend on previous third places
+                resetSubsequentBracketPicks(p);
+                saveStateToStorage();
+                renderWizardThirds();
+            });
+        }
+        availableContainer.appendChild(card);
+    });
+
+    // B. Render the 8 Slots on the Right
+    for (let i = 0; i < 8; i++) {
+        const teamCode = p.selectedThirds[i];
+        const slotEl = document.createElement('div');
+        slotEl.style = `
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        `;
+
+        if (teamCode) {
+            const team = getTeamByCode(teamCode);
+            // Find which group this team came from
+            const originItem = allThirds.find(item => item.code === teamCode);
+            const groupLabel = originItem ? `Group ${originItem.group}` : '';
+
+            slotEl.className = 'premium-card slot-card-selected';
+            slotEl.style.cssText += `
+                background: rgba(59, 130, 246, 0.04);
+                border: 1px solid var(--primary);
+                cursor: pointer;
+            `;
+            slotEl.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 0.78rem; font-weight: 800; color: var(--primary); background: rgba(59, 130, 246, 0.1); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">${groupLabel}</span>
+                        <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">${team.name}</span>
+                    </div>
+                </div>
+                <i class="fa-solid fa-circle-minus" style="color: var(--accent-crimson); font-size: 1.15rem;"></i>
+            `;
+            slotEl.addEventListener('click', () => {
+                p.selectedThirds.splice(i, 1);
+                // Invalidate subsequent picks that might depend on previous third places
+                resetSubsequentBracketPicks(p);
+                saveStateToStorage();
+                renderWizardThirds();
+            });
+        } else {
+            slotEl.className = 'slot-card-empty';
+            slotEl.style.cssText += `
+                background: transparent;
+                border: 1px dashed var(--card-border);
+                color: var(--text-dark);
+            `;
+            slotEl.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 0.78rem; font-weight: 800; color: var(--text-dark); border: 1px dashed var(--card-border); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
+                    <span style="font-size: 0.88rem; font-style: italic;">Slot ${i + 1} (Empty TBD)</span>
+                </div>
+                <span style="font-size: 0.78rem; color: var(--text-dark);">Click team to fill</span>
+            `;
+        }
+        selectedContainer.appendChild(slotEl);
+    }
+    updateWizardNextButtonState();
+}
+
+// Invalidate subsequent predicted predicted bracket picks that depend on third places
+function resetSubsequentBracketPicks(p) {
+    const thirdPlaceMatches = [1, 2, 7, 8, 11, 12, 15, 16];
+    thirdPlaceMatches.forEach(mId => {
+        p.bracketPicks[mId] = '';
+        propagateWinner(p, mId, '');
+    });
+    p.champ = '';
 }
 
 // Initialize on window load

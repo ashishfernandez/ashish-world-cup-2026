@@ -330,11 +330,16 @@
                     <div class="progress-line"></div>
                     <div class="progress-step" data-step="3">
                         <span class="step-num">3</span>
-                        <span class="step-label">Bracket</span>
+                        <span class="step-label">3rd Places</span>
                     </div>
                     <div class="progress-line"></div>
                     <div class="progress-step" data-step="4">
                         <span class="step-num">4</span>
+                        <span class="step-label">Bracket</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="5">
+                        <span class="step-num">5</span>
                         <span class="step-label">Submit</span>
                     </div>
                 </div>
@@ -360,7 +365,7 @@
                 <div class="wizard-step-panel" data-step="2">
                     <div class="step-intro-wrapper">
                         <h3>Sort Group Standings</h3>
-                        <p><i class="fa-solid fa-circle-info"></i> Arrange groups A to L. The top 2 teams and the 8 best 3rd-place teams will automatically populate your R32 knockout bracket matches!</p>
+                        <p><i class="fa-solid fa-circle-info"></i> Arrange groups A to L to establish your predicted top 2 and 3rd-place finishers. You will pick which 3rd-place teams advance in the next step!</p>
                     </div>
                     <div class="wizard-groups-scroll-area">
                         <div class="groups-grid" id="wizard-groups-grid">
@@ -369,8 +374,36 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Knockout Bracket Selection -->
+                <!-- Step 3: Select Advancing 3rd Places -->
                 <div class="wizard-step-panel" data-step="3">
+                    <div class="step-intro-wrapper">
+                        <h3>Select Top 8 Third-Place Teams</h3>
+                        <p><i class="fa-solid fa-circle-info"></i> Choose exactly 8 of the 12 third-place teams below to advance to the knockout bracket. Click them in your preferred order of strength!</p>
+                    </div>
+                    <div class="thirds-selection-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 1.5rem; height: calc(100vh - 350px); min-height: 400px; max-height: 480px;">
+                        
+                        <!-- Left pane: Available 12 teams -->
+                        <div class="thirds-available-pane" style="display: flex; flex-direction: column; gap: 1rem; border-right: 1px solid var(--card-border); padding-right: 2rem; overflow-y: auto;">
+                            <h4 style="font-family: var(--font-heading); font-weight: 700; margin: 0; color: var(--text-primary);">Predicted 3rd Place Teams</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Click on a team to advance them to the next available slot.</p>
+                            <div class="thirds-available-grid" id="wizard-thirds-available" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <!-- Injected dynamically by JS -->
+                            </div>
+                        </div>
+                        
+                        <!-- Right pane: Selected 8 slots -->
+                        <div class="thirds-selected-pane" style="display: flex; flex-direction: column; gap: 1rem; overflow-y: auto;">
+                            <h4 style="font-family: var(--font-heading); font-weight: 700; margin: 0; color: var(--text-primary);">Selected 8 Advancing Teams</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Click on a selected team to remove them from advancement.</p>
+                            <div class="thirds-slots-list" id="wizard-thirds-selected-slots" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <!-- 8 slots rendered dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Knockout Bracket Selection -->
+                <div class="wizard-step-panel" data-step="4">
                     <div class="step-intro-wrapper">
                         <h3>Fill Your Knockout Bracket</h3>
                         <p><i class="fa-solid fa-circle-info"></i> Click on any team to advance them to the subsequent round, all the way to the Finals!</p>
@@ -384,8 +417,8 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Summary & Submit Predictions -->
-                <div class="wizard-step-panel" data-step="4">
+                <!-- Step 5: Summary & Submit Predictions -->
+                <div class="wizard-step-panel" data-step="5">
                     <div class="wizard-review-container">
                         <div class="review-award-card champ-award">
                             <i class="fa-solid fa-trophy champ-trophy"></i>

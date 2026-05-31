@@ -1625,7 +1625,7 @@ body.dark-theme .wizard-card {
 }
 
 /* Modal sizing based on active step for optimal visual layout */
-.wizard-card.step-1-active, .wizard-card.step-4-active {
+.wizard-card.step-1-active, .wizard-card.step-5-active {
     max-width: 540px;
     height: auto;
     min-height: 480px;
