@@ -1948,3 +1948,13 @@ body.dark-theme .btn i {
     color: #000000 !important;
 }
 
+body.dark-theme .nav-item.active {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-theme .nav-item.active i {
+    color: #000000 !important;
+}
+
