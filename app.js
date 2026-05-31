@@ -693,11 +693,11 @@ function renderBracket() {
 
     // Define the rounds columns to draw
     const roundsList = [
-        { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
-        { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
-        { key: 'QF', title: 'Quarterfinals', matches: [25, 26, 27, 28] },
-        { key: 'SF', title: 'Semifinals', matches: [29, 30] },
-        { key: 'F', title: 'Finals & 3rd', matches: [32, 31] }, // Render Final above 3rd Place Match
+        { key: 'R32', title: 'Round 1 (R32)', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
+        { key: 'R16', title: 'Round 2 (R16)', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
+        { key: 'QF', title: 'Round 3 (QF)', matches: [25, 26, 27, 28] },
+        { key: 'SF', title: 'Round 4 (SF)', matches: [29, 30] },
+        { key: 'F', title: 'Round 5 (Finals & 3rd)', matches: [32, 31] }, // Render Final above 3rd Place Match
         { key: 'CHAMP', title: 'Champion' }
     ];
 
@@ -1441,11 +1441,11 @@ function renderWizardBracket() {
     if (!p) return;
 
     const roundsList = [
-        { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
-        { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
-        { key: 'QF', title: 'Quarterfinals', matches: [25, 26, 27, 28] },
-        { key: 'SF', title: 'Semifinals', matches: [29, 30] },
-        { key: 'F', title: 'Finals & 3rd', matches: [32, 31] },
+        { key: 'R32', title: 'Round 1 (R32)', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
+        { key: 'R16', title: 'Round 2 (R16)', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
+        { key: 'QF', title: 'Round 3 (QF)', matches: [25, 26, 27, 28] },
+        { key: 'SF', title: 'Round 4 (SF)', matches: [29, 30] },
+        { key: 'F', title: 'Round 5 (Finals & 3rd)', matches: [32, 31] },
         { key: 'CHAMP', title: 'Champion' }
     ];
 
