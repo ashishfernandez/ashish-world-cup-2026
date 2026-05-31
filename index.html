@@ -105,8 +105,6 @@
                                     <i class="fa-solid fa-cloud-arrow-up"></i>
                                     <span>Submit Picks</span>
                                 </button>
-                                <span class="badge badge-info">Option A System</span>
-                                <span class="badge badge-warning">+100 Golden Boot</span>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -181,65 +179,90 @@
                 <!-- 4. Admin Simulator Panel -->
                 <section class="tab-panel" id="tab-admin">
                     <div class="admin-grid">
-                        <!-- Score Entry Controller -->
-                        <div class="premium-card admin-control-card">
-                            <div class="card-header">
-                                <h3><i class="fa-solid fa-trophy gold-text"></i> World Cup Match Simulator</h3>
-                                <p>Simulate tournament results here to watch your friends' scores update live.</p>
-                            </div>
-                            <div class="admin-options-row">
-                                <div class="input-group">
-                                    <label for="admin-golden-boot"><i class="fa-solid fa-shoe-prints text-warning"></i> Official Golden Boot Winner:</label>
-                                    <select id="admin-golden-boot" class="custom-select">
-                                        <option value="">-- Tournament In Progress --</option>
-                                        <option value="Kylian Mbappé">Kylian Mbappé (FRA)</option>
-                                        <option value="Erling Haaland">Erling Haaland (NOR)</option>
-                                        <option value="Vinícius Júnior">Vinícius Júnior (BRA)</option>
-                                        <option value="Harry Kane">Harry Kane (ENG)</option>
-                                        <option value="Lionel Messi">Lionel Messi (ARG)</option>
-                                        <option value="Jude Bellingham">Jude Bellingham (ENG)</option>
-                                    </select>
+                        <!-- Left column: Match Simulator & Group Stages Editor -->
+                        <div class="admin-left-col" style="display: flex; flex-direction: column; gap: 2rem;">
+                            <!-- Score Entry Controller -->
+                            <div class="premium-card admin-control-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-trophy gold-text"></i> World Cup Match Simulator</h3>
                                 </div>
-                                <button id="btn-reset-simulator" class="btn btn-secondary">
-                                    <i class="fa-solid fa-rotate-left"></i> Reset All Matches
-                                </button>
+                                <div class="admin-options-row">
+                                    <div class="input-group">
+                                        <label for="admin-golden-boot"><i class="fa-solid fa-shoe-prints text-warning"></i> Official Golden Boot Winner:</label>
+                                        <select id="admin-golden-boot" class="custom-select">
+                                            <option value="">-- Tournament In Progress --</option>
+                                            <option value="Kylian Mbappé">Kylian Mbappé (FRA)</option>
+                                            <option value="Erling Haaland">Erling Haaland (NOR)</option>
+                                            <option value="Vinícius Júnior">Vinícius Júnior (BRA)</option>
+                                            <option value="Harry Kane">Harry Kane (ENG)</option>
+                                            <option value="Lionel Messi">Lionel Messi (ARG)</option>
+                                            <option value="Jude Bellingham">Jude Bellingham (ENG)</option>
+                                        </select>
+                                    </div>
+                                    <button id="btn-reset-simulator" class="btn btn-secondary">
+                                        <i class="fa-solid fa-rotate-left"></i> Reset All Matches
+                                    </button>
+                                </div>
+
+                                <div class="admin-matches-scroll">
+                                    <div id="admin-simulator-matches">
+                                        <!-- Dynamic list of tournament matches by round to set official results -->
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="admin-matches-scroll">
-                                <div id="admin-simulator-matches">
-                                    <!-- Dynamic list of tournament matches by round to set official results -->
+                            <!-- Official Group Standings Editor -->
+                            <div class="premium-card admin-groups-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-table-cells-large text-primary"></i> Official Group Standings Editor</h3>
+                                    <p>Adjust team rankings to set official group advancement outcomes. Top 2 and best 3rd-places advance automatically.</p>
+                                </div>
+                                <div class="admin-groups-scroll" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem; margin-top: 1.5rem;">
+                                    <div class="groups-grid" id="admin-groups-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                                        <!-- Populated dynamically by JS -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Simulation Stats Card -->
-                        <div class="premium-card admin-summary-card">
-                            <div class="card-header">
-                                <h3>Simulation Live Metrics</h3>
-                            </div>
-                            <div class="stats-grid">
-                                <div class="stat-box">
-                                    <span class="stat-val" id="sim-matches-played">0 / 31</span>
-                                    <span class="stat-lbl">Matches Simulated</span>
+                        <!-- Right column: Metrics & Management -->
+                        <div class="admin-right-col" style="display: flex; flex-direction: column; gap: 2rem;">
+                            <!-- Simulation Stats Card -->
+                            <div class="premium-card admin-summary-card">
+                                <div class="card-header">
+                                    <h3>Simulation Live Metrics</h3>
                                 </div>
-                                <div class="stat-box">
-                                    <span class="stat-val" id="sim-highest-score">0 pts</span>
-                                    <span class="stat-lbl">Leaderboard Max</span>
+                                <div class="stats-grid">
+                                    <div class="stat-box" style="width: 100%;">
+                                        <span class="stat-val" id="sim-matches-played">0 / 32</span>
+                                        <span class="stat-lbl">Matches Simulated</span>
+                                    </div>
+                                </div>
+
+                                <div class="points-breakdown-info">
+                                    <h4>Points Scale Active:</h4>
+                                    <ul>
+                                        <li>Group Advancement: <strong>5 pts</strong></li>
+                                        <li>Round of 32 Winner: <strong>10 pts</strong></li>
+                                        <li>Round of 16 Winner: <strong>20 pts</strong></li>
+                                        <li>Quarterfinals Winner: <strong>40 pts</strong></li>
+                                        <li>Semifinals Winner: <strong>80 pts</strong></li>
+                                        <li>3rd Place Winner: <strong>40 pts</strong></li>
+                                        <li>Tournament Champion: <strong>160 pts</strong></li>
+                                        <li>Golden Boot Bonus: <strong>100 pts</strong></li>
+                                    </ul>
                                 </div>
                             </div>
 
-                            <div class="points-breakdown-info">
-                                <h4>Points Scale Active:</h4>
-                                <ul>
-                                    <li>Group Advancement: <strong>5 pts</strong></li>
-                                    <li>Round of 32 Winner: <strong>10 pts</strong></li>
-                                    <li>Round of 16 Winner: <strong>20 pts</strong></li>
-                                    <li>Quarterfinals Winner: <strong>40 pts</strong></li>
-                                    <li>Semifinals Winner: <strong>80 pts</strong></li>
-                                    <li>3rd Place Winner: <strong>40 pts</strong></li>
-                                    <li>Tournament Champion: <strong>160 pts</strong></li>
-                                    <li>Golden Boot Bonus: <strong>100 pts</strong></li>
-                                </ul>
+                            <!-- Participant Deletion / Management Card -->
+                            <div class="premium-card admin-users-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-users-gear text-danger"></i> Manage Participants</h3>
+                                    <p>Permanently remove user prediction entries from the pool.</p>
+                                </div>
+                                <div id="admin-user-list-container" style="max-height: 300px; overflow-y: auto; margin-top: 1rem; border: 1px solid var(--card-border); border-radius: var(--radius-sm); background: var(--bg-sidebar);">
+                                    <!-- Dynamic list of users with delete buttons -->
+                                </div>
                             </div>
                         </div>
                     </div>
