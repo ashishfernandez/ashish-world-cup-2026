@@ -523,7 +523,7 @@ function updateActivePlayersCount() {
     if (!countEl) return;
     
     const count = Object.keys(STATE.participants).filter(username => {
-        if (username === 'draft') return false;
+        if (username === 'draft' || username === 'actuals') return false;
         return STATE.participants[username].submitted;
     }).length;
     
