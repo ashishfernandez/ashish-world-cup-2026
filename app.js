@@ -138,8 +138,9 @@ const KNOCKOUTS_SCHEMA = {
 // 3. Complete State: Contains Official Simulated Outcomes & Predictions
 const STATE = {
     activeTab: 'leaderboard',
-    activeBracketUser: 'draft',   // Current user selected on Bracket Tab
-    activeGroupUser: 'draft',     // Current user selected on Groups Tab
+    activeBracketUser: 'actuals',   // Current user selected on Bracket Tab (defaults to actuals!)
+    activeGroupUser: 'actuals',     // Current user selected on Groups Tab (defaults to actuals!)
+    wizardStep: 1,                  // Current active step of predictions wizard
     
     // The administrative actual outcomes of the World Cup
     officialResults: {
@@ -1130,123 +1131,393 @@ function updateSimStats() {
 
 function setupOnboarding() {
     const modal = document.getElementById('onboarding-modal');
-    const startBtn = document.getElementById('btn-start-onboarding');
     const nameInput = document.getElementById('visitor-name');
     const bootSelect = document.getElementById('visitor-boot');
 
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
     const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
+    const submitPicksBtn = document.getElementById('btn-submit-picks');
+    
+    const closeBtn = document.getElementById('btn-close-wizard');
+    const backBtn = document.getElementById('btn-wizard-back');
+    const nextBtn = document.getElementById('btn-wizard-next');
+    const submitBtn = document.getElementById('btn-wizard-submit');
 
     // Toggle Submit Button visibility
     updateSubmitButtonState();
 
-    // 2. Reusable handler for the main "Submit Picks" buttons
-    const handleMainSubmitClick = () => {
-        // If the active user is a frozen submitted entry, clicking "Submit Picks" starts a NEW entry!
-        if (STATE.activeBracketUser !== 'draft') {
-            resetDraft();
-            STATE.activeBracketUser = 'draft';
-            STATE.activeGroupUser = 'draft';
-            populateUserDropdowns();
-            renderAll();
-            
-            // Open onboarding modal if not onboarded yet
-            modal.classList.add('active');
-            nameInput.value = '';
-            return;
-        }
-
+    // 1. Wizard Open Trigger
+    const openWizard = () => {
         const draft = STATE.participants.draft;
+        nameInput.value = draft.onboarded ? draft.name : '';
+        bootSelect.value = draft.goldenBoot || 'Kylian Mbappé';
 
-        // If the draft is not customized/onboarded yet, trigger name/boot welcome modal!
-        if (!draft.onboarded) {
-            modal.classList.add('active');
-            return;
-        }
-
-        // Commit the draft as a permanent submission
-        const subId = `sub_${Date.now()}`;
-        const newSubmission = {
-            id: subId,
-            name: draft.name,
-            avatar: draft.avatar,
-            goldenBoot: draft.goldenBoot,
-            champ: draft.champ,
-            groupStandings: JSON.parse(JSON.stringify(draft.groupStandings)),
-            bracketPicks: JSON.parse(JSON.stringify(draft.bracketPicks)),
-            submitted: true,
-            onboarded: true
-        };
-
-        // Inject to participants list
-        STATE.participants[subId] = newSubmission;
-
-        // Reset draft so they can start fresh next time
-        resetDraft();
-
-        // Save states
-        saveStateToStorage();
-
-        // Set active view to the newly submitted frozen entry
-        STATE.activeBracketUser = subId;
-        STATE.activeGroupUser = subId;
-
-        populateUserDropdowns();
-        updateSubmitButtonState();
-        renderAll();
-
-        alert(`🎉 Picks submitted successfully and locked forever! You can click "Submit Picks" at any time to start a new submission.`);
-
-        // Auto transition to Leaderboard tab
-        const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
-        if (leaderboardTabBtn) leaderboardTabBtn.click();
+        goToWizardStep(1);
+        modal.classList.add('active');
     };
 
-    if (sidebarBtn) sidebarBtn.addEventListener('click', handleMainSubmitClick);
-    if (leaderboardBtn) leaderboardBtn.addEventListener('click', handleMainSubmitClick);
+    if (sidebarBtn) sidebarBtn.addEventListener('click', openWizard);
+    if (leaderboardBtn) leaderboardBtn.addEventListener('click', openWizard);
+    if (submitPicksBtn) submitPicksBtn.addEventListener('click', openWizard);
 
-    // 3. Handle onboarding welcome start click
-    startBtn.addEventListener('click', () => {
-        const nameVal = nameInput.value.trim();
-        if (!nameVal) {
-            alert('Please enter your name to start predictions!');
-            return;
-        }
-
-        const bootVal = bootSelect.value;
-        const draft = STATE.participants.draft;
-
-        // Customize the draft state
-        draft.name = nameVal;
-        draft.avatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${nameVal}`;
-        draft.goldenBoot = bootVal;
-        draft.onboarded = true;
-
-        saveStateToStorage();
-        modal.classList.remove('active');
-
-        STATE.activeBracketUser = 'draft';
-        STATE.activeGroupUser = 'draft';
-
-        populateUserDropdowns();
-        updateSubmitButtonState();
-        
-        // Dynamic switch to Group stages tab
-        const groupTabBtn = document.querySelector('.nav-item[data-tab="groups"]');
-        if (groupTabBtn) groupTabBtn.click();
-
-        renderAll();
-        
-        alert(`Welcome ${nameVal}! We have loaded the groups tab. Arrange each group's standings to populate your R32 bracket automatically in real-time.`);
-    });
-
-    // 4. Handle Bracket Sheet Submit Picks Click
-    const submitPicksBtn = document.getElementById('btn-submit-picks');
-    if (submitPicksBtn) {
-        submitPicksBtn.addEventListener('click', () => {
-            handleMainSubmitClick();
+    // 2. Close Button Trigger
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            saveStateToStorage();
+            modal.classList.remove('active');
         });
     }
+
+    // 3. Navigation - Back Button
+    if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (STATE.wizardStep > 1) {
+                goToWizardStep(STATE.wizardStep - 1);
+            }
+        });
+    }
+
+    // 4. Navigation - Next Button
+    if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const step = STATE.wizardStep;
+            
+            if (step === 1) {
+                // Profile Validation
+                const nameVal = nameInput.value.trim();
+                if (!nameVal) {
+                    alert('Please enter your name to personalize your predictions entry!');
+                    return;
+                }
+                const bootVal = bootSelect.value;
+                const draft = STATE.participants.draft;
+
+                draft.name = nameVal;
+                draft.avatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(nameVal)}`;
+                draft.goldenBoot = bootVal;
+                draft.onboarded = true;
+
+                saveStateToStorage();
+                goToWizardStep(2);
+            } else if (step === 2) {
+                // Group standings complete - proceed to bracket tree
+                goToWizardStep(3);
+            } else if (step === 3) {
+                // Bracket tree complete - proceed to summary
+                goToWizardStep(4);
+            }
+        });
+    }
+
+    // 5. Navigation - Final Submit Button
+    if (submitBtn) {
+        submitBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const draft = STATE.participants.draft;
+            
+            if (!draft.champ) {
+                alert('Please complete your knockout bracket and predict a tournament Champion in Step 3 before submitting!');
+                goToWizardStep(3);
+                return;
+            }
+
+            // Commit the draft as a permanent frozen submission
+            const subId = `sub_${Date.now()}`;
+            const newSubmission = {
+                id: subId,
+                name: draft.name,
+                avatar: draft.avatar,
+                goldenBoot: draft.goldenBoot,
+                champ: draft.champ,
+                groupStandings: JSON.parse(JSON.stringify(draft.groupStandings)),
+                bracketPicks: JSON.parse(JSON.stringify(draft.bracketPicks)),
+                submitted: true,
+                onboarded: true
+            };
+
+            // Inject to active participants pool
+            STATE.participants[subId] = newSubmission;
+
+            // Reset guest draft state
+            resetDraft();
+            saveStateToStorage();
+
+            // Close modal overlay
+            modal.classList.remove('active');
+
+            // Select the newly submitted player on the main page read-only tabs
+            STATE.activeBracketUser = subId;
+            STATE.activeGroupUser = subId;
+
+            populateUserDropdowns();
+            updateSubmitButtonState();
+            renderAll();
+
+            alert(`🎉 Success! Your predictions are submitted under name "${newSubmission.name}" and locked forever.`);
+
+            // Navigate visitor to leaderboard tab
+            const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
+            if (leaderboardTabBtn) leaderboardTabBtn.click();
+        });
+    }
+}
+
+// Global Wizard Navigation Logic
+function goToWizardStep(step) {
+    STATE.wizardStep = step;
+    
+    // Toggle active panels
+    const panels = document.querySelectorAll('.wizard-step-panel');
+    panels.forEach(panel => {
+        const panelStep = parseInt(panel.getAttribute('data-step'));
+        if (panelStep === step) {
+            panel.classList.add('active');
+        } else {
+            panel.classList.remove('active');
+        }
+    });
+
+    // Update progress tracker visual bubbles
+    const progressSteps = document.querySelectorAll('.progress-step');
+    progressSteps.forEach(pStep => {
+        const stepNum = parseInt(pStep.getAttribute('data-step'));
+        if (stepNum === step) {
+            pStep.classList.add('active');
+            pStep.classList.remove('completed');
+        } else if (stepNum < step) {
+            pStep.classList.remove('active');
+            pStep.classList.add('completed');
+        } else {
+            pStep.classList.remove('active');
+            pStep.classList.remove('completed');
+        }
+    });
+
+    // Dynamically adjust modal scaling sizes
+    const wizardCard = document.querySelector('.wizard-card');
+    if (wizardCard) {
+        wizardCard.classList.remove('step-1-active', 'step-4-active');
+        if (step === 1) {
+            wizardCard.classList.add('step-1-active');
+        } else if (step === 4) {
+            wizardCard.classList.add('step-4-active');
+        }
+    }
+
+    // Toggle Back button visibility
+    const backBtn = document.getElementById('btn-wizard-back');
+    if (backBtn) {
+        backBtn.style.visibility = (step === 1) ? 'hidden' : 'visible';
+    }
+
+    // Toggle Next button visibility
+    const nextBtn = document.getElementById('btn-wizard-next');
+    if (nextBtn) {
+        nextBtn.style.display = (step === 4) ? 'none' : 'inline-flex';
+    }
+
+    // Trigger step-specific renders or details binding
+    if (step === 2) {
+        renderWizardGroups();
+    } else if (step === 3) {
+        renderWizardBracket();
+    } else if (step === 4) {
+        const draft = STATE.participants.draft;
+        const champCode = draft.champ || '';
+        const champTeam = getTeamByCode(champCode);
+        
+        const reviewChamp = document.getElementById('wizard-review-champ');
+        if (reviewChamp) {
+            reviewChamp.innerText = champCode ? `${champTeam.flag} ${champTeam.name}` : 'TBD';
+        }
+        
+        const reviewBoot = document.getElementById('wizard-review-boot');
+        if (reviewBoot) {
+            reviewBoot.innerText = draft.goldenBoot || 'TBD';
+        }
+    }
+}
+
+// Render dynamic group stage standings builder inside predictions wizard
+function renderWizardGroups() {
+    const wrapper = document.getElementById('wizard-groups-grid');
+    if (!wrapper) return;
+    wrapper.innerHTML = '';
+
+    // Rebuild bracket slots based on standings
+    buildBracketFromStandings('draft');
+
+    const p = STATE.participants.draft;
+    if (!p || !p.groupStandings) return;
+
+    for (const groupName in GROUPS_DATA) {
+        const groupCard = document.createElement('div');
+        groupCard.className = 'group-card';
+
+        const orderedCodes = p.groupStandings[groupName] || GROUPS_DATA[groupName].map(t => t.code);
+        
+        let teamRowsHtml = '';
+        orderedCodes.forEach((code, index) => {
+            const team = getTeamByCode(code);
+            const sortActionsHtml = `
+                <div class="team-sort-actions">
+                    <button class="sort-btn btn-up" onclick="moveWizardTeam('${groupName}', ${index}, -1); event.preventDefault();"><i class="fa-solid fa-chevron-up"></i></button>
+                    <button class="sort-btn btn-down" onclick="moveWizardTeam('${groupName}', ${index}, 1); event.preventDefault();"><i class="fa-solid fa-chevron-down"></i></button>
+                </div>
+            `;
+
+            teamRowsHtml += `
+                <div class="draggable-team-row" data-group="${groupName}" data-code="${code}" data-idx="${index}">
+                    <div class="team-row-left">
+                        <div class="team-position-marker">${index + 1}</div>
+                        <span class="team-flag">${team.flag}</span>
+                        <span>${team.name}</span>
+                    </div>
+                    ${sortActionsHtml}
+                </div>
+            `;
+        });
+
+        groupCard.innerHTML = `
+            <div class="group-title">
+                <span>Group ${groupName}</span>
+                <span style="font-size: 0.75rem; color: var(--primary)">Standings</span>
+            </div>
+            <div class="group-team-list">
+                ${teamRowsHtml}
+            </div>
+        `;
+        wrapper.appendChild(groupCard);
+    }
+}
+
+window.moveWizardTeam = function(groupName, currentIndex, direction) {
+    const p = STATE.participants.draft;
+    if (!p || !p.groupStandings) return;
+    
+    const standings = p.groupStandings[groupName];
+    if (!standings) return;
+    
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= standings.length) return;
+
+    // Swap elements
+    const temp = standings[currentIndex];
+    standings[currentIndex] = standings[targetIndex];
+    standings[targetIndex] = temp;
+
+    // Sync standings with bracket tree schema in real-time
+    buildBracketFromStandings('draft');
+
+    renderWizardGroups();
+};
+
+// Render interactive bracket sheet tree inside predictions wizard
+function renderWizardBracket() {
+    const canvas = document.getElementById('wizard-bracket-tree');
+    if (!canvas) return;
+    canvas.innerHTML = '';
+
+    // Rebuild bracket slots
+    buildBracketFromStandings('draft');
+
+    const p = STATE.participants.draft;
+    if (!p) return;
+
+    const roundsList = [
+        { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
+        { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
+        { key: 'QF', title: 'Quarterfinals', matches: [25, 26, 27, 28] },
+        { key: 'SF', title: 'Semifinals', matches: [29, 30] },
+        { key: 'F', title: 'Finals & 3rd', matches: [32, 31] },
+        { key: 'CHAMP', title: 'Champion' }
+    ];
+
+    roundsList.forEach(round => {
+        const col = document.createElement('div');
+        col.className = round.key === 'CHAMP' ? 'champ-column' : 'round-column';
+        
+        const header = document.createElement('div');
+        header.className = 'round-column-title';
+        header.innerText = round.title;
+        col.appendChild(header);
+
+        if (round.key === 'CHAMP') {
+            const champCode = p.bracketPicks[32] || '';
+            const champTeam = getTeamByCode(champCode);
+
+            const champCard = document.createElement('div');
+            champCard.className = 'champ-card';
+            champCard.style = 'border: 2px solid rgba(245,158,11,0.4)';
+            champCard.innerHTML = `
+                <i class="fa-solid fa-trophy crown-icon"></i>
+                <div class="champ-title">CHAMPION</div>
+                <div class="champ-team-spot">
+                    <span class="team-flag">${champTeam.flag}</span>
+                    <span class="team-name-text">${champTeam.name}</span>
+                </div>
+            `;
+            col.appendChild(champCard);
+        } else {
+            round.matches.forEach(matchId => {
+                const matchSchema = KNOCKOUTS_SCHEMA[matchId];
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card';
+
+                const homeCode = getKnockoutParticipant(p, matchId, 'home');
+                const awayCode = getKnockoutParticipant(p, matchId, 'away');
+
+                const homeTeam = getTeamByCode(homeCode);
+                const awayTeam = getTeamByCode(awayCode);
+
+                const predictedWinner = p.bracketPicks[matchId] || '';
+
+                matchCard.innerHTML = `
+                    <div class="match-info-meta">
+                        <span>${matchSchema.label}</span>
+                        <span>${matchSchema.date} - ${matchSchema.venue}</span>
+                    </div>
+                    <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="cursor: pointer;">
+                        <div class="team-slot-info">
+                            <span class="team-flag">${homeTeam.flag}</span>
+                            <span class="team-name-text">${homeTeam.name}</span>
+                        </div>
+                        <span class="team-score"></span>
+                    </div>
+                    <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="cursor: pointer;">
+                        <div class="team-slot-info">
+                            <span class="team-flag">${awayTeam.flag}</span>
+                            <span class="team-name-text">${awayTeam.name}</span>
+                        </div>
+                        <span class="team-score"></span>
+                    </div>
+                `;
+
+                matchCard.querySelectorAll('.team-slot').forEach(slot => {
+                    slot.addEventListener('click', () => {
+                        const mId = parseInt(slot.getAttribute('data-match'));
+                        const team = slot.getAttribute('data-team');
+                        
+                        if (!team || team === 'TBD') return;
+
+                        p.bracketPicks[mId] = team;
+                        if (mId === 32) {
+                            p.champ = team;
+                        }
+
+                        propagateWinner(p, mId, team);
+                        renderWizardBracket();
+                    });
+                });
+
+                col.appendChild(matchCard);
+            });
+        }
+
+        canvas.appendChild(col);
+    });
 }
 
 function updateSubmitButtonState() {
@@ -1309,33 +1580,26 @@ function populateUserDropdowns() {
         addOptionToBoth('actuals', '🏆 Official Actuals');
     }
 
-    // 2. Add Draft in-progress next
-    if (STATE.participants.draft) {
-        const d = STATE.participants.draft;
-        const draftLabel = d.onboarded ? `📝 ${d.name} (In Progress)` : '📝 Start New Prediction';
-        addOptionToBoth('draft', draftLabel);
-    }
-
-    // 3. Add all submitted entries in order
+    // 2. Add all submitted entries in order
     for (const username in STATE.participants) {
         if (username === 'actuals' || username === 'draft') continue;
         const p = STATE.participants[username];
         addOptionToBoth(username, `👤 ${p.name} (Submitted)`);
     }
 
-    // Restore values if available, else fallback
-    if (STATE.participants[currentBracketVal]) {
+    // Restore values if available, else fallback to 'actuals'
+    if (STATE.participants[currentBracketVal] && currentBracketVal !== 'draft') {
         selectBracket.value = currentBracketVal;
     } else {
-        selectBracket.value = 'draft';
-        STATE.activeBracketUser = 'draft';
+        selectBracket.value = 'actuals';
+        STATE.activeBracketUser = 'actuals';
     }
 
-    if (STATE.participants[currentGroupVal]) {
+    if (STATE.participants[currentGroupVal] && currentGroupVal !== 'draft') {
         selectGroup.value = currentGroupVal;
     } else {
-        selectGroup.value = 'draft';
-        STATE.activeGroupUser = 'draft';
+        selectGroup.value = 'actuals';
+        STATE.activeGroupUser = 'actuals';
     }
 }
 

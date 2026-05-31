@@ -252,31 +252,131 @@
         </main>
     </div>
 
-    <!-- Onboarding Modal Overlay -->
+    <!-- Submission Wizard Modal Overlay -->
     <div id="onboarding-modal" class="onboarding-overlay">
-        <div class="onboarding-card">
-            <i class="fa-solid fa-trophy onboarding-trophy"></i>
-            <h2>World Cup 2026 Friends Pool</h2>
-            <p>Welcome! Enter your name and predict the Golden Boot winner to start filling out your tournament bracket sheet.</p>
-            
-            <div class="onboarding-form">
-                <div class="input-field">
-                    <label for="visitor-name"><i class="fa-solid fa-user-tag"></i> Your Name</label>
-                    <input type="text" id="visitor-name" placeholder="e.g. Ashish, Sarah, Chris" required autocomplete="off">
+        <div class="wizard-card">
+            <!-- Close button -->
+            <button id="btn-close-wizard" class="close-wizard-btn"><i class="fa-solid fa-xmark"></i></button>
+
+            <!-- Wizard Header -->
+            <div class="wizard-header">
+                <div class="wizard-logo">
+                    <i class="fa-solid fa-trophy trophy-logo"></i>
+                    <h2>MUNDIAL 2026 Predictor</h2>
                 </div>
-                <div class="input-field">
-                    <label for="visitor-boot"><i class="fa-solid fa-shoe-prints"></i> Golden Boot Prediction</label>
-                    <select id="visitor-boot" class="custom-select onboarding-select">
-                        <option value="Kylian Mbappé">Kylian Mbappé (FRA)</option>
-                        <option value="Erling Haaland">Erling Haaland (NOR)</option>
-                        <option value="Vinícius Júnior">Vinícius Júnior (BRA)</option>
-                        <option value="Harry Kane">Harry Kane (ENG)</option>
-                        <option value="Lionel Messi">Lionel Messi (ARG)</option>
-                        <option value="Jude Bellingham">Jude Bellingham (ENG)</option>
-                    </select>
+                <!-- Progress Tracker -->
+                <div class="wizard-progress-tracker">
+                    <div class="progress-step active" data-step="1">
+                        <span class="step-num">1</span>
+                        <span class="step-label">Profile</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="2">
+                        <span class="step-num">2</span>
+                        <span class="step-label">Groups</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="3">
+                        <span class="step-num">3</span>
+                        <span class="step-label">Bracket</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="4">
+                        <span class="step-num">4</span>
+                        <span class="step-label">Submit</span>
+                    </div>
                 </div>
-                <button id="btn-start-onboarding" class="btn btn-primary onboarding-btn">
-                    <span>Start My Predictions</span> <i class="fa-solid fa-arrow-right"></i>
+            </div>
+
+            <!-- Wizard Content Step Panels -->
+            <div class="wizard-content">
+                <!-- Step 1: Profile Onboarding -->
+                <div class="wizard-step-panel active" data-step="1">
+                    <div class="step-intro-wrapper">
+                        <h3>Let's Personalize Your Entry!</h3>
+                        <p>Enter your player name and make your Golden Boot (top goalscorer) prediction to start building your 2026 World Cup tournament prediction.</p>
+                    </div>
+                    <div class="onboarding-form" style="margin-top: 2rem;">
+                        <div class="input-field">
+                            <label for="visitor-name"><i class="fa-solid fa-user-tag"></i> Your Name</label>
+                            <input type="text" id="visitor-name" placeholder="e.g. Ashish, Sarah, Chris" required autocomplete="off">
+                        </div>
+                        <div class="input-field" style="margin-top: 1.5rem;">
+                            <label for="visitor-boot"><i class="fa-solid fa-shoe-prints"></i> Golden Boot Prediction</label>
+                            <select id="visitor-boot" class="custom-select onboarding-select">
+                                <option value="Kylian Mbappé">Kylian Mbappé (FRA)</option>
+                                <option value="Erling Haaland">Erling Haaland (NOR)</option>
+                                <option value="Vinícius Júnior">Vinícius Júnior (BRA)</option>
+                                <option value="Harry Kane">Harry Kane (ENG)</option>
+                                <option value="Lionel Messi">Lionel Messi (ARG)</option>
+                                <option value="Jude Bellingham">Jude Bellingham (ENG)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Group Stage Standings Builder -->
+                <div class="wizard-step-panel" data-step="2">
+                    <div class="step-intro-wrapper">
+                        <h3>Sort Group Standings</h3>
+                        <p><i class="fa-solid fa-circle-info"></i> Arrange groups A to L. The top 2 teams and the 8 best 3rd-place teams will automatically populate your R32 knockout bracket matches!</p>
+                    </div>
+                    <div class="wizard-groups-scroll-area">
+                        <div class="groups-grid" id="wizard-groups-grid">
+                            <!-- Injected dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Knockout Bracket Selection -->
+                <div class="wizard-step-panel" data-step="3">
+                    <div class="step-intro-wrapper">
+                        <h3>Fill Your Knockout Bracket</h3>
+                        <p><i class="fa-solid fa-circle-info"></i> Click on any team to advance them to the subsequent round, all the way to the Finals!</p>
+                    </div>
+                    <div class="wizard-bracket-scroll-area">
+                        <div class="bracket-scroll-container" style="background: transparent; border: none; padding: 0;">
+                            <div class="bracket-canvas" id="wizard-bracket-tree">
+                                <!-- Injected dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Summary & Submit Predictions -->
+                <div class="wizard-step-panel" data-step="4">
+                    <div class="wizard-review-container">
+                        <div class="review-award-card champ-award">
+                            <i class="fa-solid fa-trophy champ-trophy"></i>
+                            <div class="award-label">YOUR PREDICTED CHAMPION</div>
+                            <div class="award-value" id="wizard-review-champ">TBD</div>
+                        </div>
+                        
+                        <div class="review-award-card boot-award">
+                            <i class="fa-solid fa-shoe-prints boot-trophy"></i>
+                            <div class="award-label">GOLDEN BOOT CHOICE</div>
+                            <div class="award-value" id="wizard-review-boot">Kylian Mbappé</div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-submit-banner">
+                        <h3>Confirm Your Predictions</h3>
+                        <p>Once you submit, your tournament predictions are locked forever! You can click "Submit Picks" at any time to make another submission under a new name.</p>
+                        <button id="btn-wizard-submit" class="btn btn-primary glowing-btn wizard-submit-btn" style="margin-top: 1.5rem;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Submit My Prediction</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wizard Footer Navigation Buttons -->
+            <div class="wizard-footer">
+                <button id="btn-wizard-back" class="btn btn-secondary" style="visibility: hidden;">
+                    <i class="fa-solid fa-chevron-left"></i> Back
+                </button>
+                <button id="btn-wizard-next" class="btn btn-primary">
+                    Next <i class="fa-solid fa-chevron-right"></i>
                 </button>
             </div>
         </div>
