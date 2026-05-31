@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Cup 2026 Bracket Pool</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background dynamic ambient glow spots -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <i class="fa-solid fa-trophy trophy-logo"></i>
+                <div class="logo-text">
+                    <h1>MUNDIAL 2026</h1>
+                    <span>Friends Predictor Pool</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="leaderboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Leaderboard</span>
+                </button>
+                <button class="nav-item" data-tab="bracket">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    <span>Bracket Sheet</span>
+                </button>
+                <button class="nav-item" data-tab="groups">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    <span>Group Stages</span>
+                </button>
+                <button class="nav-item admin-nav" data-tab="admin">
+                    <i class="fa-solid fa-gears"></i>
+                    <span>Admin Control</span>
+                </button>
+            </nav>
+
+            <div class="pool-meta-card">
+                <div class="meta-row">
+                    <span class="label">Total Points Pool:</span>
+                    <span class="value gold-text">1,100 Pts</span>
+                </div>
+                <div class="meta-row">
+                    <span class="label">Golden Boot Bonus:</span>
+                    <span class="value">100 Pts</span>
+                </div>
+                <div class="meta-row">
+                    <span class="label">Active Friends:</span>
+                    <span class="value">5 Players</span>
+                </div>
+                <div class="divider"></div>
+                <div class="meta-row status-row">
+                    <span class="pulse-indicator"></span>
+                    <span class="status-text">Live Standing Updates</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard Window -->
+        <main class="main-content">
+            <!-- Header Bar -->
+            <header class="dashboard-header">
+                <div class="header-title-section">
+                    <h2 id="current-tab-title">Leaderboard Standings</h2>
+                    <p id="current-tab-desc">Track scores, predictions, and real-time rank movements among friends.</p>
+                </div>
+                <div class="header-actions">
+                    <div class="user-profile-badge">
+                        <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=Ashish" alt="User Avatar" class="user-avatar">
+                        <div class="user-info">
+                            <span class="user-name">Ashish (You)</span>
+                            <span class="user-rank">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area Panels -->
+            <div class="content-canvas">
+
+                <!-- 1. Leaderboard Panel -->
+                <section class="tab-panel active" id="tab-leaderboard">
+                    <!-- Top 3 Podium Cards -->
+                    <div class="podium-container" id="podium-wrapper">
+                        <!-- Rendered dynamically by JavaScript -->
+                    </div>
+
+                    <!-- Rankings Table Card -->
+                    <div class="premium-card table-card">
+                        <div class="card-header">
+                            <h3>Full Rankings Table</h3>
+                            <div class="header-filters">
+                                <span class="badge badge-info">Option A System</span>
+                                <span class="badge badge-warning">+100 Golden Boot</span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="leaderboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Participant</th>
+                                        <th>Predicted Champ</th>
+                                        <th>Golden Boot Pick</th>
+                                        <th class="text-center">Group (160)</th>
+                                        <th class="text-center">KO (840)</th>
+                                        <th class="text-center">Boot (100)</th>
+                                        <th class="text-right">Total Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-rows">
+                                    <!-- Rendered dynamically by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Bracket Panel -->
+                <section class="tab-panel" id="tab-bracket">
+                    <div class="bracket-controls">
+                        <div class="view-selector-container">
+                            <label for="bracket-user-select"><i class="fa-solid fa-user-pen"></i> Editing Bracket For:</label>
+                            <select id="bracket-user-select" class="custom-select">
+                                <option value="user">Ashish (You)</option>
+                                <option value="alex">Alex</option>
+                                <option value="jordan">Jordan</option>
+                                <option value="taylor">Taylor</option>
+                                <option value="morgan">Morgan</option>
+                            </select>
+                        </div>
+                        <div class="bracket-legend">
+                            <span class="legend-item"><span class="legend-dot correct"></span> Correct Matchup</span>
+                            <span class="legend-item"><span class="legend-dot incorrect"></span> Incorrect Matchup</span>
+                            <span class="legend-item"><span class="legend-dot pending"></span> Pending Outcome</span>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Bracket Arena -->
+                    <div class="bracket-scroll-container">
+                        <div class="bracket-canvas" id="bracket-tree">
+                            <!-- Columns represent rounds, rendered dynamically by JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Group Stage Panel -->
+                <section class="tab-panel" id="tab-groups">
+                    <div class="groups-header-bar">
+                        <p class="description-alert">
+                            <i class="fa-solid fa-circle-info"></i> Drag or use arrow keys to sort teams. The top 2 from each group plus the 8 best 3rd-place teams advance to the Round of 32!
+                        </p>
+                        <div class="group-actions">
+                            <label for="groups-user-select">Select Bracket Standings:</label>
+                            <select id="groups-user-select" class="custom-select">
+                                <option value="user">Ashish (You)</option>
+                                <option value="alex">Alex</option>
+                                <option value="jordan">Jordan</option>
+                                <option value="taylor">Taylor</option>
+                                <option value="morgan">Morgan</option>
+                            </select>
+                            <button id="btn-save-standings" class="btn btn-primary">
+                                <i class="fa-solid fa-floppy-disk"></i> Apply Standings to Bracket
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Groups Grid Area -->
+                    <div class="groups-grid" id="groups-grid-wrapper">
+                        <!-- 12 groups A to L will be injected dynamically -->
+                    </div>
+                </section>
+
+                <!-- 4. Admin Simulator Panel -->
+                <section class="tab-panel" id="tab-admin">
+                    <div class="admin-grid">
+                        <!-- Score Entry Controller -->
+                        <div class="premium-card admin-control-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-trophy gold-text"></i> World Cup Match Simulator</h3>
+                                <p>Simulate tournament results here to watch your friends' scores update live.</p>
+                            </div>
+                            <div class="admin-options-row">
+                                <div class="input-group">
+                                    <label for="admin-golden-boot"><i class="fa-solid fa-shoe-prints text-warning"></i> Official Golden Boot Winner:</label>
+                                    <select id="admin-golden-boot" class="custom-select">
+                                        <option value="">-- Tournament In Progress --</option>
+                                        <option value="Kylian Mbappé">Kylian Mbappé (FRA)</option>
+                                        <option value="Erling Haaland">Erling Haaland (NOR)</option>
+                                        <option value="Vinícius Júnior">Vinícius Júnior (BRA)</option>
+                                        <option value="Harry Kane">Harry Kane (ENG)</option>
+                                        <option value="Lionel Messi">Lionel Messi (ARG)</option>
+                                        <option value="Jude Bellingham">Jude Bellingham (ENG)</option>
+                                    </select>
+                                </div>
+                                <button id="btn-reset-simulator" class="btn btn-secondary">
+                                    <i class="fa-solid fa-rotate-left"></i> Reset All Matches
+                                </button>
+                            </div>
+
+                            <div class="admin-matches-scroll">
+                                <div id="admin-simulator-matches">
+                                    <!-- Dynamic list of tournament matches by round to set official results -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Simulation Stats Card -->
+                        <div class="premium-card admin-summary-card">
+                            <div class="card-header">
+                                <h3>Simulation Live Metrics</h3>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-val" id="sim-matches-played">0 / 31</span>
+                                    <span class="stat-lbl">Matches Simulated</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-val" id="sim-highest-score">0 pts</span>
+                                    <span class="stat-lbl">Leaderboard Max</span>
+                                </div>
+                            </div>
+
+                            <div class="points-breakdown-info">
+                                <h4>Points Scale Active:</h4>
+                                <ul>
+                                    <li>Group Advancement: <strong>5 pts</strong></li>
+                                    <li>Round of 32 Winner: <strong>10 pts</strong></li>
+                                    <li>Round of 16 Winner: <strong>20 pts</strong></li>
+                                    <li>Quarterfinals Winner: <strong>40 pts</strong></li>
+                                    <li>Semifinals Winner: <strong>80 pts</strong></li>
+                                    <li>3rd Place Winner: <strong>40 pts</strong></li>
+                                    <li>Tournament Champion: <strong>160 pts</strong></li>
+                                    <li>Golden Boot Bonus: <strong>100 pts</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script imports -->
+    <script src="app.js"></script>
+</body>
+</html>
