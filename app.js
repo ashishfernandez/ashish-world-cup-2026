@@ -746,7 +746,7 @@ function renderBracket() {
             `;
             col.appendChild(champCard);
 
-            // Silver Card (2nd Place)
+            // Silver Card (2nd Place) - Exact same shape and size as Champion card
             let silverCode = '';
             const homeCode32 = getKnockoutParticipant(p, 32, 'home');
             const awayCode32 = getKnockoutParticipant(p, 32, 'away');
@@ -755,40 +755,52 @@ function renderBracket() {
             }
             const silverTeam = getTeamByCode(silverCode);
             const silverCard = document.createElement('div');
-            silverCard.className = 'finalist-card silver-finalist';
-            silverCard.style = 'margin-top: 1.5rem; text-align: center; background: var(--card-bg-match); border: 1px solid var(--card-border); padding: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 250px; position: relative;';
+            silverCard.className = 'champ-card silver-card';
+            silverCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(203, 213, 225, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(203, 213, 225, 0.1) 100%); box-shadow: 0 10px 30px rgba(203, 213, 225, 0.05);';
             silverCard.innerHTML = `
-                <div class="finalist-badge" style="background: rgba(226, 232, 240, 0.15); color: #cbd5e1; border: 1px solid rgba(226, 232, 240, 0.3); font-size: 0.72rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;">
-                    <i class="fa-solid fa-medal"></i> 2nd Place / Silver
-                </div>
-                <div class="finalist-team-spot" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
-                    <span class="team-flag" style="font-size: 1.25rem;">${silverTeam.flag}</span>
+                <i class="fa-solid fa-medal crown-icon" style="color: #cbd5e1; filter: drop-shadow(0 0 12px rgba(203, 213, 225, 0.2));"></i>
+                <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
+                <div class="champ-team-spot">
+                    <span class="team-flag">${silverTeam.flag}</span>
                     <span class="team-name-text">${silverTeam.name}</span>
                 </div>
             `;
             col.appendChild(silverCard);
 
-            // Bronze Card (3rd Place)
+            // Bronze Card (3rd Place) - Exact same shape and size as Champion card
             const bronzeCode = p.bracketPicks[31] || '';
             const bronzeTeam = getTeamByCode(bronzeCode);
             const bronzeCard = document.createElement('div');
-            bronzeCard.className = 'finalist-card bronze-finalist';
-            bronzeCard.style = 'margin-top: 1rem; text-align: center; background: var(--card-bg-match); border: 1px solid var(--card-border); padding: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 250px; position: relative;';
+            bronzeCard.className = 'champ-card bronze-card';
+            bronzeCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(245, 158, 11, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.1) 100%); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05);';
             bronzeCard.innerHTML = `
-                <div class="finalist-badge" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24; border: 1px solid rgba(217, 119, 6, 0.3); font-size: 0.72rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;">
-                    <i class="fa-solid fa-medal"></i> 3rd Place / Bronze
-                </div>
-                <div class="finalist-team-spot" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
-                    <span class="team-flag" style="font-size: 1.25rem;">${bronzeTeam.flag}</span>
+                <i class="fa-solid fa-medal crown-icon" style="color: #fbbf24; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.2));"></i>
+                <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
+                <div class="champ-team-spot">
+                    <span class="team-flag">${bronzeTeam.flag}</span>
                     <span class="team-name-text">${bronzeTeam.name}</span>
                 </div>
             `;
             col.appendChild(bronzeCard);
         } else {
-            round.matches.forEach(matchId => {
+            round.matches.forEach((matchId, idx) => {
                 const matchSchema = KNOCKOUTS_SCHEMA[matchId];
                 const matchCard = document.createElement('div');
                 matchCard.className = 'match-card';
+
+                // Add classes for vertical connections
+                if (round.key !== 'F') {
+                    if (idx % 2 === 0) {
+                        matchCard.classList.add('upper-pair-match');
+                    } else {
+                        matchCard.classList.add('lower-pair-match');
+                    }
+                    
+                    // Append the vertical connector line element
+                    const connector = document.createElement('div');
+                    connector.className = 'vertical-connector';
+                    matchCard.appendChild(connector);
+                }
 
                 // Determine actual team codes playing this slot
                 const homeCode = getKnockoutParticipant(p, matchId, 'home');
@@ -1698,7 +1710,7 @@ function renderWizardBracket() {
             `;
             col.appendChild(champCard);
 
-            // Silver Card (2nd Place)
+            // Silver Card (2nd Place) - Exact same shape and size as Champion card
             let silverCode = '';
             const homeCode32 = getKnockoutParticipant(p, 32, 'home');
             const awayCode32 = getKnockoutParticipant(p, 32, 'away');
@@ -1707,40 +1719,52 @@ function renderWizardBracket() {
             }
             const silverTeam = getTeamByCode(silverCode);
             const silverCard = document.createElement('div');
-            silverCard.className = 'finalist-card silver-finalist';
-            silverCard.style = 'margin-top: 1.5rem; text-align: center; background: var(--card-bg-match); border: 1px solid var(--card-border); padding: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 250px; position: relative;';
+            silverCard.className = 'champ-card silver-card';
+            silverCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(203, 213, 225, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(203, 213, 225, 0.1) 100%); box-shadow: 0 10px 30px rgba(203, 213, 225, 0.05);';
             silverCard.innerHTML = `
-                <div class="finalist-badge" style="background: rgba(226, 232, 240, 0.15); color: #cbd5e1; border: 1px solid rgba(226, 232, 240, 0.3); font-size: 0.72rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;">
-                    <i class="fa-solid fa-medal"></i> 2nd Place / Silver
-                </div>
-                <div class="finalist-team-spot" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
-                    <span class="team-flag" style="font-size: 1.25rem;">${silverTeam.flag}</span>
+                <i class="fa-solid fa-medal crown-icon" style="color: #cbd5e1; filter: drop-shadow(0 0 12px rgba(203, 213, 225, 0.2));"></i>
+                <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
+                <div class="champ-team-spot">
+                    <span class="team-flag">${silverTeam.flag}</span>
                     <span class="team-name-text">${silverTeam.name}</span>
                 </div>
             `;
             col.appendChild(silverCard);
 
-            // Bronze Card (3rd Place)
+            // Bronze Card (3rd Place) - Exact same shape and size as Champion card
             const bronzeCode = p.bracketPicks[31] || '';
             const bronzeTeam = getTeamByCode(bronzeCode);
             const bronzeCard = document.createElement('div');
-            bronzeCard.className = 'finalist-card bronze-finalist';
-            bronzeCard.style = 'margin-top: 1rem; text-align: center; background: var(--card-bg-match); border: 1px solid var(--card-border); padding: 0.8rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 250px; position: relative;';
+            bronzeCard.className = 'champ-card bronze-card';
+            bronzeCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(245, 158, 11, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.1) 100%); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05);';
             bronzeCard.innerHTML = `
-                <div class="finalist-badge" style="background: rgba(217, 119, 6, 0.15); color: #fbbf24; border: 1px solid rgba(217, 119, 6, 0.3); font-size: 0.72rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px;">
-                    <i class="fa-solid fa-medal"></i> 3rd Place / Bronze
-                </div>
-                <div class="finalist-team-spot" style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);">
-                    <span class="team-flag" style="font-size: 1.25rem;">${bronzeTeam.flag}</span>
+                <i class="fa-solid fa-medal crown-icon" style="color: #fbbf24; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.2));"></i>
+                <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
+                <div class="champ-team-spot">
+                    <span class="team-flag">${bronzeTeam.flag}</span>
                     <span class="team-name-text">${bronzeTeam.name}</span>
                 </div>
             `;
             col.appendChild(bronzeCard);
         } else {
-            round.matches.forEach(matchId => {
+            round.matches.forEach((matchId, idx) => {
                 const matchSchema = KNOCKOUTS_SCHEMA[matchId];
                 const matchCard = document.createElement('div');
                 matchCard.className = 'match-card';
+
+                // Add classes for vertical connections
+                if (round.key !== 'F') {
+                    if (idx % 2 === 0) {
+                        matchCard.classList.add('upper-pair-match');
+                    } else {
+                        matchCard.classList.add('lower-pair-match');
+                    }
+                    
+                    // Append the vertical connector line element
+                    const connector = document.createElement('div');
+                    connector.className = 'vertical-connector';
+                    matchCard.appendChild(connector);
+                }
 
                 const homeCode = getKnockoutParticipant(p, matchId, 'home');
                 const awayCode = getKnockoutParticipant(p, matchId, 'away');
