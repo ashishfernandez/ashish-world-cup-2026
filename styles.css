@@ -130,6 +130,8 @@ body.dark-theme .ambient-glow {
     flex-direction: column;
     padding: 2rem 1.5rem;
     position: fixed;
+    left: 0;
+    top: 0;
     height: 100vh;
     z-index: 100;
 }
@@ -307,7 +309,7 @@ body.dark-theme .ambient-glow {
 .main-content {
     margin-left: var(--sidebar-width);
     flex-grow: 1;
-    padding: 2.5rem 3rem;
+    padding: 2.5rem 3.5rem 2.5rem 4.5rem;
     min-height: 100vh;
 }
 
