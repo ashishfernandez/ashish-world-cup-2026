@@ -189,14 +189,26 @@ function init() {
         }
     }
     
-    // Set initial official admin results (some simulated match values)
-    prepopulateSimulatedResults();
+    // Set initial official admin results (some simulated match values) if none were saved
+    if (!localStorage.getItem('wc-official-results')) {
+        prepopulateSimulatedResults();
+    }
     
     // Initial Render of UI
     renderAll();
 }
 
 function loadStateFromStorage() {
+    // 1. Load official results first if they exist
+    const savedResults = localStorage.getItem('wc-official-results');
+    let loadedGroupStandings = null;
+    if (savedResults) {
+        const parsed = JSON.parse(savedResults);
+        STATE.officialResults.matches = parsed.matches || {};
+        STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
+        loadedGroupStandings = parsed.groupStandings || null;
+    }
+
     // Initialize official actuals profile
     STATE.participants.actuals = {
         id: 'actuals',
@@ -209,20 +221,26 @@ function loadStateFromStorage() {
         onboarded: true,
         isActuals: true
     };
-    for (const group in GROUPS_DATA) {
-        STATE.participants.actuals.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
+    if (loadedGroupStandings) {
+        STATE.participants.actuals.groupStandings = loadedGroupStandings;
+    } else {
+        for (const group in GROUPS_DATA) {
+            STATE.participants.actuals.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
+        }
     }
 
-    // 1. Load submissions array
+    // 2. Load submissions array (ensure 'actuals' doesn't sneak in from legacy submissions)
     const savedSubs = localStorage.getItem('wc-submissions');
     if (savedSubs) {
         const subs = JSON.parse(savedSubs);
         subs.forEach(sub => {
-            STATE.participants[sub.id] = sub;
+            if (sub.id !== 'actuals') {
+                STATE.participants[sub.id] = sub;
+            }
         });
     }
 
-    // 2. Load draft or initialize a fresh one
+    // 3. Load draft or initialize a fresh one
     const savedDraft = localStorage.getItem('wc-draft');
     if (savedDraft) {
         STATE.participants.draft = JSON.parse(savedDraft);
@@ -232,10 +250,10 @@ function loadStateFromStorage() {
 }
 
 function saveStateToStorage() {
-    // 1. Save submissions
+    // 1. Save submissions (skip actuals and draft)
     const subs = [];
     for (const username in STATE.participants) {
-        if (username !== 'draft' && STATE.participants[username].submitted) {
+        if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
             subs.push(STATE.participants[username]);
         }
     }
@@ -245,6 +263,13 @@ function saveStateToStorage() {
     if (STATE.participants.draft) {
         localStorage.setItem('wc-draft', JSON.stringify(STATE.participants.draft));
     }
+
+    // 3. Save official admin results and official group standings
+    localStorage.setItem('wc-official-results', JSON.stringify({
+        matches: STATE.officialResults.matches,
+        advancingTeams: STATE.officialResults.advancingTeams,
+        groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {}
+    }));
 }
 
 function resetDraft() {
@@ -374,6 +399,7 @@ function setupAdminReset() {
         for (const key in STATE.officialResults.matches) {
             delete STATE.officialResults.matches[key];
         }
+        saveStateToStorage();
         renderAll();
     });
 }
@@ -1112,6 +1138,7 @@ function renderAdminSimulator() {
                         results.matches[mid] = team;
                     }
 
+                    saveStateToStorage();
                     renderLeaderboard();
                     renderBracket();
                     renderAdminSimulator();
