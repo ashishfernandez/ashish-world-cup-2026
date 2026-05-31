@@ -57,11 +57,7 @@
             <div class="pool-meta-card">
                 <div class="meta-row">
                     <span class="label">Total Points Pool:</span>
-                    <span class="value gold-text">1,100 Pts</span>
-                </div>
-                <div class="meta-row">
-                    <span class="label">Golden Boot Bonus:</span>
-                    <span class="value">100 Pts</span>
+                    <span class="value gold-text">1,000 Pts</span>
                 </div>
                 <div class="meta-row">
                     <span class="label">Active Players:</span>
@@ -114,10 +110,8 @@
                                         <th>Rank</th>
                                         <th>Participant</th>
                                         <th>Predicted Champ</th>
-                                        <th>Golden Boot Pick</th>
                                         <th class="text-center">Group (160)</th>
                                         <th class="text-center">KO (840)</th>
-                                        <th class="text-center">Boot (100)</th>
                                         <th class="text-right">Total Score</th>
                                     </tr>
                                 </thead>
@@ -187,18 +181,6 @@
                                     <h3><i class="fa-solid fa-trophy gold-text"></i> World Cup Match Simulator</h3>
                                 </div>
                                 <div class="admin-options-row">
-                                    <div class="input-group">
-                                        <label for="admin-golden-boot"><i class="fa-solid fa-shoe-prints text-warning"></i> Official Golden Boot Winner:</label>
-                                        <select id="admin-golden-boot" class="custom-select">
-                                            <option value="">-- Tournament In Progress --</option>
-                                            <option value="Kylian Mbappé">Kylian Mbappé (FRA)</option>
-                                            <option value="Erling Haaland">Erling Haaland (NOR)</option>
-                                            <option value="Vinícius Júnior">Vinícius Júnior (BRA)</option>
-                                            <option value="Harry Kane">Harry Kane (ENG)</option>
-                                            <option value="Lionel Messi">Lionel Messi (ARG)</option>
-                                            <option value="Jude Bellingham">Jude Bellingham (ENG)</option>
-                                        </select>
-                                    </div>
                                     <button id="btn-reset-simulator" class="btn btn-secondary">
                                         <i class="fa-solid fa-rotate-left"></i> Reset All Matches
                                     </button>
@@ -249,7 +231,6 @@
                                         <li>Semifinals Winner: <strong>80 pts</strong></li>
                                         <li>3rd Place Winner: <strong>40 pts</strong></li>
                                         <li>Tournament Champion: <strong>160 pts</strong></li>
-                                        <li>Golden Boot Bonus: <strong>100 pts</strong></li>
                                     </ul>
                                 </div>
                             </div>
@@ -310,23 +291,12 @@
                 <div class="wizard-step-panel active" data-step="1">
                     <div class="step-intro-wrapper">
                         <h3>Let's Personalize Your Entry!</h3>
-                        <p>Enter your player name and make your Golden Boot (top goalscorer) prediction to start building your 2026 World Cup tournament prediction.</p>
+                        <p>Enter your player name to start building your 2026 World Cup tournament prediction.</p>
                     </div>
                     <div class="onboarding-form" style="margin-top: 2rem;">
                         <div class="input-field">
                             <label for="visitor-name"><i class="fa-solid fa-user-tag"></i> Your Name</label>
                             <input type="text" id="visitor-name" placeholder="e.g. Ashish, Sarah, Chris" required autocomplete="off">
-                        </div>
-                        <div class="input-field" style="margin-top: 1.5rem;">
-                            <label for="visitor-boot"><i class="fa-solid fa-shoe-prints"></i> Golden Boot Prediction</label>
-                            <select id="visitor-boot" class="custom-select onboarding-select">
-                                <option value="Kylian Mbappé">Kylian Mbappé (FRA)</option>
-                                <option value="Erling Haaland">Erling Haaland (NOR)</option>
-                                <option value="Vinícius Júnior">Vinícius Júnior (BRA)</option>
-                                <option value="Harry Kane">Harry Kane (ENG)</option>
-                                <option value="Lionel Messi">Lionel Messi (ARG)</option>
-                                <option value="Jude Bellingham">Jude Bellingham (ENG)</option>
-                            </select>
                         </div>
                     </div>
                 </div>
@@ -378,12 +348,6 @@
                             <i class="fa-solid fa-medal bronze-trophy"></i>
                             <div class="award-label">BRONZE FINALIST</div>
                             <div class="award-value" id="wizard-review-bronze">TBD</div>
-                        </div>
-                        
-                        <div class="review-award-card boot-award">
-                            <i class="fa-solid fa-shoe-prints boot-trophy"></i>
-                            <div class="award-label">GOLDEN BOOT CHOICE</div>
-                            <div class="award-value" id="wizard-review-boot">Kylian Mbappé</div>
                         </div>
                     </div>
 

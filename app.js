@@ -145,11 +145,10 @@ const STATE = {
     // The administrative actual outcomes of the World Cup
     officialResults: {
         matches: {}, // key: matchId (1 to 32), value: winningTeamCode
-        goldenBoot: '', // Official Golden Boot winner code or string
         advancingTeams: [] // Explicit list of 32 teams who reached knockout stage
     },
 
-    // User profiles & predicted selections (Brackets, Groups, Golden Boot)
+    // User profiles & predicted selections (Brackets, Groups)
     participants: {}
 };
 
@@ -161,8 +160,7 @@ const POINTS_SCALE = {
     quarterfinalWinner: 40, // SF participants (Max 4 * 40 = 160 pts)
     semifinalWinner: 80,   // Finalists (Max 2 * 80 = 160 pts)
     thirdPlaceWinner: 40,  // Predict 3rd Place Match winner (Max 40 pts)
-    finalWinner: 160,      // Predict World Cup Champion (Max 160 pts)
-    goldenBoot: 100        // Predict the Golden Boot Winner (Max 100 pts)
+    finalWinner: 160       // Predict World Cup Champion (Max 160 pts)
 };
 
 // 5. Initialization: Load static configurations and predictions state
@@ -204,7 +202,6 @@ function loadStateFromStorage() {
         id: 'actuals',
         name: 'Official Actuals',
         avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=FIFA',
-        goldenBoot: 'TBD',
         champ: '',
         groupStandings: {},
         bracketPicks: STATE.officialResults.matches,
@@ -255,7 +252,6 @@ function resetDraft() {
         id: 'draft',
         name: 'Guest Player',
         avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Guest',
-        goldenBoot: 'Kylian Mbappé',
         champ: '',
         groupStandings: {},
         bracketPicks: {},
@@ -324,10 +320,20 @@ function renderAll() {
 function setupTabListeners() {
     document.querySelectorAll('.nav-item').forEach(button => {
         button.addEventListener('click', () => {
+            const tabName = button.getAttribute('data-tab');
+
+            // Enforce password protection for Admin Control tab
+            if (tabName === 'admin') {
+                const password = prompt("Enter Admin Password:");
+                if (password !== 'worldcup') {
+                    alert("Access Denied: Incorrect Password");
+                    return; // Abort tab switching
+                }
+            }
+
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
 
-            const tabName = button.getAttribute('data-tab');
             STATE.activeTab = tabName;
 
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
@@ -338,7 +344,7 @@ function setupTabListeners() {
                 leaderboard: { title: "Leaderboard Standings", desc: "Track scores, predictions, and real-time rank movements among friends." },
                 bracket: { title: "Knock-Out Stages View", desc: "Use the dropdown to view different knock-out stages selections." },
                 groups: { title: "Group Stages Viewer", desc: "Use the dropdown to view different group stages selections." },
-                admin: { title: "Admin Match Simulator", desc: "Enter official outcomes and award golden boot predictions to recalculate rankings." }
+                admin: { title: "Admin Match Simulator", desc: "Enter official outcomes to recalculate rankings." }
             };
             
             document.getElementById('current-tab-title').innerText = titleMap[tabName].title;
@@ -365,15 +371,7 @@ function setupDropdownListeners() {
 function setupAdminReset() {
     document.getElementById('btn-reset-simulator').addEventListener('click', () => {
         STATE.officialResults.matches = {};
-        STATE.officialResults.goldenBoot = '';
-        document.getElementById('admin-golden-boot').value = '';
         renderAll();
-    });
-
-    document.getElementById('admin-golden-boot').addEventListener('change', (e) => {
-        STATE.officialResults.goldenBoot = e.target.value;
-        renderLeaderboard();
-        renderUserBadge();
     });
 }
 
@@ -416,7 +414,6 @@ function calculateParticipantScores() {
         if (!p.submitted) continue; // Skip unsubmitted profiles
         let groupPts = 0;
         let koPts = 0;
-        let bootPts = 0;
 
         // A. Group advancement verification (Top 2 from each group + best 8 third places)
         // Check how many of the participant's predicted advancing teams actually advanced
@@ -472,21 +469,14 @@ function calculateParticipantScores() {
             koPts += POINTS_SCALE.finalWinner;
         }
 
-        // C. Golden Boot Prediction Verification
-        if (results.goldenBoot && p.goldenBoot.trim().toLowerCase() === results.goldenBoot.trim().toLowerCase()) {
-            bootPts += POINTS_SCALE.goldenBoot;
-        }
-
-        const totalScore = groupPts + koPts + bootPts;
+        const totalScore = groupPts + koPts;
         scoredList.push({
             id: username,
             name: p.name,
             avatar: p.avatar,
             champ: getTeamByCode(p.champ),
-            goldenBoot: p.goldenBoot,
             groupPts,
             koPts,
-            bootPts,
             totalScore
         });
     }
@@ -603,12 +593,8 @@ function renderRankingsTable(scores) {
             <td>
                 <span class="badge badge-info">${player.champ.flag} ${player.champ.name}</span>
             </td>
-            <td>
-                <span class="badge badge-warning"><i class="fa-solid fa-shoe-prints"></i> ${player.goldenBoot}</span>
-            </td>
             <td class="text-center font-heading">${player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>
             <td class="text-center font-heading">${player.koPts} <span style="font-size:0.75rem; color:var(--text-dark)">/840</span></td>
-            <td class="text-center font-heading">${player.bootPts} <span style="font-size:0.75rem; color:var(--text-dark)">/100</span></td>
             <td class="text-right points-emphasis">${player.totalScore} Pts</td>
         `;
 
@@ -1027,87 +1013,212 @@ function buildBracketFromStandings(username) {
 }
 
 // 11. Render Admin simulator matches panel
+function moveActualTeam(groupName, index, direction) {
+    const act = STATE.participants.actuals;
+    if (!act || !act.groupStandings) return;
+
+    const list = act.groupStandings[groupName];
+    if (!list) return;
+
+    const targetIdx = index + direction;
+    if (targetIdx < 0 || targetIdx >= list.length) return;
+
+    // Swap elements in the array
+    const temp = list[index];
+    list[index] = list[targetIdx];
+    list[targetIdx] = temp;
+
+    // Rebuild bracket slots based on the new official group standings
+    buildBracketFromStandings('actuals');
+
+    saveStateToStorage();
+    renderAll();
+}
+window.moveActualTeam = moveActualTeam;
+
+// 11. Render Admin simulator matches panel + group editor + user list management
 function renderAdminSimulator() {
+    // 1. Render Knockout matches simulator
     const listContainer = document.getElementById('admin-simulator-matches');
-    listContainer.innerHTML = '';
+    if (listContainer) {
+        listContainer.innerHTML = '';
+        const results = STATE.officialResults;
+        const roundTitles = {
+            'R32': 'Round of 32 Matches',
+            'R16': 'Round of 16 Matches',
+            'QF': 'Quarterfinal Matches',
+            'SF': 'Semifinal Matches',
+            '3RD': '3rd Place Match',
+            'F': 'World Cup Championship Final'
+        };
 
-    const results = STATE.officialResults;
+        let currentRound = '';
 
-    const roundTitles = {
-        'R32': 'Round of 32 Matches',
-        'R16': 'Round of 16 Matches',
-        'QF': 'Quarterfinal Matches',
-        'SF': 'Semifinal Matches',
-        '3RD': '3rd Place Match',
-        'F': 'World Cup Championship Final'
-    };
+        for (const matchId in KNOCKOUTS_SCHEMA) {
+            const m = KNOCKOUTS_SCHEMA[matchId];
+            
+            // Add round dividers
+            if (m.round !== currentRound) {
+                currentRound = m.round;
+                const div = document.createElement('div');
+                div.className = 'admin-simulator-round-divider';
+                div.innerText = roundTitles[currentRound];
+                listContainer.appendChild(div);
+            }
 
-    let currentRound = '';
+            // Pull simulated team options (Uses active actuals or fallback to defaults)
+            const homeCode = getKnockoutParticipant(STATE.participants.actuals, matchId, 'home');
+            const awayCode = getKnockoutParticipant(STATE.participants.actuals, matchId, 'away');
+            
+            const homeTeam = getTeamByCode(homeCode);
+            const awayTeam = getTeamByCode(awayCode);
 
-    for (const matchId in KNOCKOUTS_SCHEMA) {
-        const m = KNOCKOUTS_SCHEMA[matchId];
+            const currentOfficialWinner = results.matches[matchId] || '';
+
+            const row = document.createElement('div');
+            row.className = 'admin-match-row';
+
+            row.innerHTML = `
+                <div class="admin-teams-wrapper">
+                    <button class="admin-team-button ${currentOfficialWinner === homeCode && homeCode ? 'selected-winner' : ''}" data-match="${matchId}" data-team="${homeCode}">
+                        <span>${homeTeam.flag}</span>
+                        <span>${homeTeam.name}</span>
+                    </button>
+                    <span class="admin-vs-label">VS</span>
+                    <button class="admin-team-button ${currentOfficialWinner === awayCode && awayCode ? 'selected-winner' : ''}" data-match="${matchId}" data-team="${awayCode}">
+                        <span>${awayTeam.flag}</span>
+                        <span>${awayTeam.name}</span>
+                    </button>
+                </div>
+                <div class="admin-match-details">
+                    <div style="font-weight: 700; color: var(--text-primary)">${m.label}</div>
+                    <div>${m.venue}</div>
+                </div>
+            `;
+
+            row.querySelectorAll('.admin-team-button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const team = btn.getAttribute('data-team');
+                    const mid = btn.getAttribute('data-match');
+                    
+                    if (!team || team === 'TBD') return;
+
+                    if (results.matches[mid] === team) {
+                        delete results.matches[mid];
+                    } else {
+                        results.matches[mid] = team;
+                    }
+
+                    renderLeaderboard();
+                    renderBracket();
+                    renderAdminSimulator();
+                    updateSimStats();
+                });
+            });
+
+            listContainer.appendChild(row);
+        }
+    }
+
+    // 2. Render Official Group Stages Standings Editor
+    const groupsGrid = document.getElementById('admin-groups-grid');
+    if (groupsGrid) {
+        groupsGrid.innerHTML = '';
+        const act = STATE.participants.actuals;
+        if (act && act.groupStandings) {
+            for (const groupName in GROUPS_DATA) {
+                const groupCard = document.createElement('div');
+                groupCard.className = 'group-card';
+                groupCard.style = 'padding: 1rem;';
+
+                const orderedCodes = act.groupStandings[groupName] || GROUPS_DATA[groupName].map(t => t.code);
+                
+                let teamRowsHtml = '';
+                orderedCodes.forEach((code, index) => {
+                    const team = getTeamByCode(code);
+                    const sortActionsHtml = `
+                        <div class="team-sort-actions">
+                            <button class="sort-btn btn-up" onclick="moveActualTeam('${groupName}', ${index}, -1); event.preventDefault();"><i class="fa-solid fa-chevron-up"></i></button>
+                            <button class="sort-btn btn-down" onclick="moveActualTeam('${groupName}', ${index}, 1); event.preventDefault();"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                    `;
+
+                    teamRowsHtml += `
+                        <div class="draggable-team-row" style="font-size: 0.8rem; padding: 0.35rem 0.5rem; margin-bottom: 0.3rem;" data-group="${groupName}" data-code="${code}" data-idx="${index}">
+                            <div class="team-row-left">
+                                <div class="team-position-marker" style="width: 18px; height: 18px; font-size: 0.7rem;">${index + 1}</div>
+                                <span class="team-flag" style="font-size: 0.95rem;">${team.flag}</span>
+                                <span>${team.name}</span>
+                            </div>
+                            ${sortActionsHtml}
+                        </div>
+                    `;
+                });
+
+                groupCard.innerHTML = `
+                    <div class="group-title" style="margin-bottom: 0.75rem; font-size: 0.85rem;">
+                        <span>Group ${groupName}</span>
+                        <span style="font-size: 0.7rem; color: var(--primary)">Official</span>
+                    </div>
+                    <div class="group-teams-wrapper">
+                        ${teamRowsHtml}
+                    </div>
+                `;
+
+                groupsGrid.appendChild(groupCard);
+            }
+        }
+    }
+
+    // 3. Render Participant List for Deletion
+    const userList = document.getElementById('admin-user-list-container');
+    if (userList) {
+        userList.innerHTML = '';
         
-        // Add round dividers
-        if (m.round !== currentRound) {
-            currentRound = m.round;
-            const div = document.createElement('div');
-            div.className = 'admin-simulator-round-divider';
-            div.innerText = roundTitles[currentRound];
-            listContainer.appendChild(div);
+        let userCount = 0;
+        for (const username in STATE.participants) {
+            if (username === 'draft' || username === 'actuals') continue;
+            
+            userCount++;
+            const p = STATE.participants[username];
+            
+            const userRow = document.createElement('div');
+            userRow.style = 'display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border);';
+            
+            userRow.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                    <span style="font-weight: 600; font-size: 0.88rem; color: var(--text-primary);">${p.name}</span>
+                    <span style="font-size: 0.72rem; color: var(--text-dark);">Champ: ${getTeamByCode(p.champ).flag} ${getTeamByCode(p.champ).name || 'None'}</span>
+                </div>
+                <button class="btn btn-secondary delete-user-btn" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; border-color: rgba(239, 68, 68, 0.3); color: var(--accent-crimson); display: inline-flex; align-items: center; gap: 0.3rem;" data-user="${username}">
+                    <i class="fa-solid fa-trash-can"></i> Delete
+                </button>
+            `;
+            
+            userRow.querySelector('.delete-user-btn').addEventListener('click', () => {
+                if (confirm(`⚠️ Are you sure you want to permanently delete participant "${p.name}"?`)) {
+                    delete STATE.participants[username];
+                    
+                    if (STATE.activeBracketUser === username) STATE.activeBracketUser = 'actuals';
+                    if (STATE.activeGroupUser === username) STATE.activeGroupUser = 'actuals';
+                    
+                    saveStateToStorage();
+                    populateUserDropdowns();
+                    renderAll();
+                    alert(`Removed "${p.name}" from the pool.`);
+                }
+            });
+            
+            userList.appendChild(userRow);
         }
 
-        // Pull simulated team options (Uses active draft as structural option references)
-        const homeCode = getKnockoutParticipant(STATE.participants.draft, matchId, 'home');
-        const awayCode = getKnockoutParticipant(STATE.participants.draft, matchId, 'away');
-        
-        const homeTeam = getTeamByCode(homeCode);
-        const awayTeam = getTeamByCode(awayCode);
-
-        const currentOfficialWinner = results.matches[matchId] || '';
-
-        const row = document.createElement('div');
-        row.className = 'admin-match-row';
-
-        row.innerHTML = `
-            <div class="admin-teams-wrapper">
-                <button class="admin-team-button ${currentOfficialWinner === homeCode && homeCode ? 'selected-winner' : ''}" data-match="${matchId}" data-team="${homeCode}">
-                    <span>${homeTeam.flag}</span>
-                    <span>${homeTeam.name}</span>
-                </button>
-                <span class="admin-vs-label">VS</span>
-                <button class="admin-team-button ${currentOfficialWinner === awayCode && awayCode ? 'selected-winner' : ''}" data-match="${matchId}" data-team="${awayCode}">
-                    <span>${awayTeam.flag}</span>
-                    <span>${awayTeam.name}</span>
-                </button>
-            </div>
-            <div class="admin-match-details">
-                <div style="font-weight: 700; color: var(--text-primary)">${m.label}</div>
-                <div>${m.venue}</div>
-            </div>
-        `;
-
-        row.querySelectorAll('.admin-team-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const team = btn.getAttribute('data-team');
-                const mid = btn.getAttribute('data-match');
-                
-                if (!team || team === 'TBD') return;
-
-                if (results.matches[mid] === team) {
-                    // Clicking same team twice resets the match result
-                    delete results.matches[mid];
-                } else {
-                    results.matches[mid] = team;
-                }
-
-                renderLeaderboard();
-                renderBracket();
-                renderAdminSimulator();
-                updateSimStats();
-            });
-        });
-
-        listContainer.appendChild(row);
+        if (userCount === 0) {
+            userList.innerHTML = `
+                <div style="padding: 2rem 1rem; text-align: center; color: var(--text-dark); font-size: 0.85rem;">
+                    No participants registered yet
+                </div>
+            `;
+        }
     }
 
     updateSimStats();
@@ -1116,17 +1227,12 @@ function renderAdminSimulator() {
 function updateSimStats() {
     const results = STATE.officialResults;
     const matchesSimulated = Object.keys(results.matches).length;
-    document.getElementById('sim-matches-played').innerText = `${matchesSimulated} / 34`;
-
-    const scores = calculateParticipantScores();
-    const highest = scores[0] ? scores[0].totalScore : 0;
-    document.getElementById('sim-highest-score').innerText = `${highest} pts`;
+    document.getElementById('sim-matches-played').innerText = `${matchesSimulated} / 32`;
 }
 
 function setupOnboarding() {
     const modal = document.getElementById('onboarding-modal');
     const nameInput = document.getElementById('visitor-name');
-    const bootSelect = document.getElementById('visitor-boot');
 
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
     const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
@@ -1148,7 +1254,6 @@ function setupOnboarding() {
     const openWizard = () => {
         const draft = STATE.participants.draft;
         nameInput.value = draft.onboarded ? draft.name : '';
-        bootSelect.value = draft.goldenBoot || 'Kylian Mbappé';
 
         goToWizardStep(1);
         modal.classList.add('active');
@@ -1189,12 +1294,10 @@ function setupOnboarding() {
                     alert('Please enter your name to personalize your predictions entry!');
                     return;
                 }
-                const bootVal = bootSelect.value;
                 const draft = STATE.participants.draft;
 
                 draft.name = nameVal;
                 draft.avatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(nameVal)}`;
-                draft.goldenBoot = bootVal;
                 draft.onboarded = true;
 
                 saveStateToStorage();
@@ -1238,7 +1341,6 @@ function setupOnboarding() {
                 id: subId,
                 name: draft.name,
                 avatar: draft.avatar,
-                goldenBoot: draft.goldenBoot,
                 champ: draft.champ,
                 groupStandings: JSON.parse(JSON.stringify(draft.groupStandings)),
                 bracketPicks: JSON.parse(JSON.stringify(draft.bracketPicks)),
@@ -1361,11 +1463,6 @@ function goToWizardStep(step) {
         const reviewBronze = document.getElementById('wizard-review-bronze');
         if (reviewBronze) {
             reviewBronze.innerText = bronzeCode ? `${bronzeTeam.flag} ${bronzeTeam.name}` : 'TBD';
-        }
-        
-        const reviewBoot = document.getElementById('wizard-review-boot');
-        if (reviewBoot) {
-            reviewBoot.innerText = draft.goldenBoot || 'TBD';
         }
     }
     
