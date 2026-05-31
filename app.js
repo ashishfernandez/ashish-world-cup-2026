@@ -1141,6 +1141,21 @@ function renderAdminSimulator() {
     const listContainer = document.getElementById('admin-simulator-matches');
     if (listContainer) {
         listContainer.innerHTML = '';
+        
+        const act = STATE.participants.actuals;
+        if (!act.selectedThirds || act.selectedThirds.length < 8) {
+            listContainer.innerHTML = `
+                <div style="padding: 2.5rem 1.5rem; text-align: center; border: 1px dashed var(--card-border); border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.01); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 1rem;">
+                    <i class="fa-solid fa-lock" style="font-size: 2rem; color: var(--primary); opacity: 0.8;"></i>
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">Rounds Simulation Locked</div>
+                    <div style="font-size: 0.8rem; color: var(--text-dark); max-width: 320px; line-height: 1.5; margin: 0 auto;">
+                        Please select exactly <strong>8 advancing third-place teams</strong> in the <strong>Final Top-8 3rd place Editor</strong> above to unlock official knockout rounds matches simulation.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
         const results = STATE.officialResults;
         const roundTitles = {
             'R32': 'Round of 32 Matches',
