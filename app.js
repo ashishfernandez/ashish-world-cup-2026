@@ -210,6 +210,7 @@ function init() {
     setupTabListeners();
     setupDropdownListeners();
     setupAdminReset();
+    setupThemeToggle();
     
     // Set default initial standings for all users
     for (const username in STATE.participants) {
@@ -399,6 +400,33 @@ function setupAdminReset() {
         STATE.officialResults.goldenBoot = e.target.value;
         renderLeaderboard();
         renderUserBadge();
+    });
+}
+
+function setupThemeToggle() {
+    const btn = document.getElementById('btn-theme-toggle');
+    if (!btn) return;
+
+    // Load initial preference from localStorage (default to light mode, no class on body)
+    const savedTheme = localStorage.getItem('wc-theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        btn.innerHTML = `<i class="fa-solid fa-sun"></i> <span>Light Mode</span>`;
+    } else {
+        document.body.classList.remove('dark-theme');
+        btn.innerHTML = `<i class="fa-solid fa-moon"></i> <span>Dark Mode</span>`;
+    }
+
+    btn.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+        
+        if (document.body.classList.contains('dark-theme')) {
+            localStorage.setItem('wc-theme', 'dark');
+            btn.innerHTML = `<i class="fa-solid fa-sun"></i> <span>Light Mode</span>`;
+        } else {
+            localStorage.setItem('wc-theme', 'light');
+            btn.innerHTML = `<i class="fa-solid fa-moon"></i> <span>Dark Mode</span>`;
+        }
     });
 }
 

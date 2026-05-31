@@ -1,24 +1,25 @@
 /* Premium CSS Design System for World Cup 2026 Bracket Pool */
 
 :root {
-    /* Color Palette - Premium Dark Theme */
-    --bg-main: #0a0c16;
-    --bg-sidebar: #0f1225;
-    --card-bg: rgba(22, 28, 54, 0.45);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --card-glow: rgba(38, 107, 237, 0.1);
+    /* Color Palette - Premium Light Theme (Default: White page, crisp text) */
+    --bg-main: #f8fafc;
+    --bg-sidebar: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --card-bg-match: #ffffff;
+    --card-border: rgba(15, 23, 42, 0.08);
+    --card-glow: rgba(59, 130, 246, 0.04);
     
-    --text-primary: #f1f3f9;
-    --text-muted: #8b9bb4;
-    --text-dark: #4d5b7c;
+    --text-primary: #0f172a; /* Crisp slate-black text */
+    --text-muted: #475569;
+    --text-dark: #94a3b8;
     
     /* Functional Colors */
     --primary: #3b82f6;
-    --primary-glow: rgba(59, 130, 246, 0.35);
+    --primary-glow: rgba(59, 130, 246, 0.1);
     --accent-emerald: #10b981;
-    --accent-emerald-glow: rgba(16, 185, 129, 0.25);
-    --accent-gold: #f59e0b;
-    --accent-gold-glow: rgba(245, 158, 11, 0.25);
+    --accent-emerald-glow: rgba(16, 185, 129, 0.1);
+    --accent-gold: #b45309; /* Visible gold in light mode */
+    --accent-gold-glow: rgba(180, 83, 9, 0.1);
     --accent-crimson: #ef4444;
     --accent-violet: #8b5cf6;
     
@@ -31,8 +32,30 @@
     --radius-sm: 8px;
     --radius-md: 14px;
     --radius-lg: 24px;
-    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --shadow-premium: 0 10px 30px rgba(15, 23, 42, 0.04);
     --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body.dark-theme {
+    /* Color Palette - Premium Dark Theme Override */
+    --bg-main: #0a0c16;
+    --bg-sidebar: #0f1225;
+    --card-bg: rgba(22, 28, 54, 0.45);
+    --card-bg-match: rgba(22, 28, 54, 0.65);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-glow: rgba(38, 107, 237, 0.1);
+    
+    --text-primary: #f1f3f9;
+    --text-muted: #8b9bb4;
+    --text-dark: #4d5b7c;
+    
+    /* Functional Colors */
+    --primary-glow: rgba(59, 130, 246, 0.35);
+    --accent-emerald-glow: rgba(16, 185, 129, 0.25);
+    --accent-gold: #f59e0b;
+    --accent-gold-glow: rgba(245, 158, 11, 0.25);
+    
+    --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 /* Reset & Base Rules */
@@ -49,6 +72,7 @@ body {
     overflow-x: hidden;
     min-height: 100vh;
     position: relative;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Dynamic Glowing Backdrops */
@@ -58,7 +82,12 @@ body {
     filter: blur(140px);
     z-index: -1;
     pointer-events: none;
-    opacity: 0.25;
+    opacity: 0.04; /* Soft pastel in light mode */
+    transition: var(--transition-smooth);
+}
+
+body.dark-theme .ambient-glow {
+    opacity: 0.25; /* Vivid neon in dark mode */
 }
 
 .glow-1 {
@@ -296,7 +325,7 @@ body {
     font-weight: 800;
     font-size: 2.25rem;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #fff 30%, var(--text-muted) 100%);
+    background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-muted) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -431,7 +460,7 @@ body {
     order: 2;
     padding: 3rem 2rem 2.5rem 2rem;
     border-color: rgba(245, 158, 11, 0.35);
-    background: linear-gradient(180deg, rgba(22, 28, 54, 0.5) 0%, rgba(245, 158, 11, 0.04) 100%);
+    background: linear-gradient(180deg, var(--card-bg) 0%, var(--accent-gold-glow) 100%);
     box-shadow: 0 10px 40px 0 rgba(245, 158, 11, 0.12);
 }
 
@@ -785,12 +814,12 @@ tr:first-child .points-emphasis {
 
 /* Match Card Structure */
 .match-card {
-    background: rgba(22, 28, 54, 0.65);
+    background: var(--card-bg-match);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-md);
     padding: 0.75rem;
     position: relative;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     margin: 1.5rem 0;
     transition: var(--transition-smooth);
 }
@@ -847,7 +876,7 @@ tr:first-child .points-emphasis {
 
 /* Team Slot Interactive States */
 .team-slot:hover {
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: var(--primary-glow);
     color: var(--text-primary);
 }
 
@@ -904,7 +933,7 @@ tr:first-child .points-emphasis {
 }
 
 .champ-card {
-    background: linear-gradient(185deg, rgba(22, 28, 54, 0.8) 0%, rgba(245, 158, 11, 0.06) 100%);
+    background: linear-gradient(185deg, var(--card-bg) 0%, var(--accent-gold-glow) 100%);
     border: 2px solid rgba(245, 158, 11, 0.4);
     border-radius: var(--radius-lg);
     padding: 2.25rem 1.5rem;
@@ -1009,13 +1038,21 @@ tr:first-child .points-emphasis {
 }
 
 .btn-secondary {
-    background-color: rgba(255,255,255,0.06);
+    background-color: var(--bg-main);
     color: var(--text-primary);
     border: 1px solid var(--card-border);
 }
 
 .btn-secondary:hover {
-    background-color: rgba(255,255,255,0.12);
+    background-color: var(--primary-glow);
+}
+
+.theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-right: 1.25rem;
+    transition: var(--transition-smooth);
 }
 
 /* Groups Layout Grid */
