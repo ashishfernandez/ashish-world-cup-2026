@@ -43,6 +43,10 @@
                     <i class="fa-solid fa-table-cells-large"></i>
                     <span>Group Stages</span>
                 </button>
+                <button class="nav-item" data-tab="points">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Points Outline</span>
+                </button>
                 <button class="nav-item admin-nav" data-tab="admin">
                     <i class="fa-solid fa-gears"></i>
                     <span>Admin Control</span>
@@ -167,6 +171,57 @@
                     <!-- Groups Grid Area -->
                     <div class="groups-grid" id="groups-grid-wrapper">
                         <!-- 12 groups A to L will be injected dynamically -->
+                    </div>
+                </section>
+
+                <!-- Points Outline Panel -->
+                <section class="tab-panel" id="tab-points">
+                    <div class="premium-card" style="margin-top: 1rem; padding: 2rem;">
+                        <div class="card-header" style="border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                            <h3 style="font-family: var(--font-heading); font-weight: 800; text-transform: uppercase; font-size: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                <i class="fa-solid fa-circle-info"></i> Predictions Points Breakdown
+                            </h3>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0.5rem 0 0 0;">Understand how points are scored for your group and knockout predictions.</p>
+                        </div>
+                        
+                        <div class="points-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                            <!-- Group Stage Points Card -->
+                            <div class="premium-card" style="padding: 1.5rem; background: rgba(59, 130, 246, 0.03); border: 1px solid var(--card-border);">
+                                <h4 style="margin-top: 0; color: var(--text-primary); font-size: 1.05rem; display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+                                    <i class="fa-solid fa-table-cells-large" style="color: var(--primary);"></i> Group Stages
+                                </h4>
+                                <ul style="padding-left: 1.25rem; margin-bottom: 0; line-height: 1.6; font-size: 0.92rem; color: var(--text-muted); list-style-type: square;">
+                                    <li style="margin-bottom: 0.5rem;">Correct team to advance to Knockouts: <strong style="color: var(--text-primary);">5 Points</strong> each.</li>
+                                    <li style="margin-bottom: 0.5rem;">Maximum possible points: <strong style="color: var(--accent-gold);">160 Points</strong> (32 advancing teams).</li>
+                                    <li>Advancing teams include the top 2 from each of Groups A–L, plus the 8 best third-place finishers.</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Knockout Points Card -->
+                            <div class="premium-card" style="padding: 1.5rem; background: rgba(16, 185, 129, 0.03); border: 1px solid var(--card-border);">
+                                <h4 style="margin-top: 0; color: var(--text-primary); font-size: 1.05rem; display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+                                    <i class="fa-solid fa-diagram-project" style="color: var(--accent-emerald);"></i> Knockout Matches
+                                </h4>
+                                <ul style="padding-left: 1.25rem; margin-bottom: 0; line-height: 1.6; font-size: 0.92rem; color: var(--text-muted); list-style-type: square;">
+                                    <li style="margin-bottom: 0.4rem;">Round of 32 Winner (reaches Round of 16): <strong style="color: var(--text-primary);">10 Points</strong> (Max: 160 pts).</li>
+                                    <li style="margin-bottom: 0.4rem;">Round of 16 Winner (reaches Quarters): <strong style="color: var(--text-primary);">20 Points</strong> (Max: 160 pts).</li>
+                                    <li style="margin-bottom: 0.4rem;">Quarters Winner (reaches Semis): <strong style="color: var(--text-primary);">40 Points</strong> (Max: 160 pts).</li>
+                                    <li style="margin-bottom: 0.4rem;">Semis Winner (reaches Gold Final): <strong style="color: var(--text-primary);">80 Points</strong> (Max: 160 pts).</li>
+                                    <li style="margin-bottom: 0.4rem;">3rd Place Match Winner (reaches Bronze): <strong style="color: var(--text-primary);">40 Points</strong> (Max: 40 pts).</li>
+                                    <li>Tournament Champion (reaches Gold): <strong style="color: var(--text-primary);">160 Points</strong> (Max: 160 pts).</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Any Path Rule Alert -->
+                        <div class="premium-card" style="margin-top: 1.5rem; padding: 1.25rem; border-left: 4px solid var(--primary); background: rgba(59, 130, 246, 0.05); border-top: 1px solid var(--card-border); border-right: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border);">
+                            <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+                                <i class="fa-solid fa-circle-question" style="color: var(--primary);"></i> The "Any-Path" Progressive Rule
+                            </h4>
+                            <p style="margin: 0; font-size: 0.88rem; line-height: 1.6; color: var(--text-muted);">
+                                Points in the knockout rounds are awarded for a correct predicted team <strong>regardless</strong> of whether they got to that stage via your predicted path. If your predicted team reaches a round in the official tournament, you get the progression points for that round!
+                            </p>
+                        </div>
                     </div>
                 </section>
 

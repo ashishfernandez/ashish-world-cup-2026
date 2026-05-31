@@ -771,6 +771,8 @@ tr:first-child .points-emphasis {
 
 /* Bracket Tree Layout Engine */
 .bracket-scroll-container {
+    width: 100%;
+    max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 2rem;
@@ -781,6 +783,33 @@ tr:first-child .points-emphasis {
 
 .bracket-scroll-container:active {
     cursor: grabbing;
+}
+
+/* Premium grabbable scrollbar styling for Bracket Tree */
+.bracket-scroll-container::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+}
+
+.bracket-scroll-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+}
+
+.bracket-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.35); /* Bright premium accent primary */
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.3s ease;
+}
+
+.bracket-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.65) !important;
+}
+
+body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .bracket-canvas {

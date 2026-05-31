@@ -375,6 +375,7 @@ function setupTabListeners() {
                 leaderboard: { title: "Leaderboard Standings", desc: "Track scores, predictions, and real-time rank movements among friends." },
                 bracket: { title: "Knock-Out Stages View", desc: "Use the dropdown to view different knock-out stages selections." },
                 groups: { title: "Group Stages Viewer", desc: "Use the dropdown to view different group stages selections." },
+                points: { title: "Points Outline", desc: "Understand how points are scored for your predictions." },
                 admin: { title: "Admin Match Simulator", desc: "Enter official outcomes to recalculate rankings." }
             };
             
@@ -1938,22 +1939,19 @@ function makeContainerDraggable(container, isInteractive = false) {
     let isDown = false;
     let startX;
     let scrollLeft;
+    let hasMoved = false;
 
     container.addEventListener('mousedown', (e) => {
         // Prevent triggering scroll if clicking buttons, selects, or sort buttons
         if (e.target.closest('.sort-btn') || e.target.closest('button') || e.target.closest('select')) {
             return;
         }
-        // If interactive (wizard selector), also prevent drag scroll on team slots so click advances works cleanly
-        if (isInteractive && e.target.closest('.team-slot')) {
-            return;
-        }
         
         isDown = true;
+        hasMoved = false;
         container.style.cursor = 'grabbing';
         startX = e.pageX - container.offsetLeft;
         scrollLeft = container.scrollLeft;
-        e.preventDefault(); // Enforce smooth drag-to-scroll without browser selection interference
     });
 
     container.addEventListener('mouseleave', () => {
@@ -1968,11 +1966,25 @@ function makeContainerDraggable(container, isInteractive = false) {
 
     container.addEventListener('mousemove', (e) => {
         if (!isDown) return;
-        e.preventDefault();
+        
         const x = e.pageX - container.offsetLeft;
         const walk = (x - startX) * 1.5; // scrolling speed multiplier
-        container.scrollLeft = scrollLeft - walk;
+        
+        // Only treat as drag if moved by more than a 5px threshold
+        if (Math.abs(x - startX) > 5) {
+            hasMoved = true;
+            e.preventDefault(); // Prevent text selection/drag interference during actual movement
+            container.scrollLeft = scrollLeft - walk;
+        }
     });
+
+    // Intercept click events to prevent triggering action if it was a drag
+    container.addEventListener('click', (e) => {
+        if (hasMoved) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true); // Use capture phase to intercept click before child listeners
 }
 
 // Initialize on window load
