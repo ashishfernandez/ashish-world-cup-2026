@@ -707,9 +707,9 @@ function renderBracket() {
     const roundsList = [
         { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
         { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
-        { key: 'QF', title: 'Round of 8', matches: [25, 26, 27, 28] },
-        { key: 'SF', title: 'Round of 4', matches: [29, 30] },
-        { key: 'F', title: 'Round of 2', matches: [32, 31] }, 
+        { key: 'QF', title: 'Quarters', matches: [25, 26, 27, 28] },
+        { key: 'SF', title: 'Semis', matches: [29, 30] },
+        { key: 'F', title: 'Gold & Bronze', matches: [32, 31] }, 
         { key: 'CHAMP', title: 'Champion' }
     ];
 
@@ -1678,9 +1678,9 @@ function renderWizardBracket() {
     const roundsList = [
         { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
         { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
-        { key: 'QF', title: 'Round of 8', matches: [25, 26, 27, 28] },
-        { key: 'SF', title: 'Round of 4', matches: [29, 30] },
-        { key: 'F', title: 'Round of 2', matches: [32, 31] },
+        { key: 'QF', title: 'Quarters', matches: [25, 26, 27, 28] },
+        { key: 'SF', title: 'Semis', matches: [29, 30] },
+        { key: 'F', title: 'Gold & Bronze', matches: [32, 31] },
         { key: 'CHAMP', title: 'Champion' }
     ];
 
