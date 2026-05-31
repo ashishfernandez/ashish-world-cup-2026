@@ -17,7 +17,7 @@ const GROUPS_DATA = {
     C: [
         { code: 'BRA', name: 'Brazil', flag: '🇧🇷' },
         { code: 'MAR', name: 'Morocco', flag: '🇲🇦' },
-        { code: 'SCO', name: 'Scotland', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+        { code: 'SCO', name: 'Scotland', flag: '🇬🇧' },
         { code: 'HAI', name: 'Haiti', flag: '🇭🇹' }
     ],
     D: [
@@ -69,7 +69,7 @@ const GROUPS_DATA = {
         { code: 'COD', name: 'DR Congo', flag: '🇨🇩' }
     ],
     L: [
-        { code: 'ENG', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+        { code: 'ENG', name: 'England', flag: '🇬🇧' },
         { code: 'CRO', name: 'Croatia', flag: '🇭🇷' },
         { code: 'GHA', name: 'Ghana', flag: '🇬🇭' },
         { code: 'PAN', name: 'Panama', flag: '🇵🇦' }
