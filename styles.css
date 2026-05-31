@@ -892,6 +892,10 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     line-height: 1;
 }
 
+.team-flag:empty {
+    display: none;
+}
+
 .team-name-text {
     max-width: 120px;
     overflow: hidden;

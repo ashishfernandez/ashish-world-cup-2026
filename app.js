@@ -78,12 +78,12 @@ const GROUPS_DATA = {
 
 // Flatten helper to easily lookup team properties by code
 function getTeamByCode(code) {
-    if (!code) return { code: '', name: 'TBD', flag: '❓' };
+    if (!code) return { code: '', name: 'TBD', flag: '' };
     for (const group in GROUPS_DATA) {
         const team = GROUPS_DATA[group].find(t => t.code === code);
-        if (team) return team;
+        if (team) return { code: team.code, name: team.name, flag: '' };
     }
-    return { code: code, name: code, flag: '❓' };
+    return { code: code, name: code, flag: '' };
 }
 
 // 2. Bracket Matches Setup Schema (Matches 1-32)
