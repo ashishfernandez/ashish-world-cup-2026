@@ -232,11 +232,17 @@ function loadStateFromStorage() {
     // 2. Load submissions array (ensure 'actuals' doesn't sneak in from legacy submissions)
     const savedSubs = localStorage.getItem('wc-submissions');
     if (savedSubs) {
-        const subs = JSON.parse(savedSubs);
+        let subs = JSON.parse(savedSubs);
+        const originalLength = subs.length;
+        subs = subs.filter(sub => sub.id !== 'actuals');
+        
+        // Self-heal: Save back to localStorage if legacy actuals was removed
+        if (subs.length !== originalLength) {
+            localStorage.setItem('wc-submissions', JSON.stringify(subs));
+        }
+
         subs.forEach(sub => {
-            if (sub.id !== 'actuals') {
-                STATE.participants[sub.id] = sub;
-            }
+            STATE.participants[sub.id] = sub;
         });
     }
 
