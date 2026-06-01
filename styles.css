@@ -973,6 +973,31 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     white-space: nowrap;
 }
 
+/* Unfilled bracket slots — prominent red TBD */
+.team-tbd,
+.team-name-text.team-tbd {
+    color: #ef4444 !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.45);
+}
+
+body:not(.dark-theme) .team-tbd,
+body:not(.dark-theme) .team-name-text.team-tbd {
+    color: #dc2626 !important;
+    text-shadow: none;
+}
+
+.team-slot .team-tbd,
+.champ-team-spot .team-tbd {
+    font-style: italic;
+}
+
+.award-value .team-tbd {
+    font-size: inherit;
+    font-family: var(--font-heading);
+}
+
 .team-score {
     font-family: var(--font-body);
     font-weight: 700;

@@ -113,6 +113,35 @@ function getTeamByCode(code) {
     return { code: code, name: code, flag: '' };
 }
 
+function isTbdLabel(text) {
+    if (text === undefined || text === null || text === '') return true;
+    return String(text).trim().toUpperCase() === 'TBD';
+}
+
+/** Bracket / wizard: red prominent TBD when slot is unfilled */
+function teamNameSpanHtml(name) {
+    const label = name || 'TBD';
+    if (isTbdLabel(label)) {
+        return '<span class="team-name-text team-tbd">TBD</span>';
+    }
+    const safe = String(label)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    return `<span class="team-name-text">${safe}</span>`;
+}
+
+function setWizardReviewAward(el, team, hasPick) {
+    if (!el) return;
+    if (!hasPick || isTbdLabel(team?.name)) {
+        el.innerHTML = '<span class="team-tbd">TBD</span>';
+        el.classList.add('has-tbd');
+    } else {
+        el.textContent = `${team.flag} ${team.name}`.trim();
+        el.classList.remove('has-tbd');
+    }
+}
+
 // 2. Bracket Matches Setup Schema (Matches 1-32)
 // This mirrors the official World Cup 2026 Knockout Path mapping
 const KNOCKOUTS_SCHEMA = {
@@ -1190,7 +1219,7 @@ function renderBracket() {
                 <div class="champ-title">CHAMPION</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${champTeam.flag}</span>
-                    <span class="team-name-text">${champTeam.name}</span>
+                    ${teamNameSpanHtml(champTeam.name)}
                 </div>
             `;
             col.appendChild(champCard);
@@ -1211,7 +1240,7 @@ function renderBracket() {
                 <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${silverTeam.flag}</span>
-                    <span class="team-name-text">${silverTeam.name}</span>
+                    ${teamNameSpanHtml(silverTeam.name)}
                 </div>
             `;
             col.appendChild(silverCard);
@@ -1227,7 +1256,7 @@ function renderBracket() {
                 <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${bronzeTeam.flag}</span>
-                    <span class="team-name-text">${bronzeTeam.name}</span>
+                    ${teamNameSpanHtml(bronzeTeam.name)}
                 </div>
             `;
             col.appendChild(bronzeCard);
@@ -1278,14 +1307,14 @@ function renderBracket() {
                     <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="${p.submitted ? 'cursor: default !important;' : 'cursor: pointer;'}">
                         <div class="team-slot-info">
                             <span class="team-flag">${homeTeam.flag}</span>
-                            <span class="team-name-text">${homeTeam.name}</span>
+                            ${teamNameSpanHtml(homeTeam.name)}
                         </div>
                         <span class="team-score">${homeCode && officialWinner === homeCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
                     </div>
                     <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="${p.submitted ? 'cursor: default !important;' : 'cursor: pointer;'}">
                         <div class="team-slot-info">
                             <span class="team-flag">${awayTeam.flag}</span>
-                            <span class="team-name-text">${awayTeam.name}</span>
+                            ${teamNameSpanHtml(awayTeam.name)}
                         </div>
                         <span class="team-score">${awayCode && officialWinner === awayCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
                     </div>
@@ -2169,31 +2198,26 @@ function goToWizardStep(step) {
         const champCode = draft.champ || '';
         const champTeam = getTeamByCode(champCode);
         
-        const reviewChamp = document.getElementById('wizard-review-champ');
-        if (reviewChamp) {
-            reviewChamp.innerText = champCode ? `${champTeam.flag} ${champTeam.name}` : 'TBD';
-        }
+        setWizardReviewAward(document.getElementById('wizard-review-champ'), champTeam, !!champCode);
 
         // Silver is the loser of the Final Match (Match 32)
         const homeCode32 = getKnockoutParticipant(draft, 32, 'home');
         const awayCode32 = getKnockoutParticipant(draft, 32, 'away');
-        let silverCode = 'TBD';
-        if (champCode) {
+        let silverCode = '';
+        if (champCode && homeCode32 && awayCode32) {
             silverCode = (champCode === homeCode32) ? awayCode32 : homeCode32;
         }
         const silverTeam = getTeamByCode(silverCode);
-        const reviewSilver = document.getElementById('wizard-review-silver');
-        if (reviewSilver) {
-            reviewSilver.innerText = (silverCode && silverCode !== 'TBD') ? `${silverTeam.flag} ${silverTeam.name}` : 'TBD';
-        }
+        setWizardReviewAward(
+            document.getElementById('wizard-review-silver'),
+            silverTeam,
+            !!silverCode
+        );
 
         // Bronze is the winner of 3rd Place (Match 31)
         const bronzeCode = draft.bracketPicks[31] || '';
         const bronzeTeam = getTeamByCode(bronzeCode);
-        const reviewBronze = document.getElementById('wizard-review-bronze');
-        if (reviewBronze) {
-            reviewBronze.innerText = bronzeCode ? `${bronzeTeam.flag} ${bronzeTeam.name}` : 'TBD';
-        }
+        setWizardReviewAward(document.getElementById('wizard-review-bronze'), bronzeTeam, !!bronzeCode);
     }
     
     // Update Next button unlit/disabled state reactively on step entry
@@ -2359,7 +2383,7 @@ function renderWizardBracket() {
                 <div class="champ-title">CHAMPION</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${champTeam.flag}</span>
-                    <span class="team-name-text">${champTeam.name}</span>
+                    ${teamNameSpanHtml(champTeam.name)}
                 </div>
             `;
             col.appendChild(champCard);
@@ -2380,7 +2404,7 @@ function renderWizardBracket() {
                 <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${silverTeam.flag}</span>
-                    <span class="team-name-text">${silverTeam.name}</span>
+                    ${teamNameSpanHtml(silverTeam.name)}
                 </div>
             `;
             col.appendChild(silverCard);
@@ -2396,7 +2420,7 @@ function renderWizardBracket() {
                 <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${bronzeTeam.flag}</span>
-                    <span class="team-name-text">${bronzeTeam.name}</span>
+                    ${teamNameSpanHtml(bronzeTeam.name)}
                 </div>
             `;
             col.appendChild(bronzeCard);
@@ -2436,14 +2460,14 @@ function renderWizardBracket() {
                     <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="cursor: pointer;">
                         <div class="team-slot-info">
                             <span class="team-flag">${homeTeam.flag}</span>
-                            <span class="team-name-text">${homeTeam.name}</span>
+                            ${teamNameSpanHtml(homeTeam.name)}
                         </div>
                         <span class="team-score"></span>
                     </div>
                     <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="cursor: pointer;">
                         <div class="team-slot-info">
                             <span class="team-flag">${awayTeam.flag}</span>
-                            <span class="team-name-text">${awayTeam.name}</span>
+                            ${teamNameSpanHtml(awayTeam.name)}
                         </div>
                         <span class="team-score"></span>
                     </div>
@@ -2767,7 +2791,7 @@ function renderWizardThirds() {
             slotEl.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <span style="font-size: 0.78rem; font-weight: 800; color: var(--text-dark); border: 1px dashed var(--card-border); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
-                    <span style="font-size: 0.82rem; font-style: italic;">Slot ${i + 1} (Empty TBD)</span>
+                    <span class="team-tbd" style="font-size: 0.82rem; font-style: italic;">Slot ${i + 1} — TBD</span>
                 </div>
                 <span style="font-size: 0.72rem; color: var(--text-dark);">Click team to fill</span>
             `;
