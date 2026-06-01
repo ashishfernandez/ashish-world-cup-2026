@@ -1943,23 +1943,27 @@ body:not(.dark-theme) .team-name-text.team-tbd {
         right: 1rem;
         bottom: calc(4.5rem + env(safe-area-inset-bottom));
         z-index: 490;
-        width: 3.35rem !important;
+        width: auto !important;
+        min-width: 6.75rem;
         height: 3.35rem !important;
-        min-width: 3.35rem;
         margin: 0 !important;
-        padding: 0 !important;
-        border-radius: 50%;
+        padding: 0 1rem !important;
+        border-radius: 2rem;
         justify-content: center;
+        gap: 0.45rem;
         box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
     }
 
     #sidebar-submit-btn .btn-label {
-        display: none;
+        display: inline;
+        font-size: 0.78rem;
+        white-space: nowrap;
     }
 
     #sidebar-submit-btn i {
         margin: 0;
-        font-size: 1.2rem;
+        font-size: 1rem;
+        flex-shrink: 0;
     }
 
     .main-content {
