@@ -1105,16 +1105,18 @@ function renderRankingsTable(scores) {
         tr.addEventListener('click', () => {
             STATE.activeBracketUser = player.id;
             STATE.activeGroupUser = player.id;
-            
-            populateUserDropdowns();
-            renderBracket();
-            renderGroups();
-            
+
             const bracketTabBtn = document.querySelector('.nav-item[data-tab="bracket"]');
             if (bracketTabBtn) {
                 bracketTabBtn.click();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
+
+            populateUserDropdowns();
+            renderBracket();
+            renderGroups();
+            updateSubmitButtonState();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
         tbody.appendChild(tr);
@@ -2527,8 +2529,9 @@ function populateUserDropdowns() {
     const selectGroup = document.getElementById('groups-user-select');
     if (!selectBracket || !selectGroup) return;
 
-    const currentBracketVal = selectBracket.value || STATE.activeBracketUser;
-    const currentGroupVal = selectGroup.value || STATE.activeGroupUser;
+    // STATE is source of truth (old <select> value must not override a new pick from leaderboard, etc.)
+    const currentBracketVal = STATE.activeBracketUser;
+    const currentGroupVal = STATE.activeGroupUser;
 
     selectBracket.innerHTML = '';
     selectGroup.innerHTML = '';
