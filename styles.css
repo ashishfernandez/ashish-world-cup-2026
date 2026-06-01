@@ -1779,6 +1779,8 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     
     .main-content {
         margin-left: 0;
+        width: 100%;
+        max-width: 100vw;
         padding: 1.5rem;
     }
     
