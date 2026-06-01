@@ -4,6 +4,10 @@
 const SUPABASE_URL = 'https://ovfmmszhlkedypfveyxj.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_oEuZ2NtTLNBineH2ae8gaQ_ud-Fi2vE';
 let _db = null;
+let _cloudSyncStarted = false;
+let _cloudPollTimer = null;
+let _cloudSyncChannel = null;
+const CLOUD_POLL_INTERVAL_MS = 8000;
 
 /**
  * Lazy Supabase client getter. Retries initialization on every call
@@ -193,28 +197,17 @@ async function init() {
     setupThemeToggle();
     setupDragScroll();
     
-    // 1. Instant local restore (highly responsive perception)
+    // Local-only: draft, official actuals cache, theme — NOT other people's picks
     loadStateFromStorage();
     setupOnboarding();
-    populateUserDropdowns();
-    
-    // Ensure all local users have valid standings
     ensureStandardStandings();
 
-    // Set initial simulated results if none were saved locally yet
     if (!localStorage.getItem('wc-official-results')) {
         prepopulateSimulatedResults();
     }
-    
-    renderAll();
 
-    // 2. Sync from Supabase cloud store
-    await loadStateFromCloud();
-    
-    // Ensure all cloud-fetched users also have valid standings
-    ensureStandardStandings();
-    populateUserDropdowns();
-    renderAll();
+    // Global pool lives in Supabase — load before first paint so everyone sees everyone
+    await refreshFromCloudAndRender();
 
     // 3. If Supabase SDK wasn't ready on first try, retry after 2s
     if (!getDb()) {
@@ -222,14 +215,210 @@ async function init() {
         setTimeout(async () => {
             if (getDb()) {
                 console.log('☁️ Supabase SDK loaded on retry — syncing now...');
-                await loadStateFromCloud();
-                ensureStandardStandings();
-                populateUserDropdowns();
-                renderAll();
+                await refreshFromCloudAndRender();
+                setupCloudSync();
             } else {
                 console.error('☁️ Supabase SDK failed to load after retry. Cloud sync unavailable.');
             }
         }, 2000);
+    } else {
+        setupCloudSync();
+    }
+}
+
+/** Parse JSONB/string participant payload from a Supabase row */
+function parseSubmissionRow(row) {
+    if (!row) return null;
+    let sub = row.data !== undefined ? row.data : row;
+    if (typeof sub === 'string') {
+        try {
+            sub = JSON.parse(sub);
+        } catch {
+            return null;
+        }
+    }
+    const id = sub.id || row.id;
+    if (!id || id === 'actuals' || id === 'draft') return null;
+    // Every row in the shared submissions table is a public pool entry
+    return {
+        ...sub,
+        id,
+        submitted: true,
+        name: sub.name || id,
+        groupStandings: sub.groupStandings || {},
+        selectedThirds: sub.selectedThirds || [],
+        bracketPicks: sub.bracketPicks || {},
+        champ: sub.champ || ''
+    };
+}
+
+/** All locked submissions currently in the global pool (sorted by display name) */
+function getGlobalSubmissionEntries() {
+    return Object.keys(STATE.participants)
+        .filter(id => id !== 'draft' && id !== 'actuals')
+        .map(id => STATE.participants[id])
+        .filter(p => p && p.submitted !== false)
+        .sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+}
+
+/**
+ * Replace the in-memory global pool with exactly what is in Supabase.
+ * Called on every successful fetch so all visitors see the same list.
+ */
+function applySubmissionsFromCloud(subsData) {
+    for (const username of Object.keys(STATE.participants)) {
+        if (username !== 'draft' && username !== 'actuals') {
+            delete STATE.participants[username];
+        }
+    }
+
+    const applied = [];
+    subsData.forEach(row => {
+        const sub = parseSubmissionRow(row);
+        if (!sub) return;
+        STATE.participants[sub.id] = sub;
+        applied.push(sub);
+    });
+
+    localStorage.setItem('wc-submissions', JSON.stringify(applied));
+    return applied.length;
+}
+
+function applyOfficialResultsFromCloud(resData) {
+    if (!resData || !resData.data) return false;
+    let parsed = resData.data;
+    if (typeof parsed === 'string') {
+        try {
+            parsed = JSON.parse(parsed);
+        } catch {
+            return false;
+        }
+    }
+    STATE.officialResults.matches = parsed.matches || {};
+    STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
+    if (parsed.groupStandings && STATE.participants.actuals) {
+        STATE.participants.actuals.groupStandings = parsed.groupStandings;
+    }
+    if (parsed.selectedThirds && STATE.participants.actuals) {
+        STATE.participants.actuals.selectedThirds = parsed.selectedThirds;
+    }
+    localStorage.setItem('wc-official-results', JSON.stringify({
+        matches: STATE.officialResults.matches,
+        advancingTeams: STATE.officialResults.advancingTeams,
+        groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
+        selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
+    }));
+    return true;
+}
+
+/** Pull latest global pool from Supabase; returns true if any cloud fetch succeeded */
+async function loadStateFromCloud() {
+    const db = getDb();
+    if (!db) {
+        console.warn('☁️ Supabase SDK not available — skipping cloud sync.');
+        return false;
+    }
+
+    let anySuccess = false;
+
+    try {
+        const { data: subsData, error: subsError } = await db
+            .from('submissions')
+            .select('*');
+
+        if (subsError) throw subsError;
+
+        if (subsData && Array.isArray(subsData)) {
+            const count = applySubmissionsFromCloud(subsData);
+            console.log(`☁️ Loaded ${count} global submission(s) from Supabase`);
+            anySuccess = true;
+        }
+    } catch (err) {
+        console.warn('☁️ Cloud sync - submissions fetch failed:', err);
+    }
+
+    try {
+        const { data: resData, error: resError } = await db
+            .from('official_results')
+            .select('*')
+            .eq('id', 'current')
+            .maybeSingle();
+
+        if (resError) throw resError;
+
+        if (applyOfficialResultsFromCloud(resData)) {
+            anySuccess = true;
+        }
+    } catch (err) {
+        console.warn('☁️ Cloud sync - official results fetch failed:', err);
+    }
+
+    return anySuccess;
+}
+
+async function refreshFromCloudAndRender() {
+    await loadStateFromCloud();
+    ensureStandardStandings();
+    populateUserDropdowns();
+    renderAll();
+}
+
+function setupCloudSync() {
+    if (_cloudSyncStarted || !getDb()) return;
+    _cloudSyncStarted = true;
+
+    if (_cloudPollTimer) clearInterval(_cloudPollTimer);
+    _cloudPollTimer = setInterval(() => {
+        refreshFromCloudAndRender().catch(err =>
+            console.warn('☁️ Periodic cloud refresh failed:', err)
+        );
+    }, CLOUD_POLL_INTERVAL_MS);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            refreshFromCloudAndRender().catch(err =>
+                console.warn('☁️ Visibility cloud refresh failed:', err)
+            );
+        }
+    });
+
+    try {
+        const db = getDb();
+        if (_cloudSyncChannel) {
+            db.removeChannel(_cloudSyncChannel);
+        }
+        _cloudSyncChannel = db
+            .channel('wc-pool-global')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'submissions' },
+                () => refreshFromCloudAndRender()
+            )
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'official_results' },
+                () => refreshFromCloudAndRender()
+            )
+            .subscribe(status => {
+                if (status === 'SUBSCRIBED') {
+                    console.log('☁️ Realtime global pool sync active');
+                }
+            });
+    } catch (err) {
+        console.warn('☁️ Realtime subscribe failed (polling still active):', err);
+    }
+}
+
+async function deleteParticipantFromCloud(participantId) {
+    const db = getDb();
+    if (!db) return false;
+    try {
+        const { error } = await db.from('submissions').delete().eq('id', participantId);
+        if (error) throw error;
+        return true;
+    } catch (err) {
+        console.error('❌ Failed to delete submission from cloud:', err);
+        return false;
     }
 }
 
@@ -280,98 +469,15 @@ function loadStateFromStorage() {
         }
     }
 
-    // 2. Load submissions array (ensure 'actuals' doesn't sneak in from legacy submissions)
-    const savedSubs = localStorage.getItem('wc-submissions');
-    if (savedSubs) {
-        let subs = JSON.parse(savedSubs);
-        const originalLength = subs.length;
-        subs = subs.filter(sub => sub.id !== 'actuals');
-        
-        // Self-heal: Save back to localStorage if legacy actuals was removed
-        if (subs.length !== originalLength) {
-            localStorage.setItem('wc-submissions', JSON.stringify(subs));
-        }
+    // Submissions are NOT loaded from localStorage — only from Supabase (see loadStateFromCloud).
+    // wc-submissions is a write-through cache updated after each cloud fetch.
 
-        subs.forEach(sub => {
-            STATE.participants[sub.id] = sub;
-        });
-    }
-
-    // 3. Load draft or initialize a fresh one
+    // 2. Load draft or initialize a fresh one
     const savedDraft = localStorage.getItem('wc-draft');
     if (savedDraft) {
         STATE.participants.draft = JSON.parse(savedDraft);
     } else {
         resetDraft();
-    }
-}
-
-async function loadStateFromCloud() {
-    const db = getDb();
-    if (!db) {
-        console.warn('☁️ Supabase SDK not available — skipping cloud sync.');
-        return;
-    }
-
-    try {
-        // Fetch shared cloud submissions from submissions table
-        const { data: subsData, error: subsError } = await db
-            .from('submissions')
-            .select('*');
-
-        if (subsError) throw subsError;
-
-        if (subsData && Array.isArray(subsData)) {
-            console.log(`☁️ Loaded ${subsData.length} submission(s) from Supabase`);
-            subsData.forEach(row => {
-                const sub = row.data;
-                if (sub && sub.id && sub.id !== 'actuals' && sub.id !== 'draft') {
-                    STATE.participants[sub.id] = sub;
-                }
-            });
-            // Cache immediately to localStorage
-            const subs = [];
-            for (const username in STATE.participants) {
-                if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
-                    subs.push(STATE.participants[username]);
-                }
-            }
-            localStorage.setItem('wc-submissions', JSON.stringify(subs));
-        }
-    } catch (err) {
-        console.warn('☁️ Cloud sync - submissions fetch failed:', err);
-    }
-
-    try {
-        // Fetch shared official results
-        const { data: resData, error: resError } = await db
-            .from('official_results')
-            .select('*')
-            .eq('id', 'current')
-            .maybeSingle();
-
-        if (resError) throw resError;
-
-        if (resData && resData.data) {
-            const parsed = resData.data;
-            STATE.officialResults.matches = parsed.matches || {};
-            STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
-            if (parsed.groupStandings && STATE.participants.actuals) {
-                STATE.participants.actuals.groupStandings = parsed.groupStandings;
-            }
-            if (parsed.selectedThirds && STATE.participants.actuals) {
-                STATE.participants.actuals.selectedThirds = parsed.selectedThirds;
-            }
-            // Cache immediately to localStorage
-            localStorage.setItem('wc-official-results', JSON.stringify({
-                matches: STATE.officialResults.matches,
-                advancingTeams: STATE.officialResults.advancingTeams,
-                groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
-                selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
-            }));
-        }
-    } catch (err) {
-        console.warn('☁️ Cloud sync - official results fetch failed:', err);
     }
 }
 
@@ -393,7 +499,10 @@ async function saveStateToCloud() {
                 // upsert the submission (uses id as primary key)
                 const { error } = await db
                     .from('submissions')
-                    .upsert({ id: participant.id, data: participant });
+                    .upsert(
+                        { id: participant.id, data: participant },
+                        { onConflict: 'id' }
+                    );
                     
                 if (error) {
                     console.error(`❌ Failed to sync submission for ${username}:`, error);
@@ -415,7 +524,7 @@ async function saveStateToCloud() {
         
         const { error } = await db
             .from('official_results')
-            .upsert({ id: 'current', data: official });
+            .upsert({ id: 'current', data: official }, { onConflict: 'id' });
             
         if (error) {
             console.error('❌ Failed to sync official results:', error);
@@ -560,6 +669,11 @@ function setupTabListeners() {
             
             document.getElementById('current-tab-title').innerText = titleMap[tabName].title;
             document.getElementById('current-tab-desc').innerText = titleMap[tabName].desc;
+
+            // Fresh global pool when switching tabs
+            refreshFromCloudAndRender().catch(err =>
+                console.warn('☁️ Tab switch cloud refresh failed:', err)
+            );
         });
     });
 }
@@ -623,10 +737,8 @@ function calculateParticipantScores() {
     const scoredList = [];
     const results = STATE.officialResults;
 
-    for (const username in STATE.participants) {
-        if (username === 'draft' || username === 'actuals') continue; // Skip draft and official actuals in leaderboard scores
-        const p = STATE.participants[username];
-        if (!p.submitted) continue; // Skip unsubmitted profiles
+    for (const p of getGlobalSubmissionEntries()) {
+        const username = p.id;
         let groupPts = 0;
         let koPts = 0;
 
@@ -736,13 +848,9 @@ function renderLeaderboard() {
 function updateActivePlayersCount() {
     const countEl = document.getElementById('active-players-count');
     if (!countEl) return;
-    
-    const count = Object.keys(STATE.participants).filter(username => {
-        if (username === 'draft' || username === 'actuals') return false;
-        return STATE.participants[username].submitted;
-    }).length;
-    
-    countEl.innerText = `${count} Player${count !== 1 ? 's' : ''}`;
+
+    const count = getGlobalSubmissionEntries().length;
+    countEl.innerText = `${count} in global pool`;
 }
 
 function renderUserBadge(scores) {
@@ -1471,12 +1579,10 @@ function renderAdminSimulator() {
     if (userList) {
         userList.innerHTML = '';
         
-        let userCount = 0;
-        for (const username in STATE.participants) {
-            if (username === 'draft' || username === 'actuals') continue;
-            
-            userCount++;
-            const p = STATE.participants[username];
+        const globalEntries = getGlobalSubmissionEntries();
+        let userCount = globalEntries.length;
+        for (const p of globalEntries) {
+            const username = p.id;
             
             const userRow = document.createElement('div');
             userRow.style = 'display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border);';
@@ -1491,17 +1597,22 @@ function renderAdminSimulator() {
                 </button>
             `;
             
-            userRow.querySelector('.delete-user-btn').addEventListener('click', () => {
+            userRow.querySelector('.delete-user-btn').addEventListener('click', async () => {
                 if (confirm(`⚠️ Are you sure you want to permanently delete participant "${p.name}"?`)) {
+                    const cloudDeleted = await deleteParticipantFromCloud(username);
                     delete STATE.participants[username];
-                    
+
                     if (STATE.activeBracketUser === username) STATE.activeBracketUser = 'actuals';
                     if (STATE.activeGroupUser === username) STATE.activeGroupUser = 'actuals';
-                    
+
                     saveStateToStorage();
                     populateUserDropdowns();
                     renderAll();
-                    alert(`Removed "${p.name}" from the pool.`);
+                    if (cloudDeleted) {
+                        alert(`Removed "${p.name}" from the global pool.`);
+                    } else {
+                        alert(`Removed "${p.name}" locally. Cloud delete may have failed — refresh to confirm.`);
+                    }
                 }
             });
             
@@ -1815,9 +1926,8 @@ function setupOnboarding() {
             STATE.activeBracketUser = subId;
             STATE.activeGroupUser = subId;
 
-            populateUserDropdowns();
+            await refreshFromCloudAndRender();
             updateSubmitButtonState();
-            renderAll();
 
             if (cloudSuccess) {
                 alert(`🎉 Success! Your predictions under "${newSubmission.name}" are submitted and synced to the cloud!`);
@@ -2266,11 +2376,9 @@ function populateUserDropdowns() {
         addOptionToBoth('actuals', '🏆 Official Actuals');
     }
 
-    // 2. Add all submitted entries in order
-    for (const username in STATE.participants) {
-        if (username === 'actuals' || username === 'draft') continue;
-        const p = STATE.participants[username];
-        addOptionToBoth(username, `👤 ${p.name} (Submitted)`);
+    // 2. All global pool submissions (everyone sees everyone in these dropdowns)
+    for (const p of getGlobalSubmissionEntries()) {
+        addOptionToBoth(p.id, `👤 ${p.name}`);
     }
 
     // Restore values if available, else fallback to 'actuals'
