@@ -92,7 +92,7 @@ body {
 }
 
 body.dark-theme .ambient-glow {
-    opacity: 0.25; /* Vivid neon in dark mode */
+    display: none;
 }
 
 .glow-1 {
