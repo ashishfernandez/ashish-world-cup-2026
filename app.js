@@ -8,6 +8,7 @@ let _cloudSyncStarted = false;
 let _cloudPollTimer = null;
 let _cloudSyncChannel = null;
 const CLOUD_POLL_INTERVAL_MS = 8000;
+let _lastCloudSyncOk = false;
 
 /**
  * Lazy Supabase client getter. Retries initialization on every call
@@ -206,24 +207,105 @@ async function init() {
         prepopulateSimulatedResults();
     }
 
-    // Global pool lives in Supabase — load before first paint so everyone sees everyone
+    // Show cached pool immediately (helps desktop browsers with stale tabs)
+    loadSubmissionsFromLocalCache();
+    populateUserDropdowns();
+    renderAll();
+
+    setupCloudSyncControls();
+    updateCloudSyncBanner('loading', 0, 'Syncing global pool…');
+
+    // Global pool from Supabase (overwrites cache when successful)
     await refreshFromCloudAndRender();
 
-    // 3. If Supabase SDK wasn't ready on first try, retry after 2s
-    if (!getDb()) {
-        console.warn('☁️ Supabase not ready yet — scheduling retry in 2s...');
-        setTimeout(async () => {
-            if (getDb()) {
-                console.log('☁️ Supabase SDK loaded on retry — syncing now...');
-                await refreshFromCloudAndRender();
-                setupCloudSync();
-            } else {
-                console.error('☁️ Supabase SDK failed to load after retry. Cloud sync unavailable.');
-            }
-        }, 2000);
-    } else {
-        setupCloudSync();
+    setupCloudSync();
+
+    if (!_lastCloudSyncOk) {
+        scheduleCloudRetries();
     }
+}
+
+function setupCloudSyncControls() {
+    const btn = document.getElementById('btn-sync-pool');
+    if (btn) {
+        btn.addEventListener('click', async () => {
+            btn.querySelector('i')?.classList.add('fa-spin');
+            updateCloudSyncBanner('loading', getGlobalSubmissionEntries().length, 'Refreshing…');
+            await refreshFromCloudAndRender();
+            btn.querySelector('i')?.classList.remove('fa-spin');
+        });
+    }
+}
+
+function scheduleCloudRetries() {
+    setupCloudSync();
+    [2000, 5000, 12000].forEach((delay) => {
+        setTimeout(async () => {
+            if (_lastCloudSyncOk) return;
+            await refreshFromCloudAndRender();
+        }, delay);
+    });
+}
+
+function updateCloudSyncBanner(mode, count, message) {
+    const banner = document.getElementById('cloud-sync-banner');
+    const text = document.getElementById('cloud-sync-text');
+    const label = document.getElementById('sync-status-label');
+    const pulse = document.getElementById('sync-pulse');
+    const statusRow = pulse?.closest('.status-row');
+
+    if (text && message) text.textContent = message;
+    if (label) {
+        if (mode === 'ok') label.textContent = 'Live global pool';
+        else if (mode === 'loading') label.textContent = 'Connecting…';
+        else label.textContent = 'Offline / cached';
+    }
+    if (banner) {
+        banner.classList.remove('sync-ok', 'sync-warn', 'sync-error');
+        if (mode === 'ok') banner.classList.add('sync-ok');
+        else if (mode === 'warn') banner.classList.add('sync-warn');
+        else if (mode === 'error') banner.classList.add('sync-error');
+    }
+    if (statusRow) {
+        statusRow.classList.toggle('sync-error-row', mode === 'error' || mode === 'warn');
+    }
+}
+
+/** Load last known global pool from this browser (fallback when cloud fetch fails) */
+function loadSubmissionsFromLocalCache() {
+    const saved = localStorage.getItem('wc-submissions');
+    if (!saved) return 0;
+    let subs;
+    try {
+        subs = JSON.parse(saved);
+    } catch {
+        return 0;
+    }
+    if (!Array.isArray(subs)) return 0;
+
+    let count = 0;
+    subs.forEach(sub => {
+        const parsed = parseSubmissionRow({ id: sub.id, data: sub });
+        if (!parsed) return;
+        STATE.participants[parsed.id] = parsed;
+        count++;
+    });
+    return count;
+}
+
+/** Fetch submissions via REST when supabase-js client fails (common with cache/ad blockers) */
+async function fetchSubmissionsViaRest() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/submissions?select=*`, {
+        headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        }
+    });
+    if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`REST ${res.status}: ${body}`);
+    }
+    return res.json();
 }
 
 /** Parse JSONB/string participant payload from a Supabase row */
@@ -311,60 +393,95 @@ function applyOfficialResultsFromCloud(resData) {
     return true;
 }
 
-/** Pull latest global pool from Supabase; returns true if any cloud fetch succeeded */
+/** Pull latest global pool from Supabase; returns true if submissions fetch succeeded */
 async function loadStateFromCloud() {
-    const db = getDb();
-    if (!db) {
-        console.warn('☁️ Supabase SDK not available — skipping cloud sync.');
-        return false;
-    }
-
-    let anySuccess = false;
+    let submissionsOk = false;
 
     try {
-        const { data: subsData, error: subsError } = await db
-            .from('submissions')
-            .select('*');
+        let subsData = null;
+        const db = getDb();
 
-        if (subsError) throw subsError;
+        if (db) {
+            const { data, error } = await db.from('submissions').select('*');
+            if (error) throw error;
+            subsData = data;
+        } else {
+            throw new Error('Supabase SDK not loaded');
+        }
 
         if (subsData && Array.isArray(subsData)) {
             const count = applySubmissionsFromCloud(subsData);
-            console.log(`☁️ Loaded ${count} global submission(s) from Supabase`);
-            anySuccess = true;
+            console.log(`☁️ Loaded ${count} global submission(s) via Supabase client`);
+            submissionsOk = true;
         }
-    } catch (err) {
-        console.warn('☁️ Cloud sync - submissions fetch failed:', err);
+    } catch (clientErr) {
+        console.warn('☁️ Supabase client fetch failed, trying REST fallback:', clientErr);
+        try {
+            const subsData = await fetchSubmissionsViaRest();
+            if (Array.isArray(subsData)) {
+                const count = applySubmissionsFromCloud(subsData);
+                console.log(`☁️ Loaded ${count} global submission(s) via REST fallback`);
+                submissionsOk = true;
+            }
+        } catch (restErr) {
+            console.warn('☁️ REST fallback failed:', restErr);
+        }
     }
 
-    try {
-        const { data: resData, error: resError } = await db
-            .from('official_results')
-            .select('*')
-            .eq('id', 'current')
-            .maybeSingle();
-
-        if (resError) throw resError;
-
-        if (applyOfficialResultsFromCloud(resData)) {
-            anySuccess = true;
-        }
-    } catch (err) {
-        console.warn('☁️ Cloud sync - official results fetch failed:', err);
+    if (!submissionsOk) {
+        const cached = loadSubmissionsFromLocalCache();
+        console.warn(`☁️ Using local cache: ${cached} submission(s)`);
     }
 
-    return anySuccess;
+    const db = getDb();
+    if (db) {
+        try {
+            const { data: resData, error: resError } = await db
+                .from('official_results')
+                .select('*')
+                .eq('id', 'current')
+                .maybeSingle();
+
+            if (!resError && applyOfficialResultsFromCloud(resData)) {
+                /* official results updated */
+            }
+        } catch (err) {
+            console.warn('☁️ Cloud sync - official results fetch failed:', err);
+        }
+    }
+
+    _lastCloudSyncOk = submissionsOk;
+    return submissionsOk;
 }
 
 async function refreshFromCloudAndRender() {
-    await loadStateFromCloud();
+    const ok = await loadStateFromCloud();
+    const count = getGlobalSubmissionEntries().length;
+
+    if (ok) {
+        updateCloudSyncBanner('ok', count, `${count} player${count !== 1 ? 's' : ''} in global pool`);
+    } else if (count > 0) {
+        updateCloudSyncBanner(
+            'warn',
+            count,
+            `${count} cached — hard refresh (Ctrl+Shift+R) if list looks old`
+        );
+    } else {
+        updateCloudSyncBanner(
+            'error',
+            0,
+            'Cannot reach cloud — disable ad blockers or hard refresh'
+        );
+    }
+
     ensureStandardStandings();
     populateUserDropdowns();
     renderAll();
+    updateActivePlayersCount();
 }
 
 function setupCloudSync() {
-    if (_cloudSyncStarted || !getDb()) return;
+    if (_cloudSyncStarted) return;
     _cloudSyncStarted = true;
 
     if (_cloudPollTimer) clearInterval(_cloudPollTimer);
@@ -382,8 +499,10 @@ function setupCloudSync() {
         }
     });
 
+    const db = getDb();
+    if (!db) return;
+
     try {
-        const db = getDb();
         if (_cloudSyncChannel) {
             db.removeChannel(_cloudSyncChannel);
         }

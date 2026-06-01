@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20260531">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -63,18 +63,24 @@
             </button>
 
             <div class="pool-meta-card">
+                <div id="cloud-sync-banner" class="cloud-sync-banner" role="status" aria-live="polite">
+                    <span id="cloud-sync-text">Syncing global pool…</span>
+                    <button type="button" id="btn-sync-pool" class="btn-sync-pool" title="Reload everyone's picks from the cloud">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                </div>
                 <div class="meta-row">
                     <span class="label">Total Points Pool:</span>
                     <span class="value gold-text">1,000 Pts</span>
                 </div>
                 <div class="meta-row">
-                    <span class="label">Active Players:</span>
-                    <span id="active-players-count" class="value">0 Players</span>
+                    <span class="label">Global pool:</span>
+                    <span id="active-players-count" class="value">…</span>
                 </div>
                 <div class="divider"></div>
                 <div class="meta-row status-row">
-                    <span class="pulse-indicator"></span>
-                    <span class="status-text">Live Standing Updates</span>
+                    <span class="pulse-indicator" id="sync-pulse"></span>
+                    <span class="status-text" id="sync-status-label">Connecting…</span>
                 </div>
             </div>
         </aside>
@@ -494,6 +500,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js"></script>
+    <script src="app.js?v=20260531"></script>
 </body>
 </html>
