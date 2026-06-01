@@ -1643,24 +1643,6 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     display: block;
 }
 
-.points-breakdown-info h4 {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    font-size: 0.95rem;
-}
-
-.points-breakdown-info ul {
-    list-style: none;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.8;
-}
-
-.points-breakdown-info li strong {
-    color: var(--text-primary);
-}
-
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
     .app-container {
