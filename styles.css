@@ -800,6 +800,10 @@ tr:nth-child(3) .rank-badge {
     border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
+body:not(.dark-theme) .leaderboard-table .badge-info {
+    color: #1e3a8a;
+}
+
 .badge-medal-tbd {
     background-color: rgba(239, 68, 68, 0.12);
     color: #ef4444;
