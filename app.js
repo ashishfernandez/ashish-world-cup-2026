@@ -808,6 +808,19 @@ function renderAll() {
     renderAdminSimulator();
 }
 
+/** Scroll only the bottom nav strip — never use scrollIntoView (breaks fixed mobile nav). */
+function scrollMobileNavTabIntoView(tabName) {
+    const navMenu = document.querySelector('.sidebar .nav-menu');
+    const activeNav = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
+    if (!navMenu || !activeNav) return;
+
+    const targetLeft = activeNav.offsetLeft - (navMenu.clientWidth / 2) + (activeNav.offsetWidth / 2);
+    navMenu.scrollTo({
+        left: Math.max(0, targetLeft),
+        behavior: 'smooth'
+    });
+}
+
 // tab switching triggers
 function setupTabListeners() {
     document.querySelectorAll('.nav-item').forEach(button => {
@@ -831,9 +844,9 @@ function setupTabListeners() {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
 
-            const activeNav = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
-            if (activeNav && window.matchMedia('(max-width: 768px)').matches) {
-                activeNav.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                window.scrollTo(0, 0);
+                scrollMobileNavTabIntoView(tabName);
             }
 
             // Dynamic header labels
