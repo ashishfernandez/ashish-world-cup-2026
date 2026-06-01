@@ -1,18 +1,25 @@
 // World Cup 2026 Bracket Pool Core Engine
 
-// Supabase Client Initialization
+// Supabase Client Initialization — Lazy pattern to handle CDN race conditions
 const SUPABASE_URL = 'https://ovfmmszhlkedypfveyxj.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_oEuZ2NtTLNBineH2ae8gaQ_ud-Fi2vE';
-let db = null;
-try {
-    if (window.supabase && window.supabase.createClient) {
-        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('☁️ Supabase client initialized successfully');
-    } else {
-        console.warn('☁️ Supabase SDK not found on window — cloud sync disabled');
+let _db = null;
+
+/**
+ * Lazy Supabase client getter. Retries initialization on every call
+ * so the CDN script has time to load even if it wasn't ready at parse time.
+ */
+function getDb() {
+    if (_db) return _db;
+    try {
+        if (window.supabase && window.supabase.createClient) {
+            _db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log('☁️ Supabase client initialized successfully');
+        }
+    } catch(e) {
+        console.warn('☁️ Supabase SDK initialization failed:', e);
     }
-} catch(e) {
-    console.warn('Supabase SDK initialization failed:', e);
+    return _db;
 }
 
 // 1. Static Tourney Data (Groups and Teams as in standard 48-team layout)
@@ -201,14 +208,29 @@ async function init() {
     
     renderAll();
 
-    // 2. Asynchronously sync from public cloud store in the background!
+    // 2. Sync from Supabase cloud store
     await loadStateFromCloud();
     
     // Ensure all cloud-fetched users also have valid standings
     ensureStandardStandings();
-
     populateUserDropdowns();
     renderAll();
+
+    // 3. If Supabase SDK wasn't ready on first try, retry after 2s
+    if (!getDb()) {
+        console.warn('☁️ Supabase not ready yet — scheduling retry in 2s...');
+        setTimeout(async () => {
+            if (getDb()) {
+                console.log('☁️ Supabase SDK loaded on retry — syncing now...');
+                await loadStateFromCloud();
+                ensureStandardStandings();
+                populateUserDropdowns();
+                renderAll();
+            } else {
+                console.error('☁️ Supabase SDK failed to load after retry. Cloud sync unavailable.');
+            }
+        }, 2000);
+    }
 }
 
 function ensureStandardStandings() {
@@ -285,8 +307,9 @@ function loadStateFromStorage() {
 }
 
 async function loadStateFromCloud() {
+    const db = getDb();
     if (!db) {
-        console.warn('Supabase SDK not loaded yet. Skipping cloud sync.');
+        console.warn('☁️ Supabase SDK not available — skipping cloud sync.');
         return;
     }
 
@@ -299,6 +322,7 @@ async function loadStateFromCloud() {
         if (subsError) throw subsError;
 
         if (subsData && Array.isArray(subsData)) {
+            console.log(`☁️ Loaded ${subsData.length} submission(s) from Supabase`);
             subsData.forEach(row => {
                 const sub = row.data;
                 if (sub && sub.id && sub.id !== 'actuals' && sub.id !== 'draft') {
@@ -315,7 +339,7 @@ async function loadStateFromCloud() {
             localStorage.setItem('wc-submissions', JSON.stringify(subs));
         }
     } catch (err) {
-        console.warn('Cloud sync - submissions fetch failed:', err);
+        console.warn('☁️ Cloud sync - submissions fetch failed:', err);
     }
 
     try {
@@ -347,19 +371,21 @@ async function loadStateFromCloud() {
             }));
         }
     } catch (err) {
-        console.warn('Cloud sync - official results fetch failed:', err);
+        console.warn('☁️ Cloud sync - official results fetch failed:', err);
     }
 }
 
 async function saveStateToCloud() {
+    const db = getDb();
     if (!db) {
-        console.warn('☁️ Supabase client not initialized — skipping cloud sync');
-        return;
+        console.warn('☁️ Supabase client not available — skipping cloud sync');
+        return false;
     }
 
     try {
         // 1. Save participant submissions
         let syncCount = 0;
+        let lastError = null;
         for (const username in STATE.participants) {
             if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
                 const participant = STATE.participants[username];
@@ -371,6 +397,7 @@ async function saveStateToCloud() {
                     
                 if (error) {
                     console.error(`❌ Failed to sync submission for ${username}:`, error);
+                    lastError = error;
                 } else {
                     syncCount++;
                 }
@@ -390,9 +417,15 @@ async function saveStateToCloud() {
             .from('official_results')
             .upsert({ id: 'current', data: official });
             
-        if (error) console.error('❌ Failed to sync official results:', error);
+        if (error) {
+            console.error('❌ Failed to sync official results:', error);
+            lastError = error;
+        }
+
+        return !lastError;
     } catch (err) {
         console.error('❌ Failed to sync to cloud:', err);
+        return false;
     }
 }
 
@@ -1739,7 +1772,7 @@ function setupOnboarding() {
 
     // 5. Navigation - Final Submit Button
     if (submitBtn) {
-        submitBtn.addEventListener('click', (e) => {
+        submitBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             const draft = STATE.participants.draft;
             
@@ -1768,7 +1801,12 @@ function setupOnboarding() {
 
             // Reset guest draft state
             resetDraft();
+
+            // Save to localStorage immediately
             saveStateToStorage();
+
+            // Explicitly await cloud sync so we know it succeeded
+            const cloudSuccess = await saveStateToCloud();
 
             // Close modal overlay
             modal.classList.remove('active');
@@ -1781,7 +1819,11 @@ function setupOnboarding() {
             updateSubmitButtonState();
             renderAll();
 
-            alert(`🎉 Success! Your predictions are submitted under name "${newSubmission.name}" and locked forever.`);
+            if (cloudSuccess) {
+                alert(`🎉 Success! Your predictions under "${newSubmission.name}" are submitted and synced to the cloud!`);
+            } else {
+                alert(`✅ Your predictions under "${newSubmission.name}" are saved locally!\n\n⚠️ Cloud sync may have failed — your picks might not appear on other devices. Try refreshing the page.`);
+            }
 
             // Navigate visitor to leaderboard tab
             const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
