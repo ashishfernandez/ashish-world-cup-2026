@@ -796,6 +796,17 @@ tr:nth-child(3) .rank-badge {
     border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
+.badge-medal-tbd {
+    background-color: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    font-weight: 700;
+}
+
+.leaderboard-table td .badge {
+    white-space: nowrap;
+}
+
 .badge-warning {
     background-color: rgba(245, 158, 11, 0.15);
     color: #fde047;

@@ -157,6 +157,31 @@ function setWizardReviewAward(el, team, hasPick) {
     }
 }
 
+/** Champion, silver (final loser), and bronze (3rd-place match winner) from bracket picks */
+function getPredictedMedalists(p) {
+    const champCode = p.champ || p.bracketPicks[32] || '';
+    const homeCode32 = getKnockoutParticipant(p, 32, 'home');
+    const awayCode32 = getKnockoutParticipant(p, 32, 'away');
+    let silverCode = '';
+    if (champCode && homeCode32 && awayCode32) {
+        silverCode = champCode === homeCode32 ? awayCode32 : homeCode32;
+    }
+    const bronzeCode = p.bracketPicks[31] || '';
+    return {
+        champ: getTeamByCode(champCode),
+        silver: getTeamByCode(silverCode),
+        bronze: getTeamByCode(bronzeCode)
+    };
+}
+
+function leaderboardPredictionBadge(team) {
+    const t = team || getTeamByCode('');
+    if (!t.code || isTbdLabel(t.name)) {
+        return '<span class="badge badge-medal-tbd">TBD</span>';
+    }
+    return `<span class="badge badge-info">${t.flag} ${t.name}</span>`;
+}
+
 // 2. Bracket Matches Setup Schema (Matches 1-32)
 // This mirrors the official World Cup 2026 Knockout Path mapping
 const KNOCKOUTS_SCHEMA = {
@@ -977,11 +1002,14 @@ function calculateParticipantScores() {
         }
 
         const totalScore = groupPts + koPts;
+        const medalists = getPredictedMedalists(p);
         scoredList.push({
             id: username,
             name: p.name,
             avatar: p.avatar,
-            champ: getTeamByCode(p.champ),
+            champ: medalists.champ,
+            silver: medalists.silver,
+            bronze: medalists.bronze,
             groupPts,
             koPts,
             totalScore
@@ -1059,7 +1087,7 @@ function renderRankingsTable(scores) {
     if (scores.length === 0) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td colspan="8" class="text-center" style="padding: 4rem 1rem; color: var(--text-dark);">
+            <td colspan="10" class="text-center" style="padding: 4rem 1rem; color: var(--text-dark);">
                 <div style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.6; color: var(--accent-gold);">
                     <i class="fa-solid fa-users-slash"></i>
                 </div>
@@ -1093,9 +1121,9 @@ function renderRankingsTable(scores) {
                     </div>
                 </div>
             </td>
-            <td>
-                <span class="badge badge-info">${player.champ.flag} ${player.champ.name}</span>
-            </td>
+            <td>${leaderboardPredictionBadge(player.champ)}</td>
+            <td>${leaderboardPredictionBadge(player.silver)}</td>
+            <td>${leaderboardPredictionBadge(player.bronze)}</td>
             <td class="text-center font-heading" style="${!isGroupScoringActive() ? 'opacity: 0.55;' : ''}">${player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>
             <td class="text-center font-heading">${player.koPts} <span style="font-size:0.75rem; color:var(--text-dark)">/840</span></td>
             <td class="text-right points-emphasis">${player.totalScore} Pts</td>
