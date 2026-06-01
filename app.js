@@ -1124,7 +1124,9 @@ function renderRankingsTable(scores) {
             <td>${leaderboardPredictionBadge(player.champ)}</td>
             <td>${leaderboardPredictionBadge(player.silver)}</td>
             <td>${leaderboardPredictionBadge(player.bronze)}</td>
-            <td class="text-center font-heading" style="${!isGroupScoringActive() ? 'opacity: 0.55;' : ''}">${player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>
+            <td class="text-center font-heading">${!isGroupScoringActive()
+                ? `<strong class="group-pts-inactive-zero">${player.groupPts}</strong>`
+                : player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>
             <td class="text-center font-heading">${player.koPts} <span style="font-size:0.75rem; color:var(--text-dark)">/840</span></td>
             <td class="text-right points-emphasis">${player.totalScore} Pts</td>
         `;

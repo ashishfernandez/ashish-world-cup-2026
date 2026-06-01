@@ -807,6 +807,11 @@ tr:nth-child(3) .rank-badge {
     white-space: nowrap;
 }
 
+.leaderboard-table .group-pts-inactive-zero {
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
 .badge-warning {
     background-color: rgba(245, 158, 11, 0.15);
     color: #fde047;
