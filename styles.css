@@ -973,6 +973,12 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     white-space: nowrap;
 }
 
+.wizard-bracket-scroll-area .team-name-text.team-tbd,
+.wizard-step-panel .team-tbd {
+    max-width: none;
+    white-space: normal;
+}
+
 /* Unfilled bracket slots — prominent red TBD */
 .team-tbd,
 .team-name-text.team-tbd {

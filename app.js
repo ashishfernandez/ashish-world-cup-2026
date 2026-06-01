@@ -118,7 +118,9 @@ function isTbdLabel(text) {
     return String(text).trim().toUpperCase() === 'TBD';
 }
 
-/** Bracket / wizard: red prominent TBD when slot is unfilled */
+const WIZARD_UNPICKED_LABEL = 'Please choose';
+
+/** Bracket sheet: red prominent TBD when slot is unfilled */
 function teamNameSpanHtml(name) {
     const label = name || 'TBD';
     if (isTbdLabel(label)) {
@@ -131,10 +133,23 @@ function teamNameSpanHtml(name) {
     return `<span class="team-name-text">${safe}</span>`;
 }
 
+/** Submit picks wizard only: same styling, different copy */
+function wizardTeamNameSpanHtml(name) {
+    const label = name || 'TBD';
+    if (isTbdLabel(label)) {
+        return `<span class="team-name-text team-tbd">${WIZARD_UNPICKED_LABEL}</span>`;
+    }
+    const safe = String(label)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    return `<span class="team-name-text">${safe}</span>`;
+}
+
 function setWizardReviewAward(el, team, hasPick) {
     if (!el) return;
     if (!hasPick || isTbdLabel(team?.name)) {
-        el.innerHTML = '<span class="team-tbd">TBD</span>';
+        el.innerHTML = `<span class="team-tbd">${WIZARD_UNPICKED_LABEL}</span>`;
         el.classList.add('has-tbd');
     } else {
         el.textContent = `${team.flag} ${team.name}`.trim();
@@ -2383,7 +2398,7 @@ function renderWizardBracket() {
                 <div class="champ-title">CHAMPION</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${champTeam.flag}</span>
-                    ${teamNameSpanHtml(champTeam.name)}
+                    ${wizardTeamNameSpanHtml(champTeam.name)}
                 </div>
             `;
             col.appendChild(champCard);
@@ -2404,7 +2419,7 @@ function renderWizardBracket() {
                 <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${silverTeam.flag}</span>
-                    ${teamNameSpanHtml(silverTeam.name)}
+                    ${wizardTeamNameSpanHtml(silverTeam.name)}
                 </div>
             `;
             col.appendChild(silverCard);
@@ -2420,7 +2435,7 @@ function renderWizardBracket() {
                 <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
                 <div class="champ-team-spot">
                     <span class="team-flag">${bronzeTeam.flag}</span>
-                    ${teamNameSpanHtml(bronzeTeam.name)}
+                    ${wizardTeamNameSpanHtml(bronzeTeam.name)}
                 </div>
             `;
             col.appendChild(bronzeCard);
@@ -2460,14 +2475,14 @@ function renderWizardBracket() {
                     <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="cursor: pointer;">
                         <div class="team-slot-info">
                             <span class="team-flag">${homeTeam.flag}</span>
-                            ${teamNameSpanHtml(homeTeam.name)}
+                            ${wizardTeamNameSpanHtml(homeTeam.name)}
                         </div>
                         <span class="team-score"></span>
                     </div>
                     <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="cursor: pointer;">
                         <div class="team-slot-info">
                             <span class="team-flag">${awayTeam.flag}</span>
-                            ${teamNameSpanHtml(awayTeam.name)}
+                            ${wizardTeamNameSpanHtml(awayTeam.name)}
                         </div>
                         <span class="team-score"></span>
                     </div>
@@ -2791,7 +2806,7 @@ function renderWizardThirds() {
             slotEl.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <span style="font-size: 0.78rem; font-weight: 800; color: var(--text-dark); border: 1px dashed var(--card-border); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
-                    <span class="team-tbd" style="font-size: 0.82rem;">Slot ${i + 1} — TBD</span>
+                    <span class="team-tbd" style="font-size: 0.82rem;">Slot ${i + 1} — ${WIZARD_UNPICKED_LABEL}</span>
                 </div>
                 <span style="font-size: 0.72rem; color: var(--text-dark);">Click team to fill</span>
             `;
