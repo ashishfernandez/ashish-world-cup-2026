@@ -1804,6 +1804,414 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     .admin-grid {
         grid-template-columns: 1fr;
     }
+
+    .bracket-controls,
+    .groups-header-bar {
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+    }
+
+    .bracket-legend {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .description-alert {
+        max-width: 100%;
+    }
+
+    .dashboard-header {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-title-section h2 {
+        font-size: 1.65rem;
+    }
+
+    .premium-card {
+        padding: 1.25rem;
+    }
+}
+
+/* Phones: bottom nav, FAB submit, tightened layouts */
+@media (max-width: 768px) {
+    body {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .app-container {
+        padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+    }
+
+    .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        height: auto;
+        width: 100%;
+        padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
+        border-right: none;
+        border-top: 1px solid var(--card-border);
+        border-bottom: none;
+        z-index: 300;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .logo-area,
+    .pool-meta-card {
+        display: none;
+    }
+
+    .nav-menu {
+        flex-direction: row;
+        flex-grow: 0;
+        justify-content: space-between;
+        gap: 0.15rem;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 0 0.15rem;
+    }
+
+    .nav-menu::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-item {
+        flex: 1 0 auto;
+        min-width: 3.6rem;
+        max-width: 5.5rem;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 0.45rem 0.35rem;
+        font-size: 0.62rem;
+        text-align: center;
+        white-space: normal;
+        line-height: 1.15;
+    }
+
+    .nav-item i {
+        font-size: 1.05rem;
+        width: auto;
+    }
+
+    .nav-item span {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .admin-nav {
+        border-top: none;
+        margin-top: 0;
+        padding-top: 0.45rem;
+    }
+
+    #sidebar-submit-btn {
+        position: fixed;
+        right: 1rem;
+        bottom: calc(4.5rem + env(safe-area-inset-bottom));
+        z-index: 290;
+        width: 3.35rem !important;
+        height: 3.35rem !important;
+        min-width: 3.35rem;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-radius: 50%;
+        justify-content: center;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+    }
+
+    #sidebar-submit-btn .btn-label {
+        display: none;
+    }
+
+    #sidebar-submit-btn i {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        max-width: 100vw;
+        padding: 1rem 1rem 0.5rem;
+        overflow-x: hidden;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .theme-toggle-btn .btn-label {
+        display: none;
+    }
+
+    .theme-toggle-btn {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+        padding: 0.5rem;
+        justify-content: center;
+    }
+
+    .header-title-section h2 {
+        font-size: 1.35rem;
+        line-height: 1.2;
+    }
+
+    .header-title-section p {
+        font-size: 0.82rem;
+        line-height: 1.45;
+    }
+
+    .premium-card {
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+    }
+
+    .table-responsive {
+        margin: 0 -0.25rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .leaderboard-table {
+        min-width: 640px;
+        font-size: 0.82rem;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 0.65rem 0.5rem;
+    }
+
+    .badge {
+        font-size: 0.68rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .team-name-text {
+        max-width: 88px;
+    }
+
+    .bracket-controls {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .view-selector-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .view-selector-container label {
+        font-size: 0.85rem;
+    }
+
+    .custom-select {
+        width: 100%;
+    }
+
+    #bracket-status-badge {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .btn-submit-picks {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .bracket-legend {
+        justify-content: flex-start;
+        font-size: 0.72rem;
+    }
+
+    #tab-bracket .bracket-scroll-container {
+        margin: 0 -0.25rem;
+        width: calc(100% + 0.5rem);
+    }
+
+    .groups-header-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+        gap: 0.75rem;
+    }
+
+    .group-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .group-actions .custom-select {
+        width: 100%;
+    }
+
+    .groups-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    #tab-points .premium-card {
+        padding: 1rem;
+    }
+
+    #tab-points .points-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .group-scoring-control-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .group-scoring-toggle {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .scoring-toggle-btn {
+        flex: 1;
+    }
+
+    .admin-matches-scroll,
+    #admin-user-list-container {
+        max-height: 50vh;
+    }
+
+    .onboarding-overlay {
+        padding: 0.75rem;
+        align-items: flex-end;
+    }
+
+    .wizard-card {
+        max-width: 100%;
+        width: 100%;
+        height: min(92dvh, 100%);
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        padding: 1rem 1rem 0.75rem;
+        border-radius: 0;
+    }
+
+    .wizard-card.step-1-active,
+    .wizard-card.step-5-active {
+        min-height: auto;
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .close-wizard-btn {
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+
+    .wizard-header {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .wizard-progress-tracker {
+        min-width: max-content;
+    }
+
+    .step-label {
+        display: none;
+    }
+
+    .progress-step.active .step-label {
+        display: inline;
+        font-size: 0.7rem;
+    }
+
+    .wizard-footer {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .wizard-footer .btn {
+        flex: 1 1 auto;
+        min-width: calc(50% - 0.5rem);
+        justify-content: center;
+    }
+
+    .champ-column {
+        width: 200px;
+    }
+
+    .champ-card {
+        width: 200px !important;
+        min-width: 200px !important;
+        max-width: 200px !important;
+        height: 200px !important;
+        min-height: 200px !important;
+        max-height: 200px !important;
+        padding: 1.25rem 0.75rem;
+    }
+
+    .round-column {
+        width: 220px;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .header-title-section h2 {
+        font-size: 1.2rem;
+    }
+
+    .nav-item {
+        min-width: 3.2rem;
+        font-size: 0.58rem;
+        padding: 0.4rem 0.2rem;
+    }
+
+    .leaderboard-table {
+        min-width: 580px;
+    }
+
+    .match-card {
+        margin: 0.85rem 0;
+    }
+
+    .team-name-text {
+        max-width: 72px;
+        font-size: 0.78rem;
+    }
+
+    .wizard-footer .btn {
+        min-width: 100%;
+    }
 }
 
 /* Onboarding Journey Styles */

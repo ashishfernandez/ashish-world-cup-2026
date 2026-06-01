@@ -831,6 +831,11 @@ function setupTabListeners() {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
 
+            const activeNav = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
+            if (activeNav && window.matchMedia('(max-width: 768px)').matches) {
+                activeNav.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+
             // Dynamic header labels
             const titleMap = {
                 leaderboard: { title: "Leaderboard Standings", desc: "Track scores, predictions, and real-time rank movements among friends." },
