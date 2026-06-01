@@ -2791,7 +2791,7 @@ function renderWizardThirds() {
             slotEl.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <span style="font-size: 0.78rem; font-weight: 800; color: var(--text-dark); border: 1px dashed var(--card-border); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;">${i + 1}</span>
-                    <span class="team-tbd" style="font-size: 0.82rem; font-style: italic;">Slot ${i + 1} — TBD</span>
+                    <span class="team-tbd" style="font-size: 0.82rem;">Slot ${i + 1} — TBD</span>
                 </div>
                 <span style="font-size: 0.72rem; color: var(--text-dark);">Click team to fill</span>
             `;

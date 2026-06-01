@@ -990,7 +990,7 @@ body:not(.dark-theme) .team-name-text.team-tbd {
 
 .team-slot .team-tbd,
 .champ-team-spot .team-tbd {
-    font-style: italic;
+    font-style: normal;
 }
 
 .award-value .team-tbd {
