@@ -1587,7 +1587,6 @@ function renderGroups() {
         groupCard.innerHTML = `
             <div class="group-title">
                 <span>Group ${groupName}</span>
-                <span style="font-size: 0.75rem; color: var(--primary)">Standings</span>
             </div>
             <div class="group-team-list">
                 ${teamRowsHtml}
@@ -2398,7 +2397,6 @@ function renderWizardGroups() {
         groupCard.innerHTML = `
             <div class="group-title">
                 <span>Group ${groupName}</span>
-                <span style="font-size: 0.75rem; color: var(--primary)">Standings</span>
             </div>
             <div class="group-team-list">
                 ${teamRowsHtml}
