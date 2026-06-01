@@ -55,9 +55,8 @@ body.dark-theme {
     /* Functional Colors */
     --primary-glow: rgba(255, 255, 255, 0.15);
     --accent-emerald-glow: rgba(16, 185, 129, 0.2);
-    --bracket-pick-bg: rgba(16, 185, 129, 0.24);
-    --bracket-pick-border: rgba(52, 211, 153, 0.5);
-    --bracket-pick-text: #d1fae5;
+    --bracket-pick-bg: rgba(16, 185, 129, 0.1);
+    --bracket-pick-text: #b8d9ce;
     --accent-gold: #f59e0b;
     --accent-gold-glow: rgba(245, 158, 11, 0.2);
     
@@ -1094,8 +1093,8 @@ body:not(.dark-theme) .team-name-text.team-tbd {
 .team-slot.predicted-winner {
     background-color: var(--bracket-pick-bg);
     color: var(--bracket-pick-text);
-    border: 1px solid var(--bracket-pick-border);
-    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.06);
+    border: none;
+    box-shadow: none;
 }
 
 .team-slot.predicted-winner .team-score {
@@ -1117,8 +1116,8 @@ body:not(.dark-theme) .team-name-text.team-tbd {
 .match-card.correct-prediction .team-slot.predicted-winner {
     background-color: var(--bracket-pick-bg);
     color: var(--bracket-pick-text);
-    border-color: var(--bracket-pick-border);
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    border: none;
+    box-shadow: none;
 }
 
 .match-card.correct-prediction .team-slot.predicted-winner .team-score {
