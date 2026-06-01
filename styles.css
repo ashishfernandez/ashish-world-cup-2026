@@ -510,6 +510,40 @@ body.dark-theme .points-title {
     color: #ffffff !important;
 }
 
+#tab-points .points-section-heading {
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.65rem;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-bottom: 1px solid var(--card-border);
+}
+
+#tab-points .points-section-list {
+    padding-left: 1.25rem;
+    margin: 0;
+    line-height: 1.6;
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    list-style-type: square;
+}
+
+#tab-points .points-anypath-heading {
+    margin: 0 0 0.65rem 0;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+#tab-points .points-anypath-card p {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

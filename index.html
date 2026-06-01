@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260601q">
+    <link rel="stylesheet" href="styles.css?v=20260601r">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -195,11 +195,9 @@
                         
                         <div class="points-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                             <!-- Group Stage Points Card -->
-                            <div class="premium-card" style="padding: 1.5rem; background: rgba(59, 130, 246, 0.03); border: 1px solid var(--card-border);">
-                                <h4 class="points-title" style="margin-top: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
-                                    <i class="fa-solid fa-table-cells-large" style="color: var(--primary);"></i> Group Stages
-                                </h4>
-                                <ul style="padding-left: 1.25rem; margin-bottom: 0; line-height: 1.6; font-size: 0.92rem; color: var(--text-muted); list-style-type: square;">
+                            <div class="premium-card points-section-card" style="padding: 1.5rem; background: rgba(59, 130, 246, 0.03); border: 1px solid var(--card-border);">
+                                <h4 class="points-title points-section-heading"><i class="fa-solid fa-table-cells-large" style="color: var(--primary);"></i> Group Stages</h4>
+                                <ul class="points-section-list">
                                     <li style="margin-bottom: 0.5rem;">Correct team to advance to Knockouts: <strong style="color: var(--text-primary);">5 Points</strong> each.</li>
                                     <li style="margin-bottom: 0.5rem;">Maximum possible points: <strong style="color: var(--accent-gold);">160 Points</strong> (32 advancing teams).</li>
                                     <li>Advancing teams include the top 2 from each of Groups A–L, plus the 8 best third-place finishers.</li>
@@ -207,11 +205,9 @@
                             </div>
                             
                             <!-- Knockout Points Card -->
-                            <div class="premium-card" style="padding: 1.5rem; background: rgba(16, 185, 129, 0.03); border: 1px solid var(--card-border);">
-                                <h4 class="points-title" style="margin-top: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
-                                    <i class="fa-solid fa-diagram-project" style="color: var(--accent-emerald);"></i> Knockout Matches
-                                </h4>
-                                <ul style="padding-left: 1.25rem; margin-bottom: 0; line-height: 1.6; font-size: 0.92rem; color: var(--text-muted); list-style-type: square;">
+                            <div class="premium-card points-section-card" style="padding: 1.5rem; background: rgba(59, 130, 246, 0.03); border: 1px solid var(--card-border);">
+                                <h4 class="points-title points-section-heading"><i class="fa-solid fa-diagram-project" style="color: var(--accent-emerald);"></i> Knockout Matches</h4>
+                                <ul class="points-section-list">
                                     <li style="margin-bottom: 0.4rem;">Round of 32 Winner (reaches Round of 16): <strong style="color: var(--text-primary);">10 Points</strong> (Max: 160 pts).</li>
                                     <li style="margin-bottom: 0.4rem;">Round of 16 Winner (reaches Quarters): <strong style="color: var(--text-primary);">20 Points</strong> (Max: 160 pts).</li>
                                     <li style="margin-bottom: 0.4rem;">Quarters Winner (reaches Semis): <strong style="color: var(--text-primary);">40 Points</strong> (Max: 160 pts).</li>
@@ -223,8 +219,8 @@
                         </div>
 
                         <!-- Any Path Rule Alert -->
-                        <div class="premium-card" style="margin-top: 1.5rem; padding: 1.25rem; border-left: 4px solid var(--primary); background: rgba(59, 130, 246, 0.05); border-top: 1px solid var(--card-border); border-right: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border);">
-                            <h4 class="points-title" style="margin: 0 0 0.5rem 0; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <div class="premium-card points-anypath-card" style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(59, 130, 246, 0.03); border: 1px solid var(--card-border);">
+                            <h4 class="points-title points-anypath-heading">
                                 <i class="fa-solid fa-circle-question" style="color: var(--primary);"></i> The "Any-Path" Progressive Rule
                             </h4>
                             <p style="margin: 0; font-size: 0.88rem; line-height: 1.6; color: var(--text-muted);">
@@ -483,6 +479,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260601q"></script>
+    <script src="app.js?v=20260601r"></script>
 </body>
 </html>
