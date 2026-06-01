@@ -20,6 +20,7 @@
     --accent-emerald-glow: rgba(16, 185, 129, 0.1);
     --bracket-pick-bg: rgba(16, 185, 129, 0.16);
     --bracket-pick-text: #065f46;
+    --bracket-line-color: rgba(100, 116, 139, 0.5);
     --accent-gold: #b45309; /* Visible gold in light mode */
     --accent-gold-glow: rgba(180, 83, 9, 0.1);
     --accent-crimson: #ef4444;
@@ -56,6 +57,7 @@ body.dark-theme {
     --accent-emerald-glow: rgba(16, 185, 129, 0.2);
     --bracket-pick-bg: rgba(16, 185, 129, 0.1);
     --bracket-pick-text: #b8d9ce;
+    --bracket-line-color: rgba(148, 163, 184, 0.55);
     --accent-gold: #f59e0b;
     --accent-gold-glow: rgba(245, 158, 11, 0.2);
     
@@ -954,7 +956,7 @@ tr:first-child .points-emphasis {
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: visible;
     padding-bottom: 2rem;
     cursor: grab;
     user-select: none;
@@ -1006,6 +1008,7 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     justify-content: space-around;
     width: 250px;
     position: relative;
+    overflow: visible;
 }
 
 .round-column-title {
@@ -1031,6 +1034,7 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     border-radius: var(--radius-md);
     padding: 0.75rem;
     position: relative;
+    overflow: visible;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     margin: 1.5rem 0;
     transition: var(--transition-smooth);
@@ -2295,8 +2299,9 @@ body.dark-theme .nav-item.active i {
     right: -1.75rem;
     width: 1.75rem;
     height: 2px;
-    background-color: var(--card-border);
-    z-index: -1;
+    background-color: var(--bracket-line-color);
+    z-index: 2;
+    pointer-events: none;
 }
 
 .round-column:not(:first-of-type) .match-card::before {
@@ -2306,8 +2311,9 @@ body.dark-theme .nav-item.active i {
     left: -1.75rem;
     width: 1.75rem;
     height: 2px;
-    background-color: var(--card-border);
-    z-index: -1;
+    background-color: var(--bracket-line-color);
+    z-index: 2;
+    pointer-events: none;
 }
 
 .champ-card::before {
@@ -2317,56 +2323,23 @@ body.dark-theme .nav-item.active i {
     left: -1.75rem;
     width: 1.75rem;
     height: 2px;
-    background-color: var(--card-border);
-    z-index: -1;
+    background-color: var(--bracket-line-color);
+    z-index: 2;
+    pointer-events: none;
 }
 
-/* Bracket Vertical Connector Lines */
+/* Bracket vertical lines between paired matches (height set in app.js) */
 .vertical-connector {
     position: absolute;
     top: 50%;
     right: -1.75rem;
     width: 2px;
-    background-color: var(--card-border);
-    z-index: -1;
+    background-color: var(--bracket-line-color);
+    z-index: 2;
+    pointer-events: none;
 }
 
-/* Column 1 (R32) - vertical connector goes down for upper, up for lower */
-.round-column:nth-of-type(1) .upper-pair-match .vertical-connector {
-    height: 48px;
-}
-.round-column:nth-of-type(1) .lower-pair-match .vertical-connector {
-    height: 48px;
-    top: auto;
-    bottom: 50%;
-}
-
-/* Column 2 (R16) */
-.round-column:nth-of-type(2) .upper-pair-match .vertical-connector {
-    height: 104px;
-}
-.round-column:nth-of-type(2) .lower-pair-match .vertical-connector {
-    height: 104px;
-    top: auto;
-    bottom: 50%;
-}
-
-/* Column 3 (QF) */
-.round-column:nth-of-type(3) .upper-pair-match .vertical-connector {
-    height: 226px;
-}
-.round-column:nth-of-type(3) .lower-pair-match .vertical-connector {
-    height: 226px;
-    top: auto;
-    bottom: 50%;
-}
-
-/* Column 4 (SF) */
-.round-column:nth-of-type(4) .upper-pair-match .vertical-connector {
-    height: 450px;
-}
-.round-column:nth-of-type(4) .lower-pair-match .vertical-connector {
-    height: 450px;
+.round-column .lower-pair-match .vertical-connector {
     top: auto;
     bottom: 50%;
 }

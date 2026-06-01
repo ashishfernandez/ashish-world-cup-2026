@@ -268,6 +268,7 @@ async function init() {
     setupAdminGroupScoringToggle();
     setupThemeToggle();
     setupDragScroll();
+    setupBracketConnectorSync();
     
     // Local-only: draft, official actuals cache, theme — NOT other people's picks
     loadStateFromStorage();
@@ -1153,6 +1154,56 @@ function renderRankingsTable(scores) {
     });
 }
 
+let _bracketConnectorRaf = null;
+
+function appendBracketVerticalConnector(matchCard, roundKey, matchIndex) {
+    if (roundKey === 'F') return;
+    matchCard.classList.add(matchIndex % 2 === 0 ? 'upper-pair-match' : 'lower-pair-match');
+    const connector = document.createElement('div');
+    connector.className = 'vertical-connector';
+    connector.setAttribute('aria-hidden', 'true');
+    matchCard.appendChild(connector);
+}
+
+function syncBracketVerticalConnectors(canvasEl) {
+    if (!canvasEl) return;
+    canvasEl.querySelectorAll('.round-column').forEach((col) => {
+        col.querySelectorAll('.match-card.upper-pair-match').forEach((upper) => {
+            const lower = upper.nextElementSibling;
+            if (!lower?.classList.contains('lower-pair-match')) return;
+
+            const upperConn = upper.querySelector('.vertical-connector');
+            const lowerConn = lower.querySelector('.vertical-connector');
+            if (!upperConn || !lowerConn) return;
+
+            const upperMid = upper.offsetTop + upper.offsetHeight / 2;
+            const lowerMid = lower.offsetTop + lower.offsetHeight / 2;
+            const junction = (upperMid + lowerMid) / 2;
+
+            upperConn.style.height = `${Math.max(1, junction - upperMid)}px`;
+            upperConn.style.top = '50%';
+            upperConn.style.bottom = 'auto';
+
+            lowerConn.style.height = `${Math.max(1, lowerMid - junction)}px`;
+            lowerConn.style.top = 'auto';
+            lowerConn.style.bottom = '50%';
+        });
+    });
+}
+
+function scheduleBracketConnectorSync() {
+    if (_bracketConnectorRaf) cancelAnimationFrame(_bracketConnectorRaf);
+    _bracketConnectorRaf = requestAnimationFrame(() => {
+        _bracketConnectorRaf = null;
+        syncBracketVerticalConnectors(document.getElementById('bracket-tree'));
+        syncBracketVerticalConnectors(document.getElementById('wizard-bracket-tree'));
+    });
+}
+
+function setupBracketConnectorSync() {
+    window.addEventListener('resize', scheduleBracketConnectorSync);
+}
+
 // 9. Render Interactive Tournament Bracket Sheet
 function renderBracket() {
     const canvas = document.getElementById('bracket-tree');
@@ -1288,20 +1339,6 @@ function renderBracket() {
                 const matchCard = document.createElement('div');
                 matchCard.className = 'match-card';
 
-                // Add classes for vertical connections
-                if (round.key !== 'F') {
-                    if (idx % 2 === 0) {
-                        matchCard.classList.add('upper-pair-match');
-                    } else {
-                        matchCard.classList.add('lower-pair-match');
-                    }
-                    
-                    // Append the vertical connector line element
-                    const connector = document.createElement('div');
-                    connector.className = 'vertical-connector';
-                    matchCard.appendChild(connector);
-                }
-
                 // Determine actual team codes playing this slot
                 const homeCode = getKnockoutParticipant(p, matchId, 'home');
                 const awayCode = getKnockoutParticipant(p, matchId, 'away');
@@ -1366,12 +1403,15 @@ function renderBracket() {
                     });
                 }
 
+                appendBracketVerticalConnector(matchCard, round.key, idx);
                 col.appendChild(matchCard);
             });
         }
 
         canvas.appendChild(col);
     });
+
+    scheduleBracketConnectorSync();
 }
 
 // Logic to pull which team code occupies a home/away knockout slot based on user's parent predictions
@@ -2441,20 +2481,6 @@ function renderWizardBracket() {
                 const matchCard = document.createElement('div');
                 matchCard.className = 'match-card';
 
-                // Add classes for vertical connections
-                if (round.key !== 'F') {
-                    if (idx % 2 === 0) {
-                        matchCard.classList.add('upper-pair-match');
-                    } else {
-                        matchCard.classList.add('lower-pair-match');
-                    }
-                    
-                    // Append the vertical connector line element
-                    const connector = document.createElement('div');
-                    connector.className = 'vertical-connector';
-                    matchCard.appendChild(connector);
-                }
-
                 const homeCode = getKnockoutParticipant(p, matchId, 'home');
                 const awayCode = getKnockoutParticipant(p, matchId, 'away');
 
@@ -2501,12 +2527,15 @@ function renderWizardBracket() {
                     });
                 });
 
+                appendBracketVerticalConnector(matchCard, round.key, idx);
                 col.appendChild(matchCard);
             });
         }
 
         canvas.appendChild(col);
     });
+
+    scheduleBracketConnectorSync();
     
     // Reactively update Wizard Next button lit/disabled state on pick selection changes
     updateWizardNextButtonState();
