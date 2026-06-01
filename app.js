@@ -2638,65 +2638,88 @@ function getPredictedAdvancers(username) {
 function setupDragScroll() {
     const mainBracketContainer = document.querySelector('#tab-bracket .bracket-scroll-container');
     const wizardBracketContainer = document.querySelector('.wizard-bracket-scroll-area .bracket-scroll-container');
-    
-    // Main bracket tab is read-only, allow dragging everywhere (including team slots)
-    makeContainerDraggable(mainBracketContainer, false);
-    // Wizard bracket selection is interactive, prevent dragging on team slots
+
+    // Bracket Sheet: drag background; don't steal clicks from team pick rows
+    makeContainerDraggable(mainBracketContainer, true);
     makeContainerDraggable(wizardBracketContainer, true);
 }
 
-function makeContainerDraggable(container, isInteractive = false) {
-    if (!container) return;
-    
+function shouldIgnoreBracketDragStart(e, ignoreInteractiveTargets) {
+    if (e.target.closest('.sort-btn') || e.target.closest('button') || e.target.closest('select')) {
+        return true;
+    }
+    if (ignoreInteractiveTargets && e.target.closest('.team-slot')) {
+        return true;
+    }
+    return false;
+}
+
+function makeContainerDraggable(container, ignoreInteractiveTargets = false) {
+    if (!container || container.dataset.dragScrollBound === '1') return;
+    container.dataset.dragScrollBound = '1';
+
     let isDown = false;
-    let startX;
-    let scrollLeft;
+    let startX = 0;
+    let scrollLeft = 0;
     let hasMoved = false;
 
-    container.addEventListener('mousedown', (e) => {
-        // Prevent triggering scroll if clicking buttons, selects, or sort buttons
-        if (e.target.closest('.sort-btn') || e.target.closest('button') || e.target.closest('select')) {
-            return;
-        }
-        
+    const endDrag = () => {
+        isDown = false;
+        container.classList.remove('is-dragging');
+    };
+
+    const onPointerDown = (clientX, e) => {
+        if (shouldIgnoreBracketDragStart(e, ignoreInteractiveTargets)) return;
+
         isDown = true;
         hasMoved = false;
-        container.style.cursor = 'grabbing';
-        startX = e.pageX - container.offsetLeft;
+        startX = clientX;
         scrollLeft = container.scrollLeft;
-    });
+        container.classList.add('is-dragging');
+    };
 
-    container.addEventListener('mouseleave', () => {
-        isDown = false;
-        container.style.cursor = 'grab';
-    });
+    const onPointerMove = (clientX, e) => {
+        if (!isDown) return;
 
-    container.addEventListener('mouseup', () => {
-        isDown = false;
-        container.style.cursor = 'grab';
+        const walk = (clientX - startX) * 1.25;
+        if (Math.abs(walk) > 4) {
+            hasMoved = true;
+            e.preventDefault();
+            container.scrollLeft = scrollLeft - walk;
+        }
+    };
+
+    container.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        onPointerDown(e.pageX, e);
     });
 
     container.addEventListener('mousemove', (e) => {
-        if (!isDown) return;
-        
-        const x = e.pageX - container.offsetLeft;
-        const walk = (x - startX) * 1.5; // scrolling speed multiplier
-        
-        // Only treat as drag if moved by more than a 5px threshold
-        if (Math.abs(x - startX) > 5) {
-            hasMoved = true;
-            e.preventDefault(); // Prevent text selection/drag interference during actual movement
-            container.scrollLeft = scrollLeft - walk;
-        }
+        onPointerMove(e.pageX, e);
     });
 
-    // Intercept click events to prevent triggering action if it was a drag
+    container.addEventListener('mouseup', endDrag);
+    container.addEventListener('mouseleave', endDrag);
+
+    container.addEventListener('touchstart', (e) => {
+        if (!e.touches.length) return;
+        onPointerDown(e.touches[0].pageX, e);
+    }, { passive: false });
+
+    container.addEventListener('touchmove', (e) => {
+        if (!e.touches.length) return;
+        onPointerMove(e.touches[0].pageX, e);
+    }, { passive: false });
+
+    container.addEventListener('touchend', endDrag);
+    container.addEventListener('touchcancel', endDrag);
+
     container.addEventListener('click', (e) => {
         if (hasMoved) {
             e.preventDefault();
             e.stopPropagation();
         }
-    }, true); // Use capture phase to intercept click before child listeners
+    }, true);
 }
 
 // Render available and selected 3rd place teams inside predictions wizard
