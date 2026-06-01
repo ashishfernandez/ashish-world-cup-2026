@@ -1095,7 +1095,7 @@ function renderRankingsTable(scores) {
                     No Active Predictions Yet
                 </div>
                 <div style="font-size: 0.9rem; max-width: 440px; margin: 0 auto; line-height: 1.6; color: var(--text-dark);">
-                    Be the first to submit your predictions! Click the <strong>Submit Picks</strong> button to customize your profile and submit your predictions to the leaderboard.
+                    Be the first to submit your predictions! Use <strong>Submit Picks</strong> in the sidebar to customize your profile and submit your predictions to the leaderboard.
                 </div>
             </td>
         `;
@@ -1727,7 +1727,6 @@ function renderAdminSimulator() {
                         renderLeaderboard();
                         renderBracket();
                         renderAdminSimulator();
-                        updateSimStats();
                     });
                 });
 
@@ -1839,8 +1838,6 @@ function renderAdminSimulator() {
             `;
         }
     }
-
-    updateSimStats();
 
     // 2.5. Render Admin Top-8 3rd Place Editor
     const adminThirdsAvailable = document.getElementById('admin-thirds-available');
@@ -1986,18 +1983,11 @@ function renderAdminSimulator() {
     }
 }
 
-function updateSimStats() {
-    const results = STATE.officialResults;
-    const matchesSimulated = Object.keys(results.matches).length;
-    document.getElementById('sim-matches-played').innerText = `${matchesSimulated} / 32`;
-}
-
 function setupOnboarding() {
     const modal = document.getElementById('onboarding-modal');
     const nameInput = document.getElementById('visitor-name');
 
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
-    const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
     const submitPicksBtn = document.getElementById('btn-submit-picks');
     
     const closeBtn = document.getElementById('btn-close-wizard');
@@ -2022,7 +2012,6 @@ function setupOnboarding() {
     };
 
     if (sidebarBtn) sidebarBtn.addEventListener('click', openWizard);
-    if (leaderboardBtn) leaderboardBtn.addEventListener('click', openWizard);
     if (submitPicksBtn) submitPicksBtn.addEventListener('click', openWizard);
 
     // 2. Close Button Trigger
@@ -2526,21 +2515,17 @@ function renderWizardBracket() {
 function updateSubmitButtonState() {
     const submitPicksBtn = document.getElementById('btn-submit-picks');
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
-    const leaderboardBtn = document.getElementById('leaderboard-submit-btn');
 
     // Button always says "Submit Picks" since once submitted, it's locked forever.
     let labelText = 'Submit Picks';
     const iconHtml = '<i class="fa-solid fa-cloud-arrow-up"></i>';
 
-    // Sidebar and Leaderboard buttons are always fully active
-    [sidebarBtn, leaderboardBtn].forEach(btn => {
-        if (btn) {
-            btn.innerHTML = `${iconHtml} <span>${labelText}</span>`;
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.classList.add('glowing-btn');
-        }
-    });
+    if (sidebarBtn) {
+        sidebarBtn.innerHTML = `${iconHtml} <span>${labelText}</span>`;
+        sidebarBtn.disabled = false;
+        sidebarBtn.style.opacity = '1';
+        sidebarBtn.classList.add('glowing-btn');
+    }
 
     // Only show submit button inside Bracket Sheet tab when editing active draft
     if (submitPicksBtn) {

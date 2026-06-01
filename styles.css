@@ -18,6 +18,9 @@
     --primary-glow: rgba(59, 130, 246, 0.1);
     --accent-emerald: #10b981;
     --accent-emerald-glow: rgba(16, 185, 129, 0.1);
+    --bracket-pick-bg: rgba(16, 185, 129, 0.16);
+    --bracket-pick-border: rgba(5, 150, 105, 0.42);
+    --bracket-pick-text: #065f46;
     --accent-gold: #b45309; /* Visible gold in light mode */
     --accent-gold-glow: rgba(180, 83, 9, 0.1);
     --accent-crimson: #ef4444;
@@ -51,7 +54,10 @@ body.dark-theme {
     
     /* Functional Colors */
     --primary-glow: rgba(255, 255, 255, 0.15);
-    --accent-emerald-glow: rgba(255, 255, 255, 0.15);
+    --accent-emerald-glow: rgba(16, 185, 129, 0.2);
+    --bracket-pick-bg: rgba(16, 185, 129, 0.24);
+    --bracket-pick-border: rgba(52, 211, 153, 0.5);
+    --bracket-pick-text: #d1fae5;
     --accent-gold: #f59e0b;
     --accent-gold-glow: rgba(245, 158, 11, 0.2);
     
@@ -1086,13 +1092,19 @@ body:not(.dark-theme) .team-name-text.team-tbd {
 }
 
 .team-slot.predicted-winner {
-    background-color: var(--primary-glow);
-    color: var(--text-primary);
-    border: 1px solid rgba(59, 130, 246, 0.25);
+    background-color: var(--bracket-pick-bg);
+    color: var(--bracket-pick-text);
+    border: 1px solid var(--bracket-pick-border);
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.06);
 }
 
 .team-slot.predicted-winner .team-score {
-    color: var(--primary);
+    color: var(--accent-emerald);
+}
+
+.team-slot.predicted-winner:hover {
+    background-color: var(--bracket-pick-bg);
+    color: var(--bracket-pick-text);
 }
 
 /* Correct/Incorrect/Simulation Highlights */
@@ -1103,9 +1115,10 @@ body:not(.dark-theme) .team-name-text.team-tbd {
 }
 
 .match-card.correct-prediction .team-slot.predicted-winner {
-    background-color: var(--accent-emerald-glow);
-    color: #a7f3d0;
-    border-color: rgba(16, 185, 129, 0.3);
+    background-color: var(--bracket-pick-bg);
+    color: var(--bracket-pick-text);
+    border-color: var(--bracket-pick-border);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
 }
 
 .match-card.correct-prediction .team-slot.predicted-winner .team-score {
