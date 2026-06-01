@@ -269,63 +269,62 @@ function loadStateFromStorage() {
     }
 }
 
-const CLOUD_DB_BASE = 'https://kvdb.io/ashish_wc_2026_shared_pool_db_8x8zP5t7';
-
 async function loadStateFromCloud() {
+    if (typeof puter === 'undefined') {
+        console.warn('Puter SDK not loaded yet. Skipping cloud sync.');
+        return;
+    }
+
     try {
         // Fetch shared cloud submissions
-        const subsRes = await fetch(`${CLOUD_DB_BASE}/submissions`);
-        if (subsRes.ok) {
-            const cloudSubs = await subsRes.json();
-            if (Array.isArray(cloudSubs)) {
-                cloudSubs.forEach(sub => {
-                    if (sub.id && sub.id !== 'actuals' && sub.id !== 'draft') {
-                        STATE.participants[sub.id] = sub;
-                    }
-                });
-                // Cache immediately to localStorage
-                const subs = [];
-                for (const username in STATE.participants) {
-                    if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
-                        subs.push(STATE.participants[username]);
-                    }
+        const cloudSubs = await puter.kv.get('submissions');
+        if (cloudSubs && Array.isArray(cloudSubs)) {
+            cloudSubs.forEach(sub => {
+                if (sub.id && sub.id !== 'actuals' && sub.id !== 'draft') {
+                    STATE.participants[sub.id] = sub;
                 }
-                localStorage.setItem('wc-submissions', JSON.stringify(subs));
+            });
+            // Cache immediately to localStorage
+            const subs = [];
+            for (const username in STATE.participants) {
+                if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
+                    subs.push(STATE.participants[username]);
+                }
             }
+            localStorage.setItem('wc-submissions', JSON.stringify(subs));
         }
     } catch (err) {
-        console.warn('Cloud sync - submissions fetch skipped or database is uninitialized:', err);
+        console.warn('Cloud sync - submissions fetch failed:', err);
     }
 
     try {
         // Fetch shared official results
-        const resultsRes = await fetch(`${CLOUD_DB_BASE}/official-results`);
-        if (resultsRes.ok) {
-            const parsed = await resultsRes.json();
-            if (parsed) {
-                STATE.officialResults.matches = parsed.matches || {};
-                STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
-                if (parsed.groupStandings && STATE.participants.actuals) {
-                    STATE.participants.actuals.groupStandings = parsed.groupStandings;
-                }
-                if (parsed.selectedThirds && STATE.participants.actuals) {
-                    STATE.participants.actuals.selectedThirds = parsed.selectedThirds;
-                }
-                // Cache immediately to localStorage
-                localStorage.setItem('wc-official-results', JSON.stringify({
-                    matches: STATE.officialResults.matches,
-                    advancingTeams: STATE.officialResults.advancingTeams,
-                    groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
-                    selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
-                }));
+        const parsed = await puter.kv.get('official-results');
+        if (parsed) {
+            STATE.officialResults.matches = parsed.matches || {};
+            STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
+            if (parsed.groupStandings && STATE.participants.actuals) {
+                STATE.participants.actuals.groupStandings = parsed.groupStandings;
             }
+            if (parsed.selectedThirds && STATE.participants.actuals) {
+                STATE.participants.actuals.selectedThirds = parsed.selectedThirds;
+            }
+            // Cache immediately to localStorage
+            localStorage.setItem('wc-official-results', JSON.stringify({
+                matches: STATE.officialResults.matches,
+                advancingTeams: STATE.officialResults.advancingTeams,
+                groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
+                selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
+            }));
         }
     } catch (err) {
-        console.warn('Cloud sync - official results fetch skipped or database is uninitialized:', err);
+        console.warn('Cloud sync - official results fetch failed:', err);
     }
 }
 
 async function saveStateToCloud() {
+    if (typeof puter === 'undefined') return;
+
     try {
         const subs = [];
         for (const username in STATE.participants) {
@@ -335,11 +334,7 @@ async function saveStateToCloud() {
         }
 
         // 1. Put submissions
-        await fetch(`${CLOUD_DB_BASE}/submissions`, {
-            method: 'PUT',
-            body: JSON.stringify(subs),
-            headers: { 'Content-Type': 'application/json' }
-        });
+        await puter.kv.set('submissions', subs);
 
         // 2. Put official results
         const official = {
@@ -348,11 +343,7 @@ async function saveStateToCloud() {
             groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
             selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
         };
-        await fetch(`${CLOUD_DB_BASE}/official-results`, {
-            method: 'PUT',
-            body: JSON.stringify(official),
-            headers: { 'Content-Type': 'application/json' }
-        });
+        await puter.kv.set('official-results', official);
     } catch (err) {
         console.error('Failed to sync to cloud:', err);
     }
