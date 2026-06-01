@@ -172,7 +172,8 @@ const STATE = {
     // The administrative actual outcomes of the World Cup
     officialResults: {
         matches: {}, // key: matchId (1 to 32), value: winningTeamCode
-        advancingTeams: [] // Explicit list of 32 teams who reached knockout stage
+        advancingTeams: [], // Explicit list of 32 teams who reached knockout stage
+        groupScoringActive: true // Admin toggle: group column on leaderboard (max 160)
     },
 
     // User profiles & predicted selections (Brackets, Groups)
@@ -195,6 +196,7 @@ async function init() {
     setupTabListeners();
     setupDropdownListeners();
     setupAdminReset();
+    setupAdminGroupScoringToggle();
     setupThemeToggle();
     setupDragScroll();
     
@@ -366,6 +368,32 @@ function applySubmissionsFromCloud(subsData) {
     return applied.length;
 }
 
+function isGroupScoringActive() {
+    return STATE.officialResults.groupScoringActive !== false;
+}
+
+function getOfficialResultsPayload() {
+    return {
+        matches: STATE.officialResults.matches,
+        advancingTeams: STATE.officialResults.advancingTeams,
+        groupScoringActive: isGroupScoringActive(),
+        groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
+        selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
+    };
+}
+
+function applyOfficialResultsFields(parsed) {
+    STATE.officialResults.matches = parsed.matches || {};
+    STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
+    STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
+    if (parsed.groupStandings && STATE.participants.actuals) {
+        STATE.participants.actuals.groupStandings = parsed.groupStandings;
+    }
+    if (parsed.selectedThirds && STATE.participants.actuals) {
+        STATE.participants.actuals.selectedThirds = parsed.selectedThirds;
+    }
+}
+
 function applyOfficialResultsFromCloud(resData) {
     if (!resData || !resData.data) return false;
     let parsed = resData.data;
@@ -376,20 +404,9 @@ function applyOfficialResultsFromCloud(resData) {
             return false;
         }
     }
-    STATE.officialResults.matches = parsed.matches || {};
-    STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
-    if (parsed.groupStandings && STATE.participants.actuals) {
-        STATE.participants.actuals.groupStandings = parsed.groupStandings;
-    }
-    if (parsed.selectedThirds && STATE.participants.actuals) {
-        STATE.participants.actuals.selectedThirds = parsed.selectedThirds;
-    }
-    localStorage.setItem('wc-official-results', JSON.stringify({
-        matches: STATE.officialResults.matches,
-        advancingTeams: STATE.officialResults.advancingTeams,
-        groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
-        selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
-    }));
+    applyOfficialResultsFields(parsed);
+    localStorage.setItem('wc-official-results', JSON.stringify(getOfficialResultsPayload()));
+    syncGroupScoringToggleUI();
     return true;
 }
 
@@ -475,6 +492,7 @@ async function refreshFromCloudAndRender() {
     }
 
     ensureStandardStandings();
+    syncGroupScoringToggleUI();
     populateUserDropdowns();
     renderAll();
     updateActivePlayersCount();
@@ -563,6 +581,7 @@ function loadStateFromStorage() {
         const parsed = JSON.parse(savedResults);
         STATE.officialResults.matches = parsed.matches || {};
         STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
+        STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
         loadedGroupStandings = parsed.groupStandings || null;
         loadedSelectedThirds = parsed.selectedThirds || null;
     }
@@ -634,12 +653,7 @@ async function saveStateToCloud() {
         if (syncCount > 0) console.log(`☁️ Synced ${syncCount} submission(s) to Supabase`);
 
         // 2. Save official results
-        const official = {
-            matches: STATE.officialResults.matches,
-            advancingTeams: STATE.officialResults.advancingTeams,
-            groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
-            selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
-        };
+        const official = getOfficialResultsPayload();
         
         const { error } = await db
             .from('official_results')
@@ -673,12 +687,7 @@ function saveStateToStorage() {
     }
 
     // 3. Save official admin results and official group standings
-    localStorage.setItem('wc-official-results', JSON.stringify({
-        matches: STATE.officialResults.matches,
-        advancingTeams: STATE.officialResults.advancingTeams,
-        groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
-        selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
-    }));
+    localStorage.setItem('wc-official-results', JSON.stringify(getOfficialResultsPayload()));
 
     // Centralized trigger: Sync all state asynchronously in the background (non-blocking)
     saveStateToCloud().catch(err => console.warn('Cloud sync error:', err));
@@ -812,6 +821,38 @@ function setupDropdownListeners() {
     });
 }
 
+function syncGroupScoringToggleUI() {
+    const active = isGroupScoringActive();
+    const btnActive = document.getElementById('btn-group-scoring-active');
+    const btnInactive = document.getElementById('btn-group-scoring-inactive');
+    const statusEl = document.getElementById('group-scoring-status-text');
+
+    btnActive?.classList.toggle('active', active);
+    btnInactive?.classList.toggle('active', !active);
+    if (statusEl) {
+        statusEl.textContent = active
+            ? 'Group points are counting toward total scores.'
+            : 'Group (160) shows 0 for everyone — knockout points still count.';
+    }
+}
+
+function setGroupScoringActive(active) {
+    STATE.officialResults.groupScoringActive = active;
+    syncGroupScoringToggleUI();
+    saveStateToStorage();
+    renderLeaderboard();
+}
+
+function setupAdminGroupScoringToggle() {
+    document.getElementById('btn-group-scoring-active')?.addEventListener('click', () => {
+        setGroupScoringActive(true);
+    });
+    document.getElementById('btn-group-scoring-inactive')?.addEventListener('click', () => {
+        setGroupScoringActive(false);
+    });
+    syncGroupScoringToggleUI();
+}
+
 function setupAdminReset() {
     document.getElementById('btn-reset-simulator').addEventListener('click', () => {
         // Clear the existing matches object to maintain reference integrity with the actuals profile
@@ -863,14 +904,15 @@ function calculateParticipantScores() {
 
         // A. Group advancement verification (Top 2 from each group + best 8 third places)
         // Check how many of the participant's predicted advancing teams actually advanced
-        const userAdvancers = getPredictedAdvancers(username);
-        const actualAdvancers = results.advancingTeams || [];
-        
-        userAdvancers.forEach(team => {
-            if (actualAdvancers.includes(team)) {
-                groupPts += POINTS_SCALE.groupAdvancement;
-            }
-        });
+        if (isGroupScoringActive()) {
+            const userAdvancers = getPredictedAdvancers(username);
+            const actualAdvancers = results.advancingTeams || [];
+            userAdvancers.forEach(team => {
+                if (actualAdvancers.includes(team)) {
+                    groupPts += POINTS_SCALE.groupAdvancement;
+                }
+            });
+        }
 
         // B. Knockout Progression validation ("Any-Path" rule)
         // Verify Round of 32 winners (advancing to R16)
@@ -1035,7 +1077,7 @@ function renderRankingsTable(scores) {
             <td>
                 <span class="badge badge-info">${player.champ.flag} ${player.champ.name}</span>
             </td>
-            <td class="text-center font-heading">${player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>
+            <td class="text-center font-heading" style="${!isGroupScoringActive() ? 'opacity: 0.55;' : ''}">${player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>
             <td class="text-center font-heading">${player.koPts} <span style="font-size:0.75rem; color:var(--text-dark)">/840</span></td>
             <td class="text-right points-emphasis">${player.totalScore} Pts</td>
         `;

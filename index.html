@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260531">
+    <link rel="stylesheet" href="styles.css?v=20260601b">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -247,7 +247,17 @@
                                     <h3><i class="fa-solid fa-table-cells-large text-primary"></i> Final Group Standings Editor</h3>
                                     <p>Adjust team rankings to set official group advancement outcomes. Top 2 and best 3rd-places advance automatically.</p>
                                 </div>
-                                <div class="admin-groups-scroll" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem; margin-top: 1.5rem;">
+                                <div class="group-scoring-control-bar">
+                                    <div class="group-scoring-control-text">
+                                        <span class="group-scoring-toggle-label">Leaderboard Group (160) scoring</span>
+                                        <p id="group-scoring-status-text" class="group-scoring-status-text">Group points are counting toward total scores.</p>
+                                    </div>
+                                    <div class="group-scoring-toggle" role="group" aria-label="Group points scoring">
+                                        <button type="button" id="btn-group-scoring-active" class="scoring-toggle-btn active">Active</button>
+                                        <button type="button" id="btn-group-scoring-inactive" class="scoring-toggle-btn">Inactive</button>
+                                    </div>
+                                </div>
+                                <div class="admin-groups-scroll" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem; margin-top: 1rem;">
                                     <div class="groups-grid" id="admin-groups-grid" style="grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                                         <!-- Populated dynamically by JS -->
                                     </div>
@@ -500,6 +510,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260531"></script>
+    <script src="app.js?v=20260601b"></script>
 </body>
 </html>

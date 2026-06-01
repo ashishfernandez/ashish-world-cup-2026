@@ -1291,6 +1291,83 @@ body.dark-theme .bracket-scroll-container::-webkit-scrollbar-track {
     gap: 2rem;
 }
 
+.group-scoring-control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--card-border);
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.group-scoring-control-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.group-scoring-toggle-label {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: block;
+}
+
+.group-scoring-toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    border: 1px solid var(--card-border);
+    background: var(--bg-sidebar);
+}
+
+.scoring-toggle-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.6rem 1.25rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    min-width: 88px;
+}
+
+.scoring-toggle-btn.active {
+    background: var(--primary);
+    color: var(--text-primary);
+    box-shadow: 0 2px 10px var(--primary-glow);
+}
+
+.scoring-toggle-btn:not(.active):hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.group-scoring-status-text {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0.35rem 0 0 0;
+    line-height: 1.4;
+}
+
+.admin-groups-card .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+
+.admin-groups-card .card-header p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
 .admin-options-row {
     display: flex;
     justify-content: space-between;
