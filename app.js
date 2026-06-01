@@ -259,7 +259,7 @@ async function init() {
     renderAll();
 
     setupCloudSyncControls();
-    updateCloudSyncBanner('loading', 0, 'Syncing global pool…');
+    updateCloudSyncBanner('loading');
 
     // Global pool from Supabase (overwrites cache when successful)
     await refreshFromCloudAndRender();
@@ -272,15 +272,7 @@ async function init() {
 }
 
 function setupCloudSyncControls() {
-    const btn = document.getElementById('btn-sync-pool');
-    if (btn) {
-        btn.addEventListener('click', async () => {
-            btn.querySelector('i')?.classList.add('fa-spin');
-            updateCloudSyncBanner('loading', getGlobalSubmissionEntries().length, 'Refreshing…');
-            await refreshFromCloudAndRender();
-            btn.querySelector('i')?.classList.remove('fa-spin');
-        });
-    }
+    /* Sidebar sync chip removed; cloud refresh runs automatically */
 }
 
 function scheduleCloudRetries() {
@@ -293,24 +285,15 @@ function scheduleCloudRetries() {
     });
 }
 
-function updateCloudSyncBanner(mode, count, message) {
-    const banner = document.getElementById('cloud-sync-banner');
-    const text = document.getElementById('cloud-sync-text');
+function updateCloudSyncBanner(mode) {
     const label = document.getElementById('sync-status-label');
     const pulse = document.getElementById('sync-pulse');
     const statusRow = pulse?.closest('.status-row');
 
-    if (text && message) text.textContent = message;
     if (label) {
         if (mode === 'ok') label.textContent = 'Live global pool';
         else if (mode === 'loading') label.textContent = 'Connecting…';
         else label.textContent = 'Offline / cached';
-    }
-    if (banner) {
-        banner.classList.remove('sync-ok', 'sync-warn', 'sync-error');
-        if (mode === 'ok') banner.classList.add('sync-ok');
-        else if (mode === 'warn') banner.classList.add('sync-warn');
-        else if (mode === 'error') banner.classList.add('sync-error');
     }
     if (statusRow) {
         statusRow.classList.toggle('sync-error-row', mode === 'error' || mode === 'warn');
@@ -520,19 +503,11 @@ async function refreshFromCloudAndRender() {
     const count = getGlobalSubmissionEntries().length;
 
     if (ok) {
-        updateCloudSyncBanner('ok', count, `${count} player${count !== 1 ? 's' : ''} in global pool`);
+        updateCloudSyncBanner('ok');
     } else if (count > 0) {
-        updateCloudSyncBanner(
-            'warn',
-            count,
-            `${count} cached — hard refresh (Ctrl+Shift+R) if list looks old`
-        );
+        updateCloudSyncBanner('warn');
     } else {
-        updateCloudSyncBanner(
-            'error',
-            0,
-            'Cannot reach cloud — disable ad blockers or hard refresh'
-        );
+        updateCloudSyncBanner('error');
     }
 
     ensureStandardStandings();
@@ -1055,7 +1030,7 @@ function updateActivePlayersCount() {
     if (!countEl) return;
 
     const count = getGlobalSubmissionEntries().length;
-    countEl.innerText = `${count} in global pool`;
+    countEl.innerText = String(count);
 }
 
 function renderUserBadge(scores) {

@@ -236,6 +236,51 @@ body.dark-theme .ambient-glow {
     backdrop-filter: blur(10px);
 }
 
+.pool-winnings-block {
+    margin: 0.25rem 0;
+}
+
+.pool-winnings-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    margin-bottom: 0.6rem;
+}
+
+.pool-winnings-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.pool-winnings-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+}
+
+.pool-winnings-place {
+    color: var(--text-muted);
+}
+
+.pool-winnings-prize {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+.pool-winnings-list .team-tbd {
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
 .meta-row {
     display: flex;
     justify-content: space-between;
