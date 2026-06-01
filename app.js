@@ -10,6 +10,15 @@ let _cloudSyncChannel = null;
 const CLOUD_POLL_INTERVAL_MS = 8000;
 let _lastCloudSyncOk = false;
 
+/** Stripe entry fee — set required: false only for local dev without Edge Functions */
+const PAYMENT_CONFIG = {
+    required: true,
+    entryFeeDisplay: '$20.00',
+    productLabel: "Ash's WC Tourney Pool Entry",
+};
+
+const WIZARD_PAYMENT_STEP = 6;
+
 /**
  * Lazy Supabase client getter. Retries initialization on every call
  * so the CDN script has time to load even if it wasn't ready at parse time.
@@ -295,6 +304,8 @@ async function init() {
     if (!_lastCloudSyncOk) {
         scheduleCloudRetries();
     }
+
+    handlePaymentReturn();
 }
 
 function setupCloudSyncControls() {
@@ -2059,6 +2070,219 @@ function renderAdminSimulator() {
     }
 }
 
+async function callPaymentEdgeFunction(functionName, body) {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify(body),
+    });
+    let data = {};
+    try {
+        data = await res.json();
+    } catch {
+        /* ignore */
+    }
+    if (!res.ok) {
+        throw new Error(data.error || `Payment service error (${res.status})`);
+    }
+    return data;
+}
+
+function getPaymentReturnBaseUrl() {
+    const url = new URL(window.location.href);
+    let path = url.pathname || '/';
+    if (path.endsWith('index.html')) {
+        path = path.slice(0, -'index.html'.length) || '/';
+    }
+    return `${url.origin}${path}`;
+}
+
+function buildSubmissionFromDraft() {
+    const draft = STATE.participants.draft;
+    const subId = `sub_${Date.now()}`;
+    return {
+        id: subId,
+        name: draft.name,
+        avatar: draft.avatar,
+        champ: draft.champ,
+        groupStandings: JSON.parse(JSON.stringify(draft.groupStandings)),
+        selectedThirds: JSON.parse(JSON.stringify(draft.selectedThirds || [])),
+        bracketPicks: JSON.parse(JSON.stringify(draft.bracketPicks)),
+        submitted: true,
+        onboarded: true,
+    };
+}
+
+function validateDraftReadyForPayment() {
+    const draft = STATE.participants.draft;
+    if (!draft.name?.trim()) {
+        alert('Please enter your name on step 1.');
+        goToWizardStep(1);
+        return false;
+    }
+    if (!draft.selectedThirds || draft.selectedThirds.length !== 8) {
+        alert('Please select exactly 8 third-place teams on step 3.');
+        goToWizardStep(3);
+        return false;
+    }
+    for (let i = 1; i <= 32; i++) {
+        if (!draft.bracketPicks[i]) {
+            alert(`Please complete all bracket picks (match ${i} is missing).`);
+            goToWizardStep(4);
+            return false;
+        }
+    }
+    if (!draft.champ) {
+        alert('Please pick a tournament champion on step 4.');
+        goToWizardStep(4);
+        return false;
+    }
+    return true;
+}
+
+async function startStripeCheckout() {
+    if (!validateDraftReadyForPayment()) return;
+
+    const payBtn = document.getElementById('btn-wizard-pay');
+    const statusEl = document.getElementById('wizard-payment-status');
+    const participant = buildSubmissionFromDraft();
+    const base = getPaymentReturnBaseUrl();
+
+    if (payBtn) {
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Redirecting to Stripe…</span>';
+    }
+    if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = 'Preparing secure checkout…';
+        statusEl.className = 'wizard-payment-status is-loading';
+    }
+
+    try {
+        const data = await callPaymentEdgeFunction('create-checkout-session', {
+            participant,
+            submissionId: participant.id,
+            successUrl: `${base}?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${base}?payment=cancelled`,
+        });
+
+        sessionStorage.setItem('wc-pending-payment-id', data.pendingId);
+        sessionStorage.setItem('wc-pending-submission-id', data.submissionId);
+        saveStateToStorage();
+        window.location.href = data.url;
+    } catch (err) {
+        console.error('Stripe checkout error:', err);
+        if (statusEl) {
+            statusEl.hidden = false;
+            statusEl.className = 'wizard-payment-status is-error';
+            statusEl.textContent =
+                err.message ||
+                'Payment is not available yet. Ask the pool admin to configure Stripe (see STRIPE_SETUP.md).';
+        } else {
+            alert(
+                err.message ||
+                    'Payment is not available yet. The admin needs to deploy Stripe Edge Functions (see STRIPE_SETUP.md in the repo).'
+            );
+        }
+        if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<i class="fa-brands fa-stripe"></i> <span>Pay &amp; Submit Entry</span>';
+        }
+    }
+}
+
+async function finalizePaidSubmission(submissionId, participantName) {
+    await refreshFromCloudAndRender();
+    STATE.activeBracketUser = submissionId;
+    STATE.activeGroupUser = submissionId;
+    resetDraft();
+    saveStateToStorage();
+    updateSubmitButtonState();
+
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) modal.classList.remove('active');
+
+    const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
+    if (leaderboardTabBtn) leaderboardTabBtn.click();
+
+    alert(
+        `🎉 Payment received! Your predictions under "${participantName}" are locked in and on the leaderboard.`
+    );
+}
+
+async function submitWithoutPayment() {
+    if (!validateDraftReadyForPayment()) return;
+
+    const newSubmission = buildSubmissionFromDraft();
+    STATE.participants[newSubmission.id] = newSubmission;
+    resetDraft();
+    saveStateToStorage();
+    const cloudSuccess = await saveStateToCloud();
+    await refreshFromCloudAndRender();
+    updateSubmitButtonState();
+
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) modal.classList.remove('active');
+
+    STATE.activeBracketUser = newSubmission.id;
+    STATE.activeGroupUser = newSubmission.id;
+
+    if (cloudSuccess) {
+        alert(`🎉 Success! Your predictions under "${newSubmission.name}" are submitted and synced to the cloud!`);
+    } else {
+        alert(
+            `✅ Your predictions under "${newSubmission.name}" are saved locally!\n\n⚠️ Cloud sync may have failed — try refreshing the page.`
+        );
+    }
+
+    const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
+    if (leaderboardTabBtn) leaderboardTabBtn.click();
+}
+
+async function handlePaymentReturn() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('payment') === 'cancelled') {
+        window.history.replaceState({}, '', getPaymentReturnBaseUrl());
+        const modal = document.getElementById('onboarding-modal');
+        if (modal) {
+            goToWizardStep(WIZARD_PAYMENT_STEP);
+            modal.classList.add('active');
+        }
+        return;
+    }
+
+    if (params.get('payment') !== 'success') return;
+
+    const sessionId = params.get('session_id');
+    if (!sessionId) return;
+
+    window.history.replaceState({}, '', getPaymentReturnBaseUrl());
+
+    const statusEl = document.getElementById('wizard-payment-status');
+    if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.className = 'wizard-payment-status is-loading';
+        statusEl.textContent = 'Confirming your payment…';
+    }
+
+    try {
+        const result = await callPaymentEdgeFunction('verify-checkout-session', { sessionId });
+        sessionStorage.removeItem('wc-pending-payment-id');
+        sessionStorage.removeItem('wc-pending-submission-id');
+        await finalizePaidSubmission(result.submissionId, result.participantName);
+    } catch (err) {
+        console.error('Payment verification error:', err);
+        alert(
+            `Payment received, but we could not confirm your entry yet.\n\n${err.message}\n\nPlease refresh in a minute or contact the pool admin with session ID: ${sessionId}`
+        );
+    }
+}
+
 function setupOnboarding() {
     const modal = document.getElementById('onboarding-modal');
     const nameInput = document.getElementById('visitor-name');
@@ -2069,7 +2293,7 @@ function setupOnboarding() {
     const closeBtn = document.getElementById('btn-close-wizard');
     const backBtn = document.getElementById('btn-wizard-back');
     const nextBtn = document.getElementById('btn-wizard-next');
-    const submitBtn = document.getElementById('btn-wizard-submit');
+    const payBtn = document.getElementById('btn-wizard-pay');
 
     // Toggle Submit Button visibility
     updateSubmitButtonState();
@@ -2154,67 +2378,20 @@ function setupOnboarding() {
                     return;
                 }
                 goToWizardStep(5);
+            } else if (step === 5) {
+                goToWizardStep(WIZARD_PAYMENT_STEP);
             }
         });
     }
 
-    // 5. Navigation - Final Submit Button
-    if (submitBtn) {
-        submitBtn.addEventListener('click', async (e) => {
+    if (payBtn) {
+        payBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            const draft = STATE.participants.draft;
-            
-            if (!draft.champ) {
-                alert('Please complete your knockout bracket and predict a tournament Champion in Step 4 before submitting!');
-                goToWizardStep(4);
-                return;
-            }
-
-            // Commit the draft as a permanent frozen submission
-            const subId = `sub_${Date.now()}`;
-            const newSubmission = {
-                id: subId,
-                name: draft.name,
-                avatar: draft.avatar,
-                champ: draft.champ,
-                groupStandings: JSON.parse(JSON.stringify(draft.groupStandings)),
-                selectedThirds: JSON.parse(JSON.stringify(draft.selectedThirds || [])),
-                bracketPicks: JSON.parse(JSON.stringify(draft.bracketPicks)),
-                submitted: true,
-                onboarded: true
-            };
-
-            // Inject to active participants pool
-            STATE.participants[subId] = newSubmission;
-
-            // Reset guest draft state
-            resetDraft();
-
-            // Save to localStorage immediately
-            saveStateToStorage();
-
-            // Explicitly await cloud sync so we know it succeeded
-            const cloudSuccess = await saveStateToCloud();
-
-            // Close modal overlay
-            modal.classList.remove('active');
-
-            // Select the newly submitted player on the main page read-only tabs
-            STATE.activeBracketUser = subId;
-            STATE.activeGroupUser = subId;
-
-            await refreshFromCloudAndRender();
-            updateSubmitButtonState();
-
-            if (cloudSuccess) {
-                alert(`🎉 Success! Your predictions under "${newSubmission.name}" are submitted and synced to the cloud!`);
+            if (PAYMENT_CONFIG.required) {
+                await startStripeCheckout();
             } else {
-                alert(`✅ Your predictions under "${newSubmission.name}" are saved locally!\n\n⚠️ Cloud sync may have failed — your picks might not appear on other devices. Try refreshing the page.`);
+                await submitWithoutPayment();
             }
-
-            // Navigate visitor to leaderboard tab
-            const leaderboardTabBtn = document.querySelector('.nav-item[data-tab="leaderboard"]');
-            if (leaderboardTabBtn) leaderboardTabBtn.click();
         });
     }
 }
@@ -2253,11 +2430,13 @@ function goToWizardStep(step) {
     // Dynamically adjust modal scaling sizes
     const wizardCard = document.querySelector('.wizard-card');
     if (wizardCard) {
-        wizardCard.classList.remove('step-1-active', 'step-5-active');
+        wizardCard.classList.remove('step-1-active', 'step-5-active', 'step-6-active');
         if (step === 1) {
             wizardCard.classList.add('step-1-active');
         } else if (step === 5) {
             wizardCard.classList.add('step-5-active');
+        } else if (step === WIZARD_PAYMENT_STEP) {
+            wizardCard.classList.add('step-6-active');
         }
     }
 
@@ -2270,7 +2449,13 @@ function goToWizardStep(step) {
     // Toggle Next button visibility
     const nextBtn = document.getElementById('btn-wizard-next');
     if (nextBtn) {
-        nextBtn.style.display = (step === 5) ? 'none' : 'inline-flex';
+        const hideNext = step === 5 || step === WIZARD_PAYMENT_STEP;
+        nextBtn.style.display = hideNext ? 'none' : 'inline-flex';
+        if (step === 5) {
+            nextBtn.innerHTML = 'Continue to Payment <i class="fa-solid fa-chevron-right"></i>';
+        } else {
+            nextBtn.innerHTML = 'Next <i class="fa-solid fa-chevron-right"></i>';
+        }
     }
 
     // Trigger step-specific renders or details binding
@@ -2305,6 +2490,28 @@ function goToWizardStep(step) {
         const bronzeCode = draft.bracketPicks[31] || '';
         const bronzeTeam = getTeamByCode(bronzeCode);
         setWizardReviewAward(document.getElementById('wizard-review-bronze'), bronzeTeam, !!bronzeCode);
+    } else if (step === WIZARD_PAYMENT_STEP) {
+        const draft = STATE.participants.draft;
+        const amountEl = document.getElementById('wizard-payment-amount');
+        const nameEl = document.getElementById('wizard-payment-name');
+        const payBtn = document.getElementById('btn-wizard-pay');
+        const statusEl = document.getElementById('wizard-payment-status');
+
+        if (amountEl) amountEl.textContent = PAYMENT_CONFIG.entryFeeDisplay;
+        if (nameEl) nameEl.textContent = draft.name || '—';
+        if (payBtn) {
+            payBtn.disabled = false;
+            if (PAYMENT_CONFIG.required) {
+                payBtn.innerHTML = '<i class="fa-brands fa-stripe"></i> <span>Pay &amp; Submit Entry</span>';
+            } else {
+                payBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> <span>Submit Entry (dev)</span>';
+            }
+        }
+        if (statusEl) {
+            statusEl.hidden = true;
+            statusEl.textContent = '';
+            statusEl.className = 'wizard-payment-status';
+        }
     }
     
     // Update Next button unlit/disabled state reactively on step entry

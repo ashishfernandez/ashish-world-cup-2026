@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260602e">
+    <link rel="stylesheet" href="styles.css?v=20260603a">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -356,7 +356,12 @@
                     <div class="progress-line"></div>
                     <div class="progress-step" data-step="5">
                         <span class="step-num">5</span>
-                        <span class="step-label">Submit</span>
+                        <span class="step-label">Review</span>
+                    </div>
+                    <div class="progress-line"></div>
+                    <div class="progress-step" data-step="6">
+                        <span class="step-num">6</span>
+                        <span class="step-label">Payment</span>
                     </div>
                 </div>
             </div>
@@ -456,12 +461,35 @@
                     </div>
 
                     <div class="wizard-submit-banner">
-                        <h3>Confirm Your Predictions</h3>
-                        <p>Once you submit, your tournament predictions are locked forever! You can click "Submit Picks" at any time to make another submission under a new name.</p>
-                        <button id="btn-wizard-submit" class="btn btn-primary glowing-btn wizard-submit-btn" style="margin-top: 1.5rem;">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <span>Submit My Prediction</span>
+                        <h3>Review Your Predictions</h3>
+                        <p>Confirm your champion, silver, and bronze picks above. On the next step you will complete payment to lock your entry on the leaderboard.</p>
+                    </div>
+                </div>
+
+                <!-- Step 6: Payment (Stripe) -->
+                <div class="wizard-step-panel" data-step="6">
+                    <div class="step-intro-wrapper">
+                        <h3>Complete Your Entry</h3>
+                        <p><i class="fa-solid fa-lock"></i> Pay securely with Stripe. Your picks are saved to the leaderboard only after payment succeeds.</p>
+                    </div>
+                    <div class="wizard-payment-card">
+                        <div class="wizard-payment-summary">
+                            <div class="wizard-payment-row">
+                                <span class="wizard-payment-label">Pool entry</span>
+                                <span class="wizard-payment-value" id="wizard-payment-amount">$20.00</span>
+                            </div>
+                            <div class="wizard-payment-row">
+                                <span class="wizard-payment-label">Player name</span>
+                                <span class="wizard-payment-value" id="wizard-payment-name">—</span>
+                            </div>
+                            <p class="wizard-payment-note">You will be redirected to Stripe Checkout. Cards, Apple Pay, and Google Pay are supported where available.</p>
+                        </div>
+                        <div id="wizard-payment-status" class="wizard-payment-status" hidden></div>
+                        <button type="button" id="btn-wizard-pay" class="btn btn-primary glowing-btn wizard-pay-btn">
+                            <i class="fa-brands fa-stripe"></i>
+                            <span>Pay &amp; Submit Entry</span>
                         </button>
+                        <p class="wizard-payment-secure"><i class="fa-solid fa-shield-halved"></i> Payments processed by Stripe. We never store your card details.</p>
                     </div>
                 </div>
             </div>
@@ -479,6 +507,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260602e"></script>
+    <script src="app.js?v=20260603a"></script>
 </body>
 </html>

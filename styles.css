@@ -2404,10 +2404,92 @@ body.dark-theme .wizard-card {
 }
 
 /* Modal sizing based on active step for optimal visual layout */
-.wizard-card.step-1-active, .wizard-card.step-5-active {
+.wizard-card.step-1-active,
+.wizard-card.step-5-active,
+.wizard-card.step-6-active {
     max-width: 750px;
     height: auto;
     min-height: 480px;
+}
+
+.wizard-payment-card {
+    margin-top: 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    background: var(--bg-sidebar);
+    text-align: center;
+}
+
+.wizard-payment-summary {
+    text-align: left;
+    margin-bottom: 1.25rem;
+}
+
+.wizard-payment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--card-border);
+    font-family: var(--font-heading);
+}
+
+.wizard-payment-row:last-of-type {
+    border-bottom: none;
+}
+
+.wizard-payment-label {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.wizard-payment-value {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.wizard-payment-note,
+.wizard-payment-secure {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0.75rem 0 0;
+}
+
+.wizard-payment-secure {
+    margin-top: 1rem;
+}
+
+.wizard-pay-btn {
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+    padding: 0.9rem 1.25rem;
+    font-size: 1rem;
+    margin: 0 auto;
+}
+
+.wizard-payment-status {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-family: var(--font-heading);
+}
+
+.wizard-payment-status.is-loading {
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--primary);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.wizard-payment-status.is-error {
+    background: rgba(239, 68, 68, 0.12);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    text-align: left;
 }
 
 .close-wizard-btn {
