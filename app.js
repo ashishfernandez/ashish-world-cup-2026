@@ -1,5 +1,10 @@
 // World Cup 2026 Bracket Pool Core Engine
 
+// Supabase Client Initialization
+const SUPABASE_URL = 'https://ovfmmszhlkedypfveyxj.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_oEuZ2NtTLNBineH2ae8gaQ_ud-Fi2vE';
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
 // 1. Static Tourney Data (Groups and Teams as in standard 48-team layout)
 const GROUPS_DATA = {
     A: [
@@ -270,17 +275,23 @@ function loadStateFromStorage() {
 }
 
 async function loadStateFromCloud() {
-    if (typeof puter === 'undefined') {
-        console.warn('Puter SDK not loaded yet. Skipping cloud sync.');
+    if (typeof supabase === 'undefined' || !supabase) {
+        console.warn('Supabase SDK not loaded yet. Skipping cloud sync.');
         return;
     }
 
     try {
-        // Fetch shared cloud submissions
-        const cloudSubs = await puter.kv.get('submissions');
-        if (cloudSubs && Array.isArray(cloudSubs)) {
-            cloudSubs.forEach(sub => {
-                if (sub.id && sub.id !== 'actuals' && sub.id !== 'draft') {
+        // Fetch shared cloud submissions from submissions table
+        const { data: subsData, error: subsError } = await supabase
+            .from('submissions')
+            .select('*');
+
+        if (subsError) throw subsError;
+
+        if (subsData && Array.isArray(subsData)) {
+            subsData.forEach(row => {
+                const sub = row.data;
+                if (sub && sub.id && sub.id !== 'actuals' && sub.id !== 'draft') {
                     STATE.participants[sub.id] = sub;
                 }
             });
@@ -299,8 +310,16 @@ async function loadStateFromCloud() {
 
     try {
         // Fetch shared official results
-        const parsed = await puter.kv.get('official-results');
-        if (parsed) {
+        const { data: resData, error: resError } = await supabase
+            .from('official_results')
+            .select('*')
+            .eq('id', 'current')
+            .maybeSingle();
+
+        if (resError) throw resError;
+
+        if (resData && resData.data) {
+            const parsed = resData.data;
             STATE.officialResults.matches = parsed.matches || {};
             STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
             if (parsed.groupStandings && STATE.participants.actuals) {
@@ -323,27 +342,36 @@ async function loadStateFromCloud() {
 }
 
 async function saveStateToCloud() {
-    if (typeof puter === 'undefined') return;
+    if (typeof supabase === 'undefined' || !supabase) return;
 
     try {
-        const subs = [];
+        // 1. Save participant submissions
         for (const username in STATE.participants) {
             if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
-                subs.push(STATE.participants[username]);
+                const participant = STATE.participants[username];
+                
+                // upsert the submission (uses id as primary key)
+                const { error } = await supabase
+                    .from('submissions')
+                    .upsert({ id: participant.id, data: participant });
+                    
+                if (error) console.error(`Failed to sync submission for ${username}:`, error);
             }
         }
 
-        // 1. Put submissions
-        await puter.kv.set('submissions', subs);
-
-        // 2. Put official results
+        // 2. Save official results
         const official = {
             matches: STATE.officialResults.matches,
             advancingTeams: STATE.officialResults.advancingTeams,
             groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
             selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
         };
-        await puter.kv.set('official-results', official);
+        
+        const { error } = await supabase
+            .from('official_results')
+            .upsert({ id: 'current', data: official });
+            
+        if (error) console.error('Failed to sync official results:', error);
     } catch (err) {
         console.error('Failed to sync to cloud:', err);
     }
