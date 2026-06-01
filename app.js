@@ -847,6 +847,10 @@ function setupTabListeners() {
             refreshFromCloudAndRender().catch(err =>
                 console.warn('☁️ Tab switch cloud refresh failed:', err)
             );
+
+            if (tabName === 'bracket') {
+                ensureBracketSheetScrollReady();
+            }
         });
     });
 }
@@ -1412,6 +1416,21 @@ function renderBracket() {
     });
 
     scheduleBracketConnectorSync();
+    ensureBracketSheetScrollReady();
+}
+
+function ensureBracketSheetScrollReady() {
+    const container = document.querySelector('#tab-bracket .bracket-scroll-container');
+    const canvas = document.getElementById('bracket-tree');
+    if (!container || !canvas) return;
+
+    requestAnimationFrame(() => {
+        if (canvas.scrollWidth > container.clientWidth) {
+            container.classList.add('has-horizontal-scroll');
+        } else {
+            container.classList.remove('has-horizontal-scroll');
+        }
+    });
 }
 
 // Logic to pull which team code occupies a home/away knockout slot based on user's parent predictions
@@ -2639,22 +2658,29 @@ function setupDragScroll() {
     const mainBracketContainer = document.querySelector('#tab-bracket .bracket-scroll-container');
     const wizardBracketContainer = document.querySelector('.wizard-bracket-scroll-area .bracket-scroll-container');
 
-    // Bracket Sheet: drag background; don't steal clicks from team pick rows
-    makeContainerDraggable(mainBracketContainer, true);
-    makeContainerDraggable(wizardBracketContainer, true);
+    makeContainerDraggable(mainBracketContainer, { protectPickableTeamSlots: true });
+    makeContainerDraggable(wizardBracketContainer, { protectPickableTeamSlots: true });
 }
 
-function shouldIgnoreBracketDragStart(e, ignoreInteractiveTargets) {
+function isPickableTeamSlotTarget(target) {
+    const slot = target?.closest?.('.team-slot');
+    if (!slot) return false;
+    const cursor = window.getComputedStyle(slot).cursor;
+    return cursor === 'pointer';
+}
+
+function shouldIgnoreBracketDragStart(e, protectPickableTeamSlots) {
     if (e.target.closest('.sort-btn') || e.target.closest('button') || e.target.closest('select')) {
         return true;
     }
-    if (ignoreInteractiveTargets && e.target.closest('.team-slot')) {
+    if (protectPickableTeamSlots && isPickableTeamSlotTarget(e.target)) {
         return true;
     }
     return false;
 }
 
-function makeContainerDraggable(container, ignoreInteractiveTargets = false) {
+function makeContainerDraggable(container, options = {}) {
+    const { protectPickableTeamSlots = false } = options;
     if (!container || container.dataset.dragScrollBound === '1') return;
     container.dataset.dragScrollBound = '1';
 
@@ -2666,48 +2692,48 @@ function makeContainerDraggable(container, ignoreInteractiveTargets = false) {
     const endDrag = () => {
         isDown = false;
         container.classList.remove('is-dragging');
+        document.removeEventListener('mousemove', onDocMouseMove);
+        document.removeEventListener('mouseup', onDocMouseUp);
     };
 
-    const onPointerDown = (clientX, e) => {
-        if (shouldIgnoreBracketDragStart(e, ignoreInteractiveTargets)) return;
+    const onPointerMove = (clientX, e) => {
+        if (!isDown) return;
+
+        const walk = clientX - startX;
+        if (Math.abs(walk) > 3) {
+            hasMoved = true;
+            if (e.cancelable) e.preventDefault();
+            container.scrollLeft = scrollLeft - walk;
+        }
+    };
+
+    const onDocMouseMove = (e) => onPointerMove(e.pageX, e);
+    const onDocMouseUp = () => endDrag();
+
+    const beginDrag = (clientX, e) => {
+        if (shouldIgnoreBracketDragStart(e, protectPickableTeamSlots)) return;
 
         isDown = true;
         hasMoved = false;
         startX = clientX;
         scrollLeft = container.scrollLeft;
         container.classList.add('is-dragging');
-    };
-
-    const onPointerMove = (clientX, e) => {
-        if (!isDown) return;
-
-        const walk = (clientX - startX) * 1.25;
-        if (Math.abs(walk) > 4) {
-            hasMoved = true;
-            e.preventDefault();
-            container.scrollLeft = scrollLeft - walk;
-        }
+        document.addEventListener('mousemove', onDocMouseMove);
+        document.addEventListener('mouseup', onDocMouseUp);
     };
 
     container.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return;
-        onPointerDown(e.pageX, e);
+        beginDrag(e.pageX, e);
     });
-
-    container.addEventListener('mousemove', (e) => {
-        onPointerMove(e.pageX, e);
-    });
-
-    container.addEventListener('mouseup', endDrag);
-    container.addEventListener('mouseleave', endDrag);
 
     container.addEventListener('touchstart', (e) => {
         if (!e.touches.length) return;
-        onPointerDown(e.touches[0].pageX, e);
+        beginDrag(e.touches[0].pageX, e);
     }, { passive: false });
 
     container.addEventListener('touchmove', (e) => {
-        if (!e.touches.length) return;
+        if (!isDown || !e.touches.length) return;
         onPointerMove(e.touches[0].pageX, e);
     }, { passive: false });
 

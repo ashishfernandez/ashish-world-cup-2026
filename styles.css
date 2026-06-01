@@ -419,8 +419,13 @@ body.dark-theme .ambient-glow {
 .main-content {
     margin-left: var(--sidebar-width);
     flex-grow: 1;
+    width: calc(100vw - var(--sidebar-width));
+    max-width: calc(100vw - var(--sidebar-width));
+    min-width: 0;
+    overflow-x: hidden;
     padding: 2.5rem 3.5rem 2.5rem 4.5rem;
     min-height: 100vh;
+    box-sizing: border-box;
 }
 
 /* Dashboard Header */
@@ -501,6 +506,11 @@ body.dark-theme .ambient-glow {
 
 .tab-panel.active {
     display: block;
+}
+
+#tab-bracket {
+    max-width: 100%;
+    min-width: 0;
 }
 
 /* Points Outline Card Titles */
@@ -955,6 +965,7 @@ tr:first-child .points-emphasis {
 .bracket-scroll-container {
     width: 100%;
     max-width: 100%;
+    min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 2rem;
@@ -968,12 +979,14 @@ tr:first-child .points-emphasis {
     scrollbar-color: rgba(59, 130, 246, 0.55) rgba(15, 23, 42, 0.08);
 }
 
-/* Bracket Sheet tab: horizontal scroll track at bottom */
+/* Bracket Sheet tab: force horizontal scroll region + bottom bar */
 #tab-bracket .bracket-scroll-container {
-    overflow-x: scroll;
-    padding-bottom: 0.25rem;
+    display: block;
+    overflow-x: scroll !important;
+    overflow-y: hidden;
+    padding-bottom: 0.5rem;
     scrollbar-width: auto;
-    scrollbar-color: rgba(59, 130, 246, 0.65) rgba(100, 116, 139, 0.2);
+    scrollbar-color: rgba(59, 130, 246, 0.65) rgba(100, 116, 139, 0.25);
 }
 
 body.dark-theme #tab-bracket .bracket-scroll-container {
@@ -1035,11 +1048,13 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
 }
 
 .bracket-canvas {
-    display: flex;
+    display: inline-flex;
     gap: 3.5rem;
     padding: 5rem 0 2rem 0;
-    min-width: 1650px;
-    justify-content: space-between;
+    min-width: max(1650px, 100%);
+    width: max-content;
+    justify-content: flex-start;
+    vertical-align: top;
 }
 
 .round-column {
