@@ -3,7 +3,17 @@
 // Supabase Client Initialization
 const SUPABASE_URL = 'https://ovfmmszhlkedypfveyxj.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_oEuZ2NtTLNBineH2ae8gaQ_ud-Fi2vE';
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+let db = null;
+try {
+    if (window.supabase && window.supabase.createClient) {
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('☁️ Supabase client initialized successfully');
+    } else {
+        console.warn('☁️ Supabase SDK not found on window — cloud sync disabled');
+    }
+} catch(e) {
+    console.warn('Supabase SDK initialization failed:', e);
+}
 
 // 1. Static Tourney Data (Groups and Teams as in standard 48-team layout)
 const GROUPS_DATA = {
@@ -275,14 +285,14 @@ function loadStateFromStorage() {
 }
 
 async function loadStateFromCloud() {
-    if (typeof supabase === 'undefined' || !supabase) {
+    if (!db) {
         console.warn('Supabase SDK not loaded yet. Skipping cloud sync.');
         return;
     }
 
     try {
         // Fetch shared cloud submissions from submissions table
-        const { data: subsData, error: subsError } = await supabase
+        const { data: subsData, error: subsError } = await db
             .from('submissions')
             .select('*');
 
@@ -310,7 +320,7 @@ async function loadStateFromCloud() {
 
     try {
         // Fetch shared official results
-        const { data: resData, error: resError } = await supabase
+        const { data: resData, error: resError } = await db
             .from('official_results')
             .select('*')
             .eq('id', 'current')
@@ -342,22 +352,31 @@ async function loadStateFromCloud() {
 }
 
 async function saveStateToCloud() {
-    if (typeof supabase === 'undefined' || !supabase) return;
+    if (!db) {
+        console.warn('☁️ Supabase client not initialized — skipping cloud sync');
+        return;
+    }
 
     try {
         // 1. Save participant submissions
+        let syncCount = 0;
         for (const username in STATE.participants) {
             if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
                 const participant = STATE.participants[username];
                 
                 // upsert the submission (uses id as primary key)
-                const { error } = await supabase
+                const { error } = await db
                     .from('submissions')
                     .upsert({ id: participant.id, data: participant });
                     
-                if (error) console.error(`Failed to sync submission for ${username}:`, error);
+                if (error) {
+                    console.error(`❌ Failed to sync submission for ${username}:`, error);
+                } else {
+                    syncCount++;
+                }
             }
         }
+        if (syncCount > 0) console.log(`☁️ Synced ${syncCount} submission(s) to Supabase`);
 
         // 2. Save official results
         const official = {
@@ -367,13 +386,13 @@ async function saveStateToCloud() {
             selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
         };
         
-        const { error } = await supabase
+        const { error } = await db
             .from('official_results')
             .upsert({ id: 'current', data: official });
             
-        if (error) console.error('Failed to sync official results:', error);
+        if (error) console.error('❌ Failed to sync official results:', error);
     } catch (err) {
-        console.error('Failed to sync to cloud:', err);
+        console.error('❌ Failed to sync to cloud:', err);
     }
 }
 
