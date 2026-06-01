@@ -164,20 +164,39 @@ const POINTS_SCALE = {
 };
 
 // 5. Initialization: Load static configurations and predictions state
-function init() {
+async function init() {
     setupTabListeners();
     setupDropdownListeners();
     setupAdminReset();
     setupThemeToggle();
     setupDragScroll();
     
-    // Load predictions state from localStorage
+    // 1. Instant local restore (highly responsive perception)
     loadStateFromStorage();
-    
     setupOnboarding();
     populateUserDropdowns();
     
-    // Set default initial standings for all users (if any aren't set)
+    // Ensure all local users have valid standings
+    ensureStandardStandings();
+
+    // Set initial simulated results if none were saved locally yet
+    if (!localStorage.getItem('wc-official-results')) {
+        prepopulateSimulatedResults();
+    }
+    
+    renderAll();
+
+    // 2. Asynchronously sync from public cloud store in the background!
+    await loadStateFromCloud();
+    
+    // Ensure all cloud-fetched users also have valid standings
+    ensureStandardStandings();
+
+    populateUserDropdowns();
+    renderAll();
+}
+
+function ensureStandardStandings() {
     for (const username in STATE.participants) {
         const user = STATE.participants[username];
         if (!user.groupStandings || Object.keys(user.groupStandings).length === 0) {
@@ -188,14 +207,6 @@ function init() {
             buildBracketFromStandings(username);
         }
     }
-    
-    // Set initial official admin results (some simulated match values) if none were saved
-    if (!localStorage.getItem('wc-official-results')) {
-        prepopulateSimulatedResults();
-    }
-    
-    // Initial Render of UI
-    renderAll();
 }
 
 function loadStateFromStorage() {
@@ -258,6 +269,95 @@ function loadStateFromStorage() {
     }
 }
 
+const CLOUD_DB_BASE = 'https://kvdb.io/ashish_wc_2026_shared_pool_db_8x8zP5t7';
+
+async function loadStateFromCloud() {
+    try {
+        // Fetch shared cloud submissions
+        const subsRes = await fetch(`${CLOUD_DB_BASE}/submissions`);
+        if (subsRes.ok) {
+            const cloudSubs = await subsRes.json();
+            if (Array.isArray(cloudSubs)) {
+                cloudSubs.forEach(sub => {
+                    if (sub.id && sub.id !== 'actuals' && sub.id !== 'draft') {
+                        STATE.participants[sub.id] = sub;
+                    }
+                });
+                // Cache immediately to localStorage
+                const subs = [];
+                for (const username in STATE.participants) {
+                    if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
+                        subs.push(STATE.participants[username]);
+                    }
+                }
+                localStorage.setItem('wc-submissions', JSON.stringify(subs));
+            }
+        }
+    } catch (err) {
+        console.warn('Cloud sync - submissions fetch skipped or database is uninitialized:', err);
+    }
+
+    try {
+        // Fetch shared official results
+        const resultsRes = await fetch(`${CLOUD_DB_BASE}/official-results`);
+        if (resultsRes.ok) {
+            const parsed = await resultsRes.json();
+            if (parsed) {
+                STATE.officialResults.matches = parsed.matches || {};
+                STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
+                if (parsed.groupStandings && STATE.participants.actuals) {
+                    STATE.participants.actuals.groupStandings = parsed.groupStandings;
+                }
+                if (parsed.selectedThirds && STATE.participants.actuals) {
+                    STATE.participants.actuals.selectedThirds = parsed.selectedThirds;
+                }
+                // Cache immediately to localStorage
+                localStorage.setItem('wc-official-results', JSON.stringify({
+                    matches: STATE.officialResults.matches,
+                    advancingTeams: STATE.officialResults.advancingTeams,
+                    groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
+                    selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
+                }));
+            }
+        }
+    } catch (err) {
+        console.warn('Cloud sync - official results fetch skipped or database is uninitialized:', err);
+    }
+}
+
+async function saveStateToCloud() {
+    try {
+        const subs = [];
+        for (const username in STATE.participants) {
+            if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
+                subs.push(STATE.participants[username]);
+            }
+        }
+
+        // 1. Put submissions
+        await fetch(`${CLOUD_DB_BASE}/submissions`, {
+            method: 'PUT',
+            body: JSON.stringify(subs),
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        // 2. Put official results
+        const official = {
+            matches: STATE.officialResults.matches,
+            advancingTeams: STATE.officialResults.advancingTeams,
+            groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
+            selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
+        };
+        await fetch(`${CLOUD_DB_BASE}/official-results`, {
+            method: 'PUT',
+            body: JSON.stringify(official),
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } catch (err) {
+        console.error('Failed to sync to cloud:', err);
+    }
+}
+
 function saveStateToStorage() {
     // 1. Save submissions (skip actuals and draft)
     const subs = [];
@@ -280,6 +380,9 @@ function saveStateToStorage() {
         groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
         selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
     }));
+
+    // Centralized trigger: Sync all state asynchronously in the background (non-blocking)
+    saveStateToCloud().catch(err => console.warn('Cloud sync error:', err));
 }
 
 function resetDraft() {
