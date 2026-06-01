@@ -398,6 +398,13 @@ body.dark-theme .ambient-glow {
     margin-top: 0.25rem;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
 /* Header Avatar Badge */
 .user-profile-badge {
     background: var(--card-bg);
@@ -1207,7 +1214,7 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    margin-right: 1.25rem;
+    margin-right: 0;
     transition: var(--transition-smooth);
 }
 
