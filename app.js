@@ -854,7 +854,7 @@ function setupTabListeners() {
             // Enforce password protection for Admin Control tab
             if (tabName === 'admin') {
                 const password = prompt("Enter Admin Password:");
-                if (password !== 'worldcup') {
+                if (password !== 'worldcupx') {
                     alert("Access Denied: Incorrect Password");
                     return; // Abort tab switching
                 }
