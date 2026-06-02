@@ -265,7 +265,8 @@ function getKnockoutMatchIdsByFifaOrder() {
 
 // Official FIFA WC26 column layout (pair groupings + center finals).
 const BRACKET_ROUNDS_LAYOUT = [
-    { key: 'R32', title: 'Round of 32', side: 'left', pairs: [[1, 2], [3, 4], [9, 10], [11, 12]] },
+    // Left R32: M83/M84 & M81/M82 swapped in from right; M76/M78 & M79/M80 moved to right
+    { key: 'R32', title: 'Round of 32', side: 'left', pairs: [[1, 2], [3, 4], [5, 6], [7, 8]] },
     { key: 'R16', title: 'Round of 16', side: 'left', pairs: [[17, 18], [19, 20]] },
     { key: 'QF', title: 'Quarter-final', side: 'left', pairs: [[25, 26]] },
     { key: 'SF', title: 'Semi-final', side: 'left', singles: [29] },
@@ -273,7 +274,7 @@ const BRACKET_ROUNDS_LAYOUT = [
     { key: 'SF', title: 'Semi-final', side: 'right', singles: [30] },
     { key: 'QF', title: 'Quarter-final', side: 'right', pairs: [[27, 28]] },
     { key: 'R16', title: 'Round of 16', side: 'right', pairs: [[21, 22], [23, 24]] },
-    { key: 'R32', title: 'Round of 32', side: 'right', pairs: [[5, 6], [7, 8], [13, 14], [15, 16]] }
+    { key: 'R32', title: 'Round of 32', side: 'right', pairs: [[9, 10], [11, 12], [13, 14], [15, 16]] }
 ];
 
 // 3. Complete State: Contains Official Simulated Outcomes & Predictions
