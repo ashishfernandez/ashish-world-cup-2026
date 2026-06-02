@@ -1199,7 +1199,7 @@ function renderRankingsTable(scores) {
                     No Active Predictions Yet
                 </div>
                 <div style="font-size: 0.9rem; max-width: 440px; margin: 0 auto; line-height: 1.6; color: var(--text-dark);">
-                    Be the first to submit your predictions! Use <strong>Submit Picks</strong> in the sidebar to customize your profile and submit your predictions to the leaderboard.
+                    Be the first to submit your predictions! Use <strong>Submit Picks</strong> in the sidebar to submit your predictions to the leaderboard.
                 </div>
             </td>
         `;
