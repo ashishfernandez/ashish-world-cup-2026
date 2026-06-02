@@ -1311,52 +1311,196 @@ function renderRankingsTable(scores) {
 
 let _bracketConnectorRaf = null;
 
-function appendBracketVerticalConnector(matchCard, roundKey, matchIndex) {
-    if (roundKey === 'F') return;
-    matchCard.classList.add(matchIndex % 2 === 0 ? 'upper-pair-match' : 'lower-pair-match');
-    const connector = document.createElement('div');
-    connector.className = 'vertical-connector';
-    connector.setAttribute('aria-hidden', 'true');
-    matchCard.appendChild(connector);
+function getBracketMatchCard(canvas, matchId) {
+    const slot = canvas.querySelector(`.team-slot[data-match="${matchId}"]`);
+    return slot ? slot.closest('.match-card') : null;
 }
 
-function syncBracketVerticalConnectors(canvasEl) {
-    if (!canvasEl) return;
-    canvasEl.querySelectorAll('.round-column').forEach((col) => {
-        col.querySelectorAll('.match-card.upper-pair-match').forEach((upper) => {
-            const lower = upper.nextElementSibling;
-            if (!lower?.classList.contains('lower-pair-match')) return;
+function getBracketAnchor(canvas, el, side) {
+    const canvasRect = canvas.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    return {
+        x: (side === 'right' ? elRect.right : elRect.left) - canvasRect.left + canvas.scrollLeft,
+        y: elRect.top + elRect.height / 2 - canvasRect.top + canvas.scrollTop
+    };
+}
 
-            const upperConn = upper.querySelector('.vertical-connector');
-            const lowerConn = lower.querySelector('.vertical-connector');
-            if (!upperConn || !lowerConn) return;
+function getChampCardAnchor(canvas, card, side) {
+    return getBracketAnchor(canvas, card, side);
+}
 
-            const upperMid = upper.offsetTop + upper.offsetHeight / 2;
-            const lowerMid = lower.offsetTop + lower.offsetHeight / 2;
-            const junction = (upperMid + lowerMid) / 2;
+function getFeederMatchIds(matchId) {
+    return Object.entries(KNOCKOUTS_SCHEMA)
+        .filter(([, schema]) => schema.nextMatch === matchId)
+        .map(([id]) => parseInt(id, 10))
+        .sort((a, b) => a - b);
+}
 
-            upperConn.style.height = `${Math.max(1, junction - upperMid)}px`;
-            upperConn.style.top = '50%';
-            upperConn.style.bottom = 'auto';
+function ensureBracketConnectorSvg(canvas) {
+    let svg = canvas.querySelector('.bracket-connectors-svg');
+    if (!svg) {
+        svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'bracket-connectors-svg');
+        svg.setAttribute('aria-hidden', 'true');
+        canvas.insertBefore(svg, canvas.firstChild);
+    }
+    const w = Math.max(canvas.scrollWidth, canvas.offsetWidth);
+    const h = Math.max(canvas.scrollHeight, canvas.offsetHeight);
+    svg.setAttribute('width', String(w));
+    svg.setAttribute('height', String(h));
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    return svg;
+}
 
-            lowerConn.style.height = `${Math.max(1, lowerMid - junction)}px`;
-            lowerConn.style.top = 'auto';
-            lowerConn.style.bottom = '50%';
-        });
-    });
+function drawBracketSvgLine(svg, x1, y1, x2, y2) {
+    if (!Number.isFinite(x1 + y1 + x2 + y2)) return;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', String(Math.round(x1 * 10) / 10));
+    line.setAttribute('y1', String(Math.round(y1 * 10) / 10));
+    line.setAttribute('x2', String(Math.round(x2 * 10) / 10));
+    line.setAttribute('y2', String(Math.round(y2 * 10) / 10));
+    svg.appendChild(line);
+}
+
+/** Horizontal then vertical elbow */
+function drawBracketElbow(svg, x1, y1, x2, y2) {
+    if (Math.abs(x1 - x2) < 0.5) {
+        drawBracketSvgLine(svg, x1, y1, x2, y2);
+        return;
+    }
+    if (Math.abs(y1 - y2) < 0.5) {
+        drawBracketSvgLine(svg, x1, y1, x2, y2);
+        return;
+    }
+    drawBracketSvgLine(svg, x1, y1, x2, y1);
+    drawBracketSvgLine(svg, x2, y1, x2, y2);
+}
+
+function connectFeederPairToMatch(canvas, svg, feederIds, targetMatchId) {
+    if (feederIds.length !== 2) return;
+    const targetCard = getBracketMatchCard(canvas, targetMatchId);
+    const feederA = getBracketMatchCard(canvas, feederIds[0]);
+    const feederB = getBracketMatchCard(canvas, feederIds[1]);
+    if (!targetCard || !feederA || !feederB) return;
+
+    const targetCol = targetCard.closest('.round-column');
+    const enterSide = targetCol?.classList.contains('bracket-side-right') ? 'right' : 'left';
+    const exitSide = enterSide === 'left' ? 'right' : 'left';
+
+    const pA = getBracketAnchor(canvas, feederA, exitSide);
+    const pB = getBracketAnchor(canvas, feederB, exitSide);
+    const pT = getBracketAnchor(canvas, targetCard, enterSide);
+
+    const stub = Math.min(28, Math.abs(pT.x - pA.x) * 0.35, Math.abs(pT.x - pB.x) * 0.35);
+    const junctionX = enterSide === 'left'
+        ? Math.max(pA.x, pB.x) + stub
+        : Math.min(pA.x, pB.x) - stub;
+    const junctionY = (pA.y + pB.y) / 2;
+
+    drawBracketSvgLine(svg, pA.x, pA.y, junctionX, pA.y);
+    drawBracketSvgLine(svg, pB.x, pB.y, junctionX, pB.y);
+    drawBracketSvgLine(svg, junctionX, pA.y, junctionX, pB.y);
+    drawBracketElbow(svg, junctionX, junctionY, pT.x, pT.y);
+}
+
+function connectMatchPairOnSide(canvas, svg, matchIdA, matchIdB, side) {
+    const cardA = getBracketMatchCard(canvas, matchIdA);
+    const cardB = getBracketMatchCard(canvas, matchIdB);
+    if (!cardA || !cardB) return null;
+
+    const pA = getBracketAnchor(canvas, cardA, side);
+    const pB = getBracketAnchor(canvas, cardB, side);
+    const stub = 14;
+    const spineX = side === 'right' ? Math.max(pA.x, pB.x) + stub : Math.min(pA.x, pB.x) - stub;
+
+    drawBracketSvgLine(svg, pA.x, pA.y, spineX, pA.y);
+    drawBracketSvgLine(svg, pB.x, pB.y, spineX, pB.y);
+    drawBracketSvgLine(svg, spineX, pA.y, spineX, pB.y);
+
+    return { x: spineX, y: (pA.y + pB.y) / 2, yTop: pA.y, yBottom: pB.y };
+}
+
+function connectSemisToFinalColumn(canvas, svg) {
+    const sf29 = getBracketMatchCard(canvas, 29);
+    const sf30 = getBracketMatchCard(canvas, 30);
+    const finalCard = getBracketMatchCard(canvas, 32);
+    if (!sf29 || !sf30 || !finalCard) return;
+
+    const p29 = getBracketAnchor(canvas, sf29, 'right');
+    const p30 = getBracketAnchor(canvas, sf30, 'left');
+    const pFinal = getBracketAnchor(canvas, finalCard, 'left');
+
+    const junctionX = (p29.x + p30.x) / 2;
+    const junctionY = (p29.y + p30.y) / 2;
+
+    drawBracketSvgLine(svg, p29.x, p29.y, junctionX, p29.y);
+    drawBracketSvgLine(svg, p30.x, p30.y, junctionX, p30.y);
+    drawBracketSvgLine(svg, junctionX, p29.y, junctionX, p30.y);
+
+    drawBracketElbow(svg, junctionX, junctionY, pFinal.x, pFinal.y);
+}
+
+function connectFinalColumnToChampion(canvas, svg) {
+    const finalCard = getBracketMatchCard(canvas, 32);
+    const thirdCard = getBracketMatchCard(canvas, 31);
+    const champCol = canvas.querySelector('.champ-column');
+    if (!finalCard || !thirdCard || !champCol) return;
+
+    const champCard = champCol.querySelector('.champ-card:not(.silver-card):not(.bronze-card)');
+    const bronzeCard = champCol.querySelector('.champ-card.bronze-card');
+    if (!champCard || !bronzeCard) return;
+
+    const pairSpine = connectMatchPairOnSide(canvas, svg, 32, 31, 'right');
+    if (!pairSpine) return;
+
+    const pChamp = getChampCardAnchor(canvas, champCard, 'left');
+    const pBronze = getChampCardAnchor(canvas, bronzeCard, 'left');
+
+    drawBracketElbow(svg, pairSpine.x, pairSpine.yTop, pChamp.x, pChamp.y);
+    drawBracketElbow(svg, pairSpine.x, pairSpine.yBottom, pBronze.x, pBronze.y);
+
+    const silverCard = champCol.querySelector('.champ-card.silver-card');
+    if (silverCard) {
+        const pSilver = getChampCardAnchor(canvas, silverCard, 'left');
+        drawBracketSvgLine(svg, pairSpine.x, pairSpine.y, pSilver.x, pairSpine.y);
+    }
+}
+
+function drawBracketConnectors(canvas) {
+    if (!canvas) return;
+    const svg = ensureBracketConnectorSvg(canvas);
+
+    for (const matchId in KNOCKOUTS_SCHEMA) {
+        const schema = KNOCKOUTS_SCHEMA[matchId];
+        const id = parseInt(matchId, 10);
+        if (schema.round === 'R32' || schema.round === '3RD' || schema.round === 'F') continue;
+        const feeders = getFeederMatchIds(id);
+        if (feeders.length === 2) {
+            connectFeederPairToMatch(canvas, svg, feeders, id);
+        }
+    }
+
+    connectSemisToFinalColumn(canvas, svg);
+    connectFinalColumnToChampion(canvas, svg);
 }
 
 function scheduleBracketConnectorSync() {
     if (_bracketConnectorRaf) cancelAnimationFrame(_bracketConnectorRaf);
     _bracketConnectorRaf = requestAnimationFrame(() => {
-        _bracketConnectorRaf = null;
-        syncBracketVerticalConnectors(document.getElementById('bracket-tree'));
-        syncBracketVerticalConnectors(document.getElementById('wizard-bracket-tree'));
+        requestAnimationFrame(() => {
+            _bracketConnectorRaf = null;
+            drawBracketConnectors(document.getElementById('bracket-tree'));
+            drawBracketConnectors(document.getElementById('wizard-bracket-tree'));
+        });
     });
 }
 
 function setupBracketConnectorSync() {
     window.addEventListener('resize', scheduleBracketConnectorSync);
+    document.querySelectorAll('.bracket-scroll-container, .wizard-bracket-scroll-area').forEach((el) => {
+        el.addEventListener('scroll', scheduleBracketConnectorSync, { passive: true });
+    });
 }
 
 function formatKnockoutSlotLine(schema) {
@@ -1528,7 +1672,6 @@ function renderBracketColumns(canvas, p, options = {}) {
                     });
                 }
 
-                appendBracketVerticalConnector(matchCard, round.key, idx);
                 col.appendChild(matchCard);
             });
         }

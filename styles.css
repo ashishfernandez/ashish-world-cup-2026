@@ -1067,6 +1067,28 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
     width: max-content;
     justify-content: flex-start;
     vertical-align: top;
+    position: relative;
+}
+
+.bracket-connectors-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: visible;
+}
+
+.bracket-connectors-svg line {
+    stroke: var(--bracket-line-color);
+    stroke-width: 2;
+    stroke-linecap: square;
+}
+
+.bracket-canvas > .round-column,
+.bracket-canvas > .champ-column {
+    position: relative;
+    z-index: 1;
 }
 
 .round-column {
@@ -3028,72 +3050,5 @@ body.dark-theme .nav-item.active i {
     color: #000000 !important;
 }
 
-/* Bracket Connector Lines */
-.round-column:not(:last-of-type) .match-card::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: -1.75rem;
-    width: 1.75rem;
-    height: 2px;
-    background-color: var(--bracket-line-color);
-    z-index: 2;
-    pointer-events: none;
-}
-
-.round-column:not(:first-of-type) .match-card::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -1.75rem;
-    width: 1.75rem;
-    height: 2px;
-    background-color: var(--bracket-line-color);
-    z-index: 2;
-    pointer-events: none;
-}
-
-.champ-card::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -1.75rem;
-    width: 1.75rem;
-    height: 2px;
-    background-color: var(--bracket-line-color);
-    z-index: 2;
-    pointer-events: none;
-}
-
-/* Bracket vertical lines between paired matches (height set in app.js) */
-.vertical-connector {
-    position: absolute;
-    top: 50%;
-    right: -1.75rem;
-    width: 2px;
-    background-color: var(--bracket-line-color);
-    z-index: 2;
-    pointer-events: none;
-}
-
-.round-column .lower-pair-match .vertical-connector {
-    top: auto;
-    bottom: 50%;
-}
-
-/* Right half of split bracket — connectors flow toward center */
-.round-column.bracket-side-right:not(:last-of-type) .match-card::after {
-    right: auto;
-    left: -1.75rem;
-}
-
-.round-column.bracket-side-right:not(:first-of-type) .match-card::before {
-    left: auto;
-    right: -1.75rem;
-}
-
-.round-column.bracket-side-right .vertical-connector {
-    right: auto;
-    left: -1.75rem;
-}
+/* Bracket connector lines are drawn in app.js (SVG overlay) */
 
