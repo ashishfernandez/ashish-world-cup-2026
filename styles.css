@@ -1425,7 +1425,7 @@ body.dark-theme .bracket-team-row {
 
 .bracket-podium-row span {
     color: var(--text-muted);
-    text-transform: uppercase;
+    text-transform: none;
     font-weight: 700;
     font-size: 0.58rem;
     letter-spacing: 0.04em;
@@ -2985,6 +2985,44 @@ body.dark-theme .wizard-card {
 
 .wizard-card.step-4-active .wizard-bracket-scroll-area .bracket-scroll-container {
     min-height: 100%;
+}
+
+/* Wizard knockout step: no actuals comparison indicators */
+.wizard-bracket-scroll-area .bracket-pick-check {
+    display: none !important;
+}
+
+.wizard-bracket-scroll-area .bracket-match-box.correct-prediction .bracket-match-inner,
+.wizard-bracket-scroll-area .bracket-match-box.incorrect-prediction .bracket-match-inner {
+    border-color: var(--fifa-line);
+}
+
+/* Wizard podium (1st / 2nd / 3rd): ~30% larger than default */
+.wizard-bracket-scroll-area .bracket-podium {
+    margin-bottom: 2.1rem;
+    gap: 0.68rem;
+    max-width: 260px;
+}
+
+.wizard-bracket-scroll-area .bracket-podium-row {
+    font-size: 1.14rem;
+    padding: 0.68rem 0.94rem;
+    gap: 0.58rem;
+    border-radius: 8px;
+}
+
+.wizard-bracket-scroll-area .bracket-podium-row i {
+    font-size: 1.05rem;
+    width: 1.25rem;
+    text-align: center;
+}
+
+.wizard-bracket-scroll-area .bracket-podium-row span {
+    font-size: 0.98rem;
+}
+
+.wizard-bracket-scroll-area .bracket-podium-row strong {
+    font-size: 1.22rem;
 }
 
 .wizard-card.step-5-active .wizard-content,

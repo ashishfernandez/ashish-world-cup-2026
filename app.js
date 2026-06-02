@@ -129,6 +129,8 @@ function isTbdLabel(text) {
 
 const WIZARD_UNPICKED_LABEL = 'Please choose';
 
+const BRACKET_PODIUM_RANK_LABELS = { first: '1ST', second: '2ND', third: '3RD' };
+
 /** Bracket sheet: red prominent TBD when slot is unfilled */
 function teamNameSpanHtml(name) {
     const label = name || 'TBD';
@@ -1526,7 +1528,7 @@ function buildFifaTeamRowHtml(matchId, slot, p, schema, options) {
     const code = getKnockoutParticipant(p, matchId, slot);
     const slotInfo = formatBracketSlotLabel(p, matchId, slot, schema, mode);
     const isWinner = predictedWinner === code && Boolean(code);
-    const check = officialWinner && code && officialWinner === code
+    const check = mode === 'sheet' && officialWinner && code && officialWinner === code
         ? '<i class="fa-solid fa-circle-check bracket-pick-check"></i>' : '';
 
     return `
@@ -1564,8 +1566,8 @@ function createFifaMatchBox(matchId, p, schema, side, options) {
     inner.className = 'bracket-match-inner';
     inner.innerHTML = `
         <div class="bracket-match-date">${getMatchKickoff(schema)}</div>
-        ${buildFifaTeamRowHtml(matchId, 'home', p, schema, { nameHtml, predictedWinner, officialWinner, cursorStyle })}
-        ${buildFifaTeamRowHtml(matchId, 'away', p, schema, { nameHtml, predictedWinner, officialWinner, cursorStyle })}
+        ${buildFifaTeamRowHtml(matchId, 'home', p, schema, { nameHtml, predictedWinner, officialWinner, cursorStyle, mode })}
+        ${buildFifaTeamRowHtml(matchId, 'away', p, schema, { nameHtml, predictedWinner, officialWinner, cursorStyle, mode })}
     `;
 
     if (side === 'right') {
@@ -1608,9 +1610,9 @@ function appendBracketPodium(parentEl, p, options) {
     const podium = document.createElement('div');
     podium.className = 'bracket-podium';
     podium.innerHTML = `
-        <div class="bracket-podium-row gold"><i class="fa-solid fa-trophy"></i><span>1st</span><strong>${nameHtml(champTeam.name)}</strong></div>
-        <div class="bracket-podium-row silver"><i class="fa-solid fa-medal"></i><span>2nd</span><strong>${nameHtml(getTeamByCode(silverCode).name)}</strong></div>
-        <div class="bracket-podium-row bronze"><i class="fa-solid fa-medal"></i><span>3rd</span><strong>${nameHtml(getTeamByCode(bronzeCode).name)}</strong></div>
+        <div class="bracket-podium-row gold"><i class="fa-solid fa-trophy"></i><span>${BRACKET_PODIUM_RANK_LABELS.first}</span><strong>${nameHtml(champTeam.name)}</strong></div>
+        <div class="bracket-podium-row silver"><i class="fa-solid fa-medal"></i><span>${BRACKET_PODIUM_RANK_LABELS.second}</span><strong>${nameHtml(getTeamByCode(silverCode).name)}</strong></div>
+        <div class="bracket-podium-row bronze"><i class="fa-solid fa-medal"></i><span>${BRACKET_PODIUM_RANK_LABELS.third}</span><strong>${nameHtml(getTeamByCode(bronzeCode).name)}</strong></div>
     `;
     parentEl.appendChild(podium);
 }
@@ -1632,7 +1634,9 @@ function appendBracketPair(col, pairIds, p, side, options) {
 
 function renderBracketColumns(canvas, p, options = {}) {
     const mode = options.mode || 'sheet';
-    const results = options.results || STATE.officialResults;
+    const results = mode === 'wizard'
+        ? { matches: {} }
+        : (options.results || STATE.officialResults);
     const nameHtml = mode === 'wizard' ? wizardTeamNameSpanHtml : teamNameSpanHtml;
     const sheetInteractive = mode === 'sheet' && !p.submitted;
     const renderOpts = { mode, results, nameHtml, sheetInteractive };
@@ -2995,6 +2999,7 @@ function updateWizardTeamSlotElement(slot, teamCode, team, predictedWinner, sche
     const flagBox = slot.querySelector('.bracket-flag-box');
     if (label) label.innerHTML = wizardTeamNameSpanHtml(slotInfo.text);
     if (flagBox) flagBox.innerHTML = slotInfo.flag ? `<span class="team-flag">${slotInfo.flag}</span>` : '';
+    slot.querySelector('.bracket-pick-check')?.remove();
     slot.style.cursor = code && code !== 'TBD' ? 'pointer' : 'default';
 }
 
@@ -3030,9 +3035,16 @@ function refreshWizardChampColumn() {
         silverCode = champCode === home32 ? away32 : home32;
     }
     const rows = podium.querySelectorAll('.bracket-podium-row');
-    if (rows[0]) rows[0].querySelector('strong').innerHTML = wizardTeamNameSpanHtml(getTeamByCode(champCode).name);
-    if (rows[1]) rows[1].querySelector('strong').innerHTML = wizardTeamNameSpanHtml(getTeamByCode(silverCode).name);
-    if (rows[2]) rows[2].querySelector('strong').innerHTML = wizardTeamNameSpanHtml(getTeamByCode(p.bracketPicks[31] || '').name);
+    const rankLabels = [BRACKET_PODIUM_RANK_LABELS.first, BRACKET_PODIUM_RANK_LABELS.second, BRACKET_PODIUM_RANK_LABELS.third];
+    rows.forEach((row, i) => {
+        const label = row.querySelector('span');
+        const value = row.querySelector('strong');
+        if (label) label.textContent = rankLabels[i] || '';
+        if (!value) return;
+        if (i === 0) value.innerHTML = wizardTeamNameSpanHtml(getTeamByCode(champCode).name);
+        else if (i === 1) value.innerHTML = wizardTeamNameSpanHtml(getTeamByCode(silverCode).name);
+        else value.innerHTML = wizardTeamNameSpanHtml(getTeamByCode(p.bracketPicks[31] || '').name);
+    });
 }
 
 function refreshWizardBracketAfterPick(startMatchId) {
