@@ -1075,7 +1075,16 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
     width: 250px;
     position: relative;
     overflow: visible;
+    z-index: 1;
 }
+
+/* Later knockout columns stack above earlier rounds so picks stay clickable */
+#wizard-bracket-tree > .round-column:nth-child(1) { z-index: 1; }
+#wizard-bracket-tree > .round-column:nth-child(2) { z-index: 2; }
+#wizard-bracket-tree > .round-column:nth-child(3) { z-index: 3; }
+#wizard-bracket-tree > .round-column:nth-child(4) { z-index: 4; }
+#wizard-bracket-tree > .round-column:nth-child(5) { z-index: 5; }
+#wizard-bracket-tree > .champ-column { z-index: 6; }
 
 .round-column-title {
     font-family: var(--font-heading);
@@ -1129,6 +1138,8 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
     font-size: 0.85rem;
     color: var(--text-muted);
     transition: var(--transition-smooth);
+    position: relative;
+    z-index: 4;
 }
 
 .team-slot-info {

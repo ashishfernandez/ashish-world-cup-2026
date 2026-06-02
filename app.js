@@ -1569,15 +1569,16 @@ function getKnockoutParticipant(participant, matchId, slot) {
     }
 
     // Knockout rounds: derive teams dynamically from the winners of parent matches
-    const parentMatches = Object.values(KNOCKOUTS_SCHEMA).filter(m => m.nextMatch === matchId);
-    
+    const parentMatches = Object.values(KNOCKOUTS_SCHEMA)
+        .filter(m => m.nextMatch === matchId)
+        .sort((a, b) => parseInt(a.name.replace('M', ''), 10) - parseInt(b.name.replace('M', ''), 10));
+
     if (slot === 'home') {
         const parentMatch = parentMatches[0];
-        return parentMatch ? participant.bracketPicks[parentMatch.name.replace('M','')] : '';
-    } else {
-        const parentMatch = parentMatches[1];
-        return parentMatch ? participant.bracketPicks[parentMatch.name.replace('M','')] : '';
+        return parentMatch ? participant.bracketPicks[parseInt(parentMatch.name.replace('M', ''), 10)] : '';
     }
+    const parentMatch = parentMatches[1];
+    return parentMatch ? participant.bracketPicks[parseInt(parentMatch.name.replace('M', ''), 10)] : '';
 }
 
 // Keep predicted brackets logically clean on selection changes
@@ -2717,6 +2718,126 @@ window.moveWizardTeam = function(groupName, currentIndex, direction) {
     renderWizardGroups();
 };
 
+let _wizardBracketPickBound = false;
+
+function getBracketMatchesToRefreshAfterPick(matchId) {
+    const ids = new Set([matchId, 31]);
+    let nextId = KNOCKOUTS_SCHEMA[matchId]?.nextMatch;
+    while (nextId) {
+        ids.add(nextId);
+        nextId = KNOCKOUTS_SCHEMA[nextId]?.nextMatch;
+    }
+    return Array.from(ids).sort((a, b) => a - b);
+}
+
+function updateWizardTeamSlotElement(slot, teamCode, team, predictedWinner) {
+    const code = teamCode || '';
+    slot.setAttribute('data-team', code);
+    slot.classList.toggle('predicted-winner', !!code && predictedWinner === code);
+    const info = slot.querySelector('.team-slot-info');
+    if (info) {
+        info.innerHTML = `<span class="team-flag">${team.flag}</span>${wizardTeamNameSpanHtml(team.name)}`;
+    }
+    slot.style.cursor = code && code !== 'TBD' ? 'pointer' : 'default';
+}
+
+function updateWizardMatchCardSlots(p, matchId) {
+    const canvas = document.getElementById('wizard-bracket-tree');
+    if (!canvas) return;
+
+    const slots = canvas.querySelectorAll(`.team-slot[data-match="${matchId}"]`);
+    if (!slots.length) return;
+
+    const predictedWinner = p.bracketPicks[matchId] || '';
+    const homeCode = getKnockoutParticipant(p, matchId, 'home');
+    const awayCode = getKnockoutParticipant(p, matchId, 'away');
+    const homeTeam = getTeamByCode(homeCode);
+    const awayTeam = getTeamByCode(awayCode);
+
+    updateWizardTeamSlotElement(slots[0], homeCode, homeTeam, predictedWinner);
+    updateWizardTeamSlotElement(slots[1], awayCode, awayTeam, predictedWinner);
+}
+
+function refreshWizardChampColumn() {
+    const canvas = document.getElementById('wizard-bracket-tree');
+    const p = STATE.participants.draft;
+    if (!canvas || !p) return;
+
+    const col = canvas.querySelector('.champ-column');
+    if (!col) return;
+
+    const champCode = p.bracketPicks[32] || '';
+    const champTeam = getTeamByCode(champCode);
+    const homeCode32 = getKnockoutParticipant(p, 32, 'home');
+    const awayCode32 = getKnockoutParticipant(p, 32, 'away');
+    let silverCode = '';
+    if (champCode && homeCode32 && awayCode32) {
+        silverCode = champCode === homeCode32 ? awayCode32 : homeCode32;
+    }
+    const silverTeam = getTeamByCode(silverCode);
+    const bronzeCode = p.bracketPicks[31] || '';
+    const bronzeTeam = getTeamByCode(bronzeCode);
+
+    const champSpot = col.querySelector('.champ-card:not(.silver-card):not(.bronze-card) .champ-team-spot');
+    const silverSpot = col.querySelector('.silver-card .champ-team-spot');
+    const bronzeSpot = col.querySelector('.bronze-card .champ-team-spot');
+
+    if (champSpot) {
+        champSpot.innerHTML = `<span class="team-flag">${champTeam.flag}</span>${wizardTeamNameSpanHtml(champTeam.name)}`;
+    }
+    if (silverSpot) {
+        silverSpot.innerHTML = `<span class="team-flag">${silverTeam.flag}</span>${wizardTeamNameSpanHtml(silverTeam.name)}`;
+    }
+    if (bronzeSpot) {
+        bronzeSpot.innerHTML = `<span class="team-flag">${bronzeTeam.flag}</span>${wizardTeamNameSpanHtml(bronzeTeam.name)}`;
+    }
+}
+
+function refreshWizardBracketAfterPick(startMatchId) {
+    const p = STATE.participants.draft;
+    if (!p) return;
+
+    getBracketMatchesToRefreshAfterPick(startMatchId).forEach((matchId) => {
+        updateWizardMatchCardSlots(p, matchId);
+    });
+    refreshWizardChampColumn();
+    scheduleBracketConnectorSync();
+    updateWizardNextButtonState();
+}
+
+function handleWizardBracketPick(matchId, teamCode) {
+    const p = STATE.participants.draft;
+    if (!p || !teamCode || teamCode === 'TBD') return;
+
+    p.bracketPicks[matchId] = teamCode;
+    if (matchId === 32) {
+        p.champ = teamCode;
+    }
+
+    propagateWinner(p, matchId, teamCode);
+    refreshWizardBracketAfterPick(matchId);
+}
+
+function bindWizardBracketPickHandler() {
+    const canvas = document.getElementById('wizard-bracket-tree');
+    if (!canvas || _wizardBracketPickBound) return;
+    _wizardBracketPickBound = true;
+
+    canvas.addEventListener('click', (e) => {
+        const slot = e.target.closest('.team-slot');
+        if (!slot || !canvas.contains(slot)) return;
+
+        const team = slot.getAttribute('data-team');
+        if (!team || team === 'TBD') return;
+
+        const matchId = parseInt(slot.getAttribute('data-match'), 10);
+        if (!matchId) return;
+
+        e.stopPropagation();
+        handleWizardBracketPick(matchId, team);
+    });
+}
+
 // Render interactive bracket sheet tree inside predictions wizard
 function renderWizardBracket() {
     const canvas = document.getElementById('wizard-bracket-tree');
@@ -2835,23 +2956,6 @@ function renderWizardBracket() {
                     </div>
                 `;
 
-                matchCard.querySelectorAll('.team-slot').forEach(slot => {
-                    slot.addEventListener('click', () => {
-                        const mId = parseInt(slot.getAttribute('data-match'));
-                        const team = slot.getAttribute('data-team');
-                        
-                        if (!team || team === 'TBD') return;
-
-                        p.bracketPicks[mId] = team;
-                        if (mId === 32) {
-                            p.champ = team;
-                        }
-
-                        propagateWinner(p, mId, team);
-                        renderWizardBracket();
-                    });
-                });
-
                 appendBracketVerticalConnector(matchCard, round.key, idx);
                 col.appendChild(matchCard);
             });
@@ -2860,9 +2964,8 @@ function renderWizardBracket() {
         canvas.appendChild(col);
     });
 
+    bindWizardBracketPickHandler();
     scheduleBracketConnectorSync();
-    
-    // Reactively update Wizard Next button lit/disabled state on pick selection changes
     updateWizardNextButtonState();
 }
 
@@ -3047,7 +3150,7 @@ function makeContainerDraggable(container, options = {}) {
     container.addEventListener('touchcancel', endDrag);
 
     container.addEventListener('click', (e) => {
-        if (hasMoved) {
+        if (hasMoved && !isPickableTeamSlotTarget(e.target)) {
             e.preventDefault();
             e.stopPropagation();
         }
