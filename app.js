@@ -194,51 +194,63 @@ function leaderboardPredictionBadge(team) {
 // 2. Bracket Matches Setup Schema (Matches 1-32)
 // This mirrors the official World Cup 2026 Knockout Path mapping
 const KNOCKOUTS_SCHEMA = {
-    // Round of 32 (Matches 1-16)
-    1: { round: 'R32', label: 'Match 1', name: 'M1', venue: 'Boston', date: 'Jun 28', defaultHome: '1E', defaultAway: '3ABCDF', nextMatch: 17, slot: 'home' },
-    2: { round: 'R32', label: 'Match 2', name: 'M2', venue: 'New York', date: 'Jun 30', defaultHome: '1I', defaultAway: '3CDFGH', nextMatch: 17, slot: 'away' },
-    3: { round: 'R32', label: 'Match 3', name: 'M3', venue: 'Los Angeles', date: 'Jun 28', defaultHome: '2A', defaultAway: '2B', nextMatch: 18, slot: 'home' },
-    4: { round: 'R32', label: 'Match 4', name: 'M4', venue: 'Monterrey', date: 'Jun 29', defaultHome: '1F', defaultAway: '2C', nextMatch: 18, slot: 'away' },
-    5: { round: 'R32', label: 'Match 5', name: 'M5', venue: 'Toronto', date: 'Jul 02', defaultHome: '2K', defaultAway: '2L', nextMatch: 19, slot: 'home' },
-    6: { round: 'R32', label: 'Match 6', name: 'M6', venue: 'Los Angeles', date: 'Jul 02', defaultHome: '1H', defaultAway: '2J', nextMatch: 19, slot: 'away' },
-    7: { round: 'R32', label: 'Match 7', name: 'M7', venue: 'San Francisco', date: 'Jul 01', defaultHome: '1D', defaultAway: '3BEFIJ', nextMatch: 20, slot: 'home' },
-    8: { round: 'R32', label: 'Match 8', name: 'M8', venue: 'Seattle', date: 'Jul 01', defaultHome: '1G', defaultAway: '3AEHIJ', nextMatch: 20, slot: 'away' },
-    
-    9: { round: 'R32', label: 'Match 9', name: 'M9', venue: 'Houston', date: 'Jun 29', defaultHome: '1C', defaultAway: '2F', nextMatch: 21, slot: 'home' },
-    10: { round: 'R32', label: 'Match 10', name: 'M10', venue: 'Dallas', date: 'Jun 30', defaultHome: '2E', defaultAway: '2I', nextMatch: 21, slot: 'away' },
-    11: { round: 'R32', label: 'Match 11', name: 'M11', venue: 'Mexico City', date: 'Jun 30', defaultHome: '1A', defaultAway: '3CEFHI', nextMatch: 22, slot: 'home' },
-    12: { round: 'R32', label: 'Match 12', name: 'M12', venue: 'Atlanta', date: 'Jul 01', defaultHome: '1L', defaultAway: '3EHIJK', nextMatch: 22, slot: 'away' },
-    13: { round: 'R32', label: 'Match 13', name: 'M13', venue: 'Miami', date: 'Jul 03', defaultHome: '1J', defaultAway: '2H', nextMatch: 23, slot: 'home' },
-    14: { round: 'R32', label: 'Match 14', name: 'M14', venue: 'Dallas', date: 'Jul 03', defaultHome: '2D', defaultAway: '2G', nextMatch: 23, slot: 'away' },
-    15: { round: 'R32', label: 'Match 15', name: 'M15', venue: 'Vancouver', date: 'Jul 02', defaultHome: '1B', defaultAway: '3EFGLI', nextMatch: 24, slot: 'home' },
-    16: { round: 'R32', label: 'Match 16', name: 'M16', venue: 'Kansas City', date: 'Jul 03', defaultHome: '1K', defaultAway: '3DEJLL', nextMatch: 24, slot: 'away' },
+    // Round of 32 (internal 1–16 → FIFA M73–M88); left bracket 1–8, right bracket 9–16
+    1: { round: 'R32', label: 'M74', name: 'M1', venue: 'Boston', date: 'Jun 28', defaultHome: '1E', defaultAway: '3ABCDF', nextMatch: 17, slot: 'home' },
+    2: { round: 'R32', label: 'M77', name: 'M2', venue: 'New York', date: 'Jun 30', defaultHome: '1I', defaultAway: '3CDFGH', nextMatch: 17, slot: 'away' },
+    3: { round: 'R32', label: 'M73', name: 'M3', venue: 'Los Angeles', date: 'Jun 28', defaultHome: '2A', defaultAway: '2B', nextMatch: 18, slot: 'home' },
+    4: { round: 'R32', label: 'M75', name: 'M4', venue: 'Monterrey', date: 'Jun 29', defaultHome: '1F', defaultAway: '2C', nextMatch: 18, slot: 'away' },
+    5: { round: 'R32', label: 'M83', name: 'M5', venue: 'Toronto', date: 'Jul 02', defaultHome: '2K', defaultAway: '2L', nextMatch: 19, slot: 'home' },
+    6: { round: 'R32', label: 'M84', name: 'M6', venue: 'Los Angeles', date: 'Jul 02', defaultHome: '1H', defaultAway: '2J', nextMatch: 19, slot: 'away' },
+    7: { round: 'R32', label: 'M81', name: 'M7', venue: 'San Francisco', date: 'Jul 01', defaultHome: '1D', defaultAway: '3BEFIJ', nextMatch: 20, slot: 'home' },
+    8: { round: 'R32', label: 'M82', name: 'M8', venue: 'Seattle', date: 'Jul 01', defaultHome: '1G', defaultAway: '3AEHIJ', nextMatch: 20, slot: 'away' },
 
-    // Round of 16 (Matches 17-24)
-    17: { round: 'R16', label: 'Match 74', name: 'M17', venue: 'Philadelphia', date: 'Jul 04', nextMatch: 25, slot: 'home' },
-    18: { round: 'R16', label: 'Match 77', name: 'M18', venue: 'Houston', date: 'Jul 04', nextMatch: 25, slot: 'away' },
-    19: { round: 'R16', label: 'Match 73', name: 'M19', venue: 'Dallas', date: 'Jul 05', nextMatch: 26, slot: 'home' },
-    20: { round: 'R16', label: 'Match 75', name: 'M20', venue: 'Seattle', date: 'Jul 06', nextMatch: 26, slot: 'away' },
-    21: { round: 'R16', label: 'Match 76', name: 'M21', venue: 'New York', date: 'Jul 05', nextMatch: 27, slot: 'home' },
-    22: { round: 'R16', label: 'Match 78', name: 'M22', venue: 'Mexico City', date: 'Jul 05', nextMatch: 27, slot: 'away' },
-    23: { round: 'R16', label: 'Match 79', name: 'M23', venue: 'Atlanta', date: 'Jul 07', nextMatch: 28, slot: 'home' },
-    24: { round: 'R16', label: 'Match 80', name: 'M24', venue: 'Vancouver', date: 'Jul 07', nextMatch: 28, slot: 'away' },
+    9: { round: 'R32', label: 'M76', name: 'M9', venue: 'Houston', date: 'Jun 29', defaultHome: '1C', defaultAway: '2F', nextMatch: 21, slot: 'home' },
+    10: { round: 'R32', label: 'M78', name: 'M10', venue: 'Dallas', date: 'Jun 30', defaultHome: '2E', defaultAway: '2I', nextMatch: 21, slot: 'away' },
+    11: { round: 'R32', label: 'M79', name: 'M11', venue: 'Mexico City', date: 'Jun 30', defaultHome: '1A', defaultAway: '3CEFHI', nextMatch: 22, slot: 'home' },
+    12: { round: 'R32', label: 'M80', name: 'M12', venue: 'Atlanta', date: 'Jul 01', defaultHome: '1L', defaultAway: '3EHIJK', nextMatch: 22, slot: 'away' },
+    13: { round: 'R32', label: 'M86', name: 'M13', venue: 'Miami', date: 'Jul 03', defaultHome: '1J', defaultAway: '2H', nextMatch: 23, slot: 'home' },
+    14: { round: 'R32', label: 'M88', name: 'M14', venue: 'Dallas', date: 'Jul 03', defaultHome: '2D', defaultAway: '2G', nextMatch: 23, slot: 'away' },
+    15: { round: 'R32', label: 'M85', name: 'M15', venue: 'Vancouver', date: 'Jul 02', defaultHome: '1B', defaultAway: '3EFGIJ', nextMatch: 24, slot: 'home' },
+    16: { round: 'R32', label: 'M87', name: 'M16', venue: 'Kansas City', date: 'Jul 03', defaultHome: '1K', defaultAway: '3DEIJL', nextMatch: 24, slot: 'away' },
 
-    // Quarterfinals (Matches 25-28)
-    25: { round: 'QF', label: 'Match 89', name: 'M25', venue: 'Boston', date: 'Jul 09', nextMatch: 29, slot: 'home' },
-    26: { round: 'QF', label: 'Match 90', name: 'M26', venue: 'Los Angeles', date: 'Jul 10', nextMatch: 29, slot: 'away' },
-    27: { round: 'QF', label: 'Match 91', name: 'M27', venue: 'Miami', date: 'Jul 11', nextMatch: 30, slot: 'home' },
-    28: { round: 'QF', label: 'Match 92', name: 'M28', venue: 'Kansas City', date: 'Jul 11', nextMatch: 30, slot: 'away' },
+    // Round of 16 (17–24 → FIFA M89–M96)
+    17: { round: 'R16', label: 'M89', name: 'M17', venue: 'Philadelphia', date: 'Jul 04', nextMatch: 25, slot: 'home' },
+    18: { round: 'R16', label: 'M90', name: 'M18', venue: 'Houston', date: 'Jul 04', nextMatch: 25, slot: 'away' },
+    19: { round: 'R16', label: 'M93', name: 'M19', venue: 'Dallas', date: 'Jul 05', nextMatch: 26, slot: 'home' },
+    20: { round: 'R16', label: 'M94', name: 'M20', venue: 'Seattle', date: 'Jul 06', nextMatch: 26, slot: 'away' },
+    21: { round: 'R16', label: 'M91', name: 'M21', venue: 'New York', date: 'Jul 05', nextMatch: 27, slot: 'home' },
+    22: { round: 'R16', label: 'M92', name: 'M22', venue: 'Mexico City', date: 'Jul 05', nextMatch: 27, slot: 'away' },
+    23: { round: 'R16', label: 'M95', name: 'M23', venue: 'Atlanta', date: 'Jul 07', nextMatch: 28, slot: 'home' },
+    24: { round: 'R16', label: 'M96', name: 'M24', venue: 'Vancouver', date: 'Jul 07', nextMatch: 28, slot: 'away' },
 
-    // Semifinals (Matches 29-30)
-    29: { round: 'SF', label: 'Match 97', name: 'M29', venue: 'Dallas', date: 'Jul 14', nextMatch: 32, slot: 'home' }, // Winner goes to Final
-    30: { round: 'SF', label: 'Match 98', name: 'M30', venue: 'Atlanta', date: 'Jul 15', nextMatch: 32, slot: 'away' }, // Winner goes to Final
+    // Quarterfinals (25–28 → FIFA M97–M100)
+    25: { round: 'QF', label: 'M97', name: 'M25', venue: 'Boston', date: 'Jul 09', nextMatch: 29, slot: 'home' },
+    26: { round: 'QF', label: 'M98', name: 'M26', venue: 'Los Angeles', date: 'Jul 10', nextMatch: 29, slot: 'away' },
+    27: { round: 'QF', label: 'M99', name: 'M27', venue: 'Miami', date: 'Jul 11', nextMatch: 30, slot: 'home' },
+    28: { round: 'QF', label: 'M100', name: 'M28', venue: 'Kansas City', date: 'Jul 11', nextMatch: 30, slot: 'away' },
 
-    // 3rd Place (Match 31)
-    31: { round: '3RD', label: '3rd Place', name: 'M31', venue: 'Miami', date: 'Jul 18' },
+    // Semifinals (29–30 → FIFA M101–M102)
+    29: { round: 'SF', label: 'M101', name: 'M29', venue: 'Dallas', date: 'Jul 14', nextMatch: 32, slot: 'home' },
+    30: { round: 'SF', label: 'M102', name: 'M30', venue: 'Atlanta', date: 'Jul 15', nextMatch: 32, slot: 'away' },
 
-    // Final (Match 32)
-    32: { round: 'F', label: 'Final Match', name: 'M32', venue: 'New York', date: 'Jul 19' }
+    // 3rd place & final (31–32 → FIFA M103–M104)
+    31: { round: '3RD', label: 'M103', name: 'M31', venue: 'Miami', date: 'Jul 18' },
+    32: { round: 'F', label: 'M104', name: 'M32', venue: 'New York', date: 'Jul 19' }
 };
+
+// Split-bracket column order: left R32 → center → right R32 (official WC26 draw)
+const BRACKET_ROUNDS_LAYOUT = [
+    { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8], side: 'left' },
+    { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20], side: 'left' },
+    { key: 'QF', title: 'Quarters', matches: [25, 26], side: 'left' },
+    { key: 'SF', title: 'Semis', matches: [29], side: 'left' },
+    { key: 'F', title: 'Gold & Bronze', matches: [32, 31], side: 'center' },
+    { key: 'CHAMP', title: 'Champion', side: 'center' },
+    { key: 'SF', title: 'Semis', matches: [30], side: 'right' },
+    { key: 'QF', title: 'Quarters', matches: [27, 28], side: 'right' },
+    { key: 'R16', title: 'Round of 16', matches: [21, 22, 23, 24], side: 'right' },
+    { key: 'R32', title: 'Round of 32', matches: [9, 10, 11, 12, 13, 14, 15, 16], side: 'right' }
+];
 
 // 3. Complete State: Contains Official Simulated Outcomes & Predictions
 const STATE = {
@@ -1347,6 +1359,184 @@ function setupBracketConnectorSync() {
     window.addEventListener('resize', scheduleBracketConnectorSync);
 }
 
+function formatKnockoutSlotLine(schema) {
+    if (!schema?.defaultHome || !schema?.defaultAway) return '';
+    return `${schema.defaultHome} vs ${schema.defaultAway}`;
+}
+
+function buildMatchCardMetaHtml(matchSchema, matchId) {
+    const dateLine = `${matchSchema.date} · ${matchSchema.venue}`;
+    const slotLine = matchSchema.round === 'R32' ? formatKnockoutSlotLine(matchSchema) : '';
+    if (slotLine) {
+        return `
+            <div class="match-info-meta">
+                <span>${matchSchema.label}</span>
+                <span class="match-slot-codes">${slotLine}</span>
+            </div>
+            <div class="match-info-meta match-info-sub">
+                <span>${dateLine}</span>
+            </div>`;
+    }
+    return `
+        <div class="match-info-meta">
+            <span>${matchSchema.label}</span>
+            <span>${dateLine}</span>
+        </div>`;
+}
+
+function appendChampionColumn(col, p, options) {
+    const results = options.results || STATE.officialResults;
+    const nameHtml = options.nameHtml || teamNameSpanHtml;
+    const showResultBorders = options.showResultBorders === true;
+
+    const champCode = p.bracketPicks[32] || '';
+    const champTeam = getTeamByCode(champCode);
+    let borderStyle = 'border: 2px solid rgba(245,158,11,0.4)';
+    if (showResultBorders) {
+        const isWinnerCorrect = results.matches[32] && results.matches[32] === champCode;
+        const isWinnerIncorrect = results.matches[32] && results.matches[32] !== champCode;
+        if (isWinnerCorrect) borderStyle = 'border: 2px solid var(--accent-emerald)';
+        if (isWinnerIncorrect) borderStyle = 'border: 2px solid var(--accent-crimson)';
+    }
+
+    const champCard = document.createElement('div');
+    champCard.className = 'champ-card';
+    champCard.style = borderStyle;
+    champCard.innerHTML = `
+        <i class="fa-solid fa-trophy crown-icon"></i>
+        <div class="champ-title">CHAMPION</div>
+        <div class="champ-team-spot">
+            <span class="team-flag">${champTeam.flag}</span>
+            ${nameHtml(champTeam.name)}
+        </div>
+    `;
+    col.appendChild(champCard);
+
+    let silverCode = '';
+    const homeCode32 = getKnockoutParticipant(p, 32, 'home');
+    const awayCode32 = getKnockoutParticipant(p, 32, 'away');
+    if (champCode && homeCode32 && awayCode32) {
+        silverCode = (champCode === homeCode32) ? awayCode32 : homeCode32;
+    }
+    const silverTeam = getTeamByCode(silverCode);
+    const silverCard = document.createElement('div');
+    silverCard.className = 'champ-card silver-card';
+    silverCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(203, 213, 225, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(203, 213, 225, 0.1) 100%); box-shadow: 0 10px 30px rgba(203, 213, 225, 0.05);';
+    silverCard.innerHTML = `
+        <i class="fa-solid fa-medal crown-icon" style="color: #cbd5e1; filter: drop-shadow(0 0 12px rgba(203, 213, 225, 0.2));"></i>
+        <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
+        <div class="champ-team-spot">
+            <span class="team-flag">${silverTeam.flag}</span>
+            ${nameHtml(silverTeam.name)}
+        </div>
+    `;
+    col.appendChild(silverCard);
+
+    const bronzeCode = p.bracketPicks[31] || '';
+    const bronzeTeam = getTeamByCode(bronzeCode);
+    const bronzeCard = document.createElement('div');
+    bronzeCard.className = 'champ-card bronze-card';
+    bronzeCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(245, 158, 11, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.1) 100%); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05);';
+    bronzeCard.innerHTML = `
+        <i class="fa-solid fa-medal crown-icon" style="color: #fbbf24; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.2));"></i>
+        <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
+        <div class="champ-team-spot">
+            <span class="team-flag">${bronzeTeam.flag}</span>
+            ${nameHtml(bronzeTeam.name)}
+        </div>
+    `;
+    col.appendChild(bronzeCard);
+}
+
+function renderBracketColumns(canvas, p, options = {}) {
+    const mode = options.mode || 'sheet';
+    const results = options.results || STATE.officialResults;
+    const nameHtml = mode === 'wizard' ? wizardTeamNameSpanHtml : teamNameSpanHtml;
+    const sheetInteractive = mode === 'sheet' && !p.submitted;
+
+    BRACKET_ROUNDS_LAYOUT.forEach((round, colIndex) => {
+        const col = document.createElement('div');
+        if (round.key === 'CHAMP') {
+            col.className = 'champ-column';
+        } else {
+            col.className = 'round-column' + (round.side === 'right' ? ' bracket-side-right' : '');
+        }
+        col.style.zIndex = String(colIndex + 1);
+
+        const header = document.createElement('div');
+        header.className = 'round-column-title';
+        header.innerText = round.title;
+        col.appendChild(header);
+
+        if (round.key === 'CHAMP') {
+            appendChampionColumn(col, p, {
+                results,
+                nameHtml,
+                showResultBorders: mode === 'sheet'
+            });
+        } else {
+            round.matches.forEach((matchId, idx) => {
+                const matchSchema = KNOCKOUTS_SCHEMA[matchId];
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card';
+
+                const homeCode = getKnockoutParticipant(p, matchId, 'home');
+                const awayCode = getKnockoutParticipant(p, matchId, 'away');
+                const homeTeam = getTeamByCode(homeCode);
+                const awayTeam = getTeamByCode(awayCode);
+                const predictedWinner = p.bracketPicks[matchId] || '';
+                const officialWinner = results.matches[matchId] || '';
+
+                if (mode === 'sheet' && officialWinner) {
+                    matchCard.classList.add(predictedWinner === officialWinner ? 'correct-prediction' : 'incorrect-prediction');
+                }
+
+                const cursorStyle = sheetInteractive || mode === 'wizard'
+                    ? 'cursor: pointer;'
+                    : 'cursor: default !important;';
+
+                matchCard.innerHTML = `
+                    ${buildMatchCardMetaHtml(matchSchema, matchId)}
+                    <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="${cursorStyle}">
+                        <div class="team-slot-info">
+                            <span class="team-flag">${homeTeam.flag}</span>
+                            ${nameHtml(homeTeam.name)}
+                        </div>
+                        <span class="team-score">${mode === 'sheet' && homeCode && officialWinner === homeCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
+                    </div>
+                    <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="${cursorStyle}">
+                        <div class="team-slot-info">
+                            <span class="team-flag">${awayTeam.flag}</span>
+                            ${nameHtml(awayTeam.name)}
+                        </div>
+                        <span class="team-score">${mode === 'sheet' && awayCode && officialWinner === awayCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
+                    </div>
+                `;
+
+                if (sheetInteractive) {
+                    matchCard.querySelectorAll('.team-slot').forEach(slot => {
+                        slot.addEventListener('click', () => {
+                            const mId = parseInt(slot.getAttribute('data-match'), 10);
+                            const team = slot.getAttribute('data-team');
+                            if (!team || team === 'TBD') return;
+                            p.bracketPicks[mId] = team;
+                            if (mId === 32) p.champ = team;
+                            propagateWinner(p, mId, team);
+                            renderBracket();
+                            renderLeaderboard();
+                        });
+                    });
+                }
+
+                appendBracketVerticalConnector(matchCard, round.key, idx);
+                col.appendChild(matchCard);
+            });
+        }
+
+        canvas.appendChild(col);
+    });
+}
+
 // 9. Render Interactive Tournament Bracket Sheet
 function renderBracket() {
     const canvas = document.getElementById('bracket-tree');
@@ -1397,162 +1587,7 @@ function renderBracket() {
         }
     }
 
-    // Define the rounds columns to draw
-    const roundsList = [
-        { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
-        { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
-        { key: 'QF', title: 'Quarters', matches: [25, 26, 27, 28] },
-        { key: 'SF', title: 'Semis', matches: [29, 30] },
-        { key: 'F', title: 'Gold & Bronze', matches: [32, 31] }, 
-        { key: 'CHAMP', title: 'Champion' }
-    ];
-
-    roundsList.forEach(round => {
-        const col = document.createElement('div');
-        col.className = round.key === 'CHAMP' ? 'champ-column' : 'round-column';
-        
-        // Add round headers
-        const header = document.createElement('div');
-        header.className = 'round-column-title';
-        header.innerText = round.title;
-        col.appendChild(header);
-
-        if (round.key === 'CHAMP') {
-            const champCode = p.bracketPicks[32] || '';
-            const champTeam = getTeamByCode(champCode);
-            const isWinnerCorrect = results.matches[32] && results.matches[32] === champCode;
-            const isWinnerIncorrect = results.matches[32] && results.matches[32] !== champCode;
-
-            let borderStyle = 'border: 2px solid rgba(245,158,11,0.4)';
-            if (isWinnerCorrect) borderStyle = 'border: 2px solid var(--accent-emerald)';
-            if (isWinnerIncorrect) borderStyle = 'border: 2px solid var(--accent-crimson)';
-
-            const champCard = document.createElement('div');
-            champCard.className = 'champ-card';
-            champCard.style = borderStyle;
-            champCard.innerHTML = `
-                <i class="fa-solid fa-trophy crown-icon"></i>
-                <div class="champ-title">CHAMPION</div>
-                <div class="champ-team-spot">
-                    <span class="team-flag">${champTeam.flag}</span>
-                    ${teamNameSpanHtml(champTeam.name)}
-                </div>
-            `;
-            col.appendChild(champCard);
-
-            // Silver Card (2nd Place) - Exact same shape and size as Champion card
-            let silverCode = '';
-            const homeCode32 = getKnockoutParticipant(p, 32, 'home');
-            const awayCode32 = getKnockoutParticipant(p, 32, 'away');
-            if (champCode && homeCode32 && awayCode32) {
-                silverCode = (champCode === homeCode32) ? awayCode32 : homeCode32;
-            }
-            const silverTeam = getTeamByCode(silverCode);
-            const silverCard = document.createElement('div');
-            silverCard.className = 'champ-card silver-card';
-            silverCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(203, 213, 225, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(203, 213, 225, 0.1) 100%); box-shadow: 0 10px 30px rgba(203, 213, 225, 0.05);';
-            silverCard.innerHTML = `
-                <i class="fa-solid fa-medal crown-icon" style="color: #cbd5e1; filter: drop-shadow(0 0 12px rgba(203, 213, 225, 0.2));"></i>
-                <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
-                <div class="champ-team-spot">
-                    <span class="team-flag">${silverTeam.flag}</span>
-                    ${teamNameSpanHtml(silverTeam.name)}
-                </div>
-            `;
-            col.appendChild(silverCard);
-
-            // Bronze Card (3rd Place) - Exact same shape and size as Champion card
-            const bronzeCode = p.bracketPicks[31] || '';
-            const bronzeTeam = getTeamByCode(bronzeCode);
-            const bronzeCard = document.createElement('div');
-            bronzeCard.className = 'champ-card bronze-card';
-            bronzeCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(245, 158, 11, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.1) 100%); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05);';
-            bronzeCard.innerHTML = `
-                <i class="fa-solid fa-medal crown-icon" style="color: #fbbf24; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.2));"></i>
-                <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
-                <div class="champ-team-spot">
-                    <span class="team-flag">${bronzeTeam.flag}</span>
-                    ${teamNameSpanHtml(bronzeTeam.name)}
-                </div>
-            `;
-            col.appendChild(bronzeCard);
-        } else {
-            round.matches.forEach((matchId, idx) => {
-                const matchSchema = KNOCKOUTS_SCHEMA[matchId];
-                const matchCard = document.createElement('div');
-                matchCard.className = 'match-card';
-
-                // Determine actual team codes playing this slot
-                const homeCode = getKnockoutParticipant(p, matchId, 'home');
-                const awayCode = getKnockoutParticipant(p, matchId, 'away');
-
-                const homeTeam = getTeamByCode(homeCode);
-                const awayTeam = getTeamByCode(awayCode);
-
-                const predictedWinner = p.bracketPicks[matchId] || '';
-                const officialWinner = results.matches[matchId] || '';
-
-                // Apply correct/incorrect border classes if official results are simulated/played
-                if (officialWinner) {
-                    if (predictedWinner === officialWinner) {
-                        matchCard.classList.add('correct-prediction');
-                    } else {
-                        matchCard.classList.add('incorrect-prediction');
-                    }
-                }
-
-                matchCard.innerHTML = `
-                    <div class="match-info-meta">
-                        <span>${matchSchema.label}</span>
-                        <span>${matchSchema.date} - ${matchSchema.venue}</span>
-                    </div>
-                    <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="${p.submitted ? 'cursor: default !important;' : 'cursor: pointer;'}">
-                        <div class="team-slot-info">
-                            <span class="team-flag">${homeTeam.flag}</span>
-                            ${teamNameSpanHtml(homeTeam.name)}
-                        </div>
-                        <span class="team-score">${homeCode && officialWinner === homeCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
-                    </div>
-                    <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="${p.submitted ? 'cursor: default !important;' : 'cursor: pointer;'}">
-                        <div class="team-slot-info">
-                            <span class="team-flag">${awayTeam.flag}</span>
-                            ${teamNameSpanHtml(awayTeam.name)}
-                        </div>
-                        <span class="team-score">${awayCode && officialWinner === awayCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
-                    </div>
-                `;
-
-                // Set interactive click event for advancement selection
-                if (!p.submitted) {
-                    matchCard.querySelectorAll('.team-slot').forEach(slot => {
-                        slot.addEventListener('click', () => {
-                            const mId = parseInt(slot.getAttribute('data-match'));
-                            const team = slot.getAttribute('data-team');
-                            
-                            if (!team || team === 'TBD') return;
-
-                            // Set participant pick
-                            p.bracketPicks[mId] = team;
-                            if (mId === 32) {
-                                p.champ = team; // Set global predicted champ
-                            }
-
-                            // Recursively propagate and clear children to keep tree logically correct
-                            propagateWinner(p, mId, team);
-                            
-                            renderBracket();
-                            renderLeaderboard();
-                        });
-                    });
-                }
-
-                appendBracketVerticalConnector(matchCard, round.key, idx);
-                col.appendChild(matchCard);
-            });
-        }
-
-        canvas.appendChild(col);
-    });
+    renderBracketColumns(canvas, p, { mode: 'sheet', results });
 
     scheduleBracketConnectorSync();
     ensureBracketSheetScrollReady();
@@ -2884,119 +2919,7 @@ function renderWizardBracket() {
     const p = STATE.participants.draft;
     if (!p) return;
 
-    const roundsList = [
-        { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] },
-        { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20, 21, 22, 23, 24] },
-        { key: 'QF', title: 'Quarters', matches: [25, 26, 27, 28] },
-        { key: 'SF', title: 'Semis', matches: [29, 30] },
-        { key: 'F', title: 'Gold & Bronze', matches: [32, 31] },
-        { key: 'CHAMP', title: 'Champion' }
-    ];
-
-    roundsList.forEach(round => {
-        const col = document.createElement('div');
-        col.className = round.key === 'CHAMP' ? 'champ-column' : 'round-column';
-        
-        const header = document.createElement('div');
-        header.className = 'round-column-title';
-        header.innerText = round.title;
-        col.appendChild(header);
-
-        if (round.key === 'CHAMP') {
-            const champCode = p.bracketPicks[32] || '';
-            const champTeam = getTeamByCode(champCode);
-
-            const champCard = document.createElement('div');
-            champCard.className = 'champ-card';
-            champCard.style = 'border: 2px solid rgba(245,158,11,0.4)';
-            champCard.innerHTML = `
-                <i class="fa-solid fa-trophy crown-icon"></i>
-                <div class="champ-title">CHAMPION</div>
-                <div class="champ-team-spot">
-                    <span class="team-flag">${champTeam.flag}</span>
-                    ${wizardTeamNameSpanHtml(champTeam.name)}
-                </div>
-            `;
-            col.appendChild(champCard);
-
-            // Silver Card (2nd Place) - Exact same shape and size as Champion card
-            let silverCode = '';
-            const homeCode32 = getKnockoutParticipant(p, 32, 'home');
-            const awayCode32 = getKnockoutParticipant(p, 32, 'away');
-            if (champCode && homeCode32 && awayCode32) {
-                silverCode = (champCode === homeCode32) ? awayCode32 : homeCode32;
-            }
-            const silverTeam = getTeamByCode(silverCode);
-            const silverCard = document.createElement('div');
-            silverCard.className = 'champ-card silver-card';
-            silverCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(203, 213, 225, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(203, 213, 225, 0.1) 100%); box-shadow: 0 10px 30px rgba(203, 213, 225, 0.05);';
-            silverCard.innerHTML = `
-                <i class="fa-solid fa-medal crown-icon" style="color: #cbd5e1; filter: drop-shadow(0 0 12px rgba(203, 213, 225, 0.2));"></i>
-                <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
-                <div class="champ-team-spot">
-                    <span class="team-flag">${silverTeam.flag}</span>
-                    ${wizardTeamNameSpanHtml(silverTeam.name)}
-                </div>
-            `;
-            col.appendChild(silverCard);
-
-            // Bronze Card (3rd Place) - Exact same shape and size as Champion card
-            const bronzeCode = p.bracketPicks[31] || '';
-            const bronzeTeam = getTeamByCode(bronzeCode);
-            const bronzeCard = document.createElement('div');
-            bronzeCard.className = 'champ-card bronze-card';
-            bronzeCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(245, 158, 11, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.1) 100%); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05);';
-            bronzeCard.innerHTML = `
-                <i class="fa-solid fa-medal crown-icon" style="color: #fbbf24; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.2));"></i>
-                <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
-                <div class="champ-team-spot">
-                    <span class="team-flag">${bronzeTeam.flag}</span>
-                    ${wizardTeamNameSpanHtml(bronzeTeam.name)}
-                </div>
-            `;
-            col.appendChild(bronzeCard);
-        } else {
-            round.matches.forEach((matchId, idx) => {
-                const matchSchema = KNOCKOUTS_SCHEMA[matchId];
-                const matchCard = document.createElement('div');
-                matchCard.className = 'match-card';
-
-                const homeCode = getKnockoutParticipant(p, matchId, 'home');
-                const awayCode = getKnockoutParticipant(p, matchId, 'away');
-
-                const homeTeam = getTeamByCode(homeCode);
-                const awayTeam = getTeamByCode(awayCode);
-
-                const predictedWinner = p.bracketPicks[matchId] || '';
-
-                matchCard.innerHTML = `
-                    <div class="match-info-meta">
-                        <span>${matchSchema.label}</span>
-                        <span>${matchSchema.date} - ${matchSchema.venue}</span>
-                    </div>
-                    <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="cursor: pointer;">
-                        <div class="team-slot-info">
-                            <span class="team-flag">${homeTeam.flag}</span>
-                            ${wizardTeamNameSpanHtml(homeTeam.name)}
-                        </div>
-                        <span class="team-score"></span>
-                    </div>
-                    <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="cursor: pointer;">
-                        <div class="team-slot-info">
-                            <span class="team-flag">${awayTeam.flag}</span>
-                            ${wizardTeamNameSpanHtml(awayTeam.name)}
-                        </div>
-                        <span class="team-score"></span>
-                    </div>
-                `;
-
-                appendBracketVerticalConnector(matchCard, round.key, idx);
-                col.appendChild(matchCard);
-            });
-        }
-
-        canvas.appendChild(col);
-    });
+    renderBracketColumns(canvas, p, { mode: 'wizard' });
 
     bindWizardBracketPickHandler();
     scheduleBracketConnectorSync();

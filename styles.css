@@ -978,7 +978,7 @@ tr:first-child .points-emphasis {
     max-width: 100%;
     min-width: 0;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
     padding-bottom: 2rem;
     cursor: grab;
     user-select: none;
@@ -994,7 +994,8 @@ tr:first-child .points-emphasis {
 #tab-bracket .bracket-scroll-container {
     display: block;
     overflow-x: scroll !important;
-    overflow-y: hidden;
+    overflow-y: auto;
+    max-height: min(88vh, 920px);
     padding-bottom: 0.5rem;
     scrollbar-width: auto;
     scrollbar-color: rgba(59, 130, 246, 0.65) rgba(100, 116, 139, 0.25);
@@ -1062,7 +1063,7 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
     display: inline-flex;
     gap: 3.5rem;
     padding: 5rem 0 2rem 0;
-    min-width: max(1650px, 100%);
+    min-width: max(2800px, 100%);
     width: max-content;
     justify-content: flex-start;
     vertical-align: top;
@@ -1124,6 +1125,21 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     padding-bottom: 0.25rem;
     font-family: var(--font-heading);
+}
+
+.match-info-meta.match-info-sub {
+    margin-top: -0.35rem;
+    margin-bottom: 0.5rem;
+    border-bottom: none;
+    padding-bottom: 0;
+    opacity: 0.85;
+}
+
+.match-slot-codes {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    white-space: nowrap;
 }
 
 .team-slot {
@@ -3063,5 +3079,21 @@ body.dark-theme .nav-item.active i {
 .round-column .lower-pair-match .vertical-connector {
     top: auto;
     bottom: 50%;
+}
+
+/* Right half of split bracket — connectors flow toward center */
+.round-column.bracket-side-right:not(:last-of-type) .match-card::after {
+    right: auto;
+    left: -1.75rem;
+}
+
+.round-column.bracket-side-right:not(:first-of-type) .match-card::before {
+    left: auto;
+    right: -1.75rem;
+}
+
+.round-column.bracket-side-right .vertical-connector {
+    right: auto;
+    left: -1.75rem;
 }
 
