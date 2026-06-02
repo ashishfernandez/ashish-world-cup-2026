@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260604b">
+    <link rel="stylesheet" href="styles.css?v=20260604c">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -97,9 +97,8 @@
                     <p id="current-tab-desc">Track scores, predictions, and real-time rank movements among friends.</p>
                 </div>
                 <div class="header-actions">
-                    <button id="btn-theme-toggle" class="btn btn-secondary theme-toggle-btn">
-                        <i class="fa-solid fa-moon"></i>
-                        <span class="btn-label">Dark Mode</span>
+                    <button type="button" id="btn-theme-toggle" class="btn btn-secondary theme-toggle-btn" aria-label="Switch to dark mode" title="Dark mode">
+                        <i class="fa-solid fa-moon" aria-hidden="true"></i>
                     </button>
                 </div>
             </header>
@@ -529,6 +528,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260604b"></script>
+    <script src="app.js?v=20260604c"></script>
 </body>
 </html>

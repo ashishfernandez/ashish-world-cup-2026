@@ -1393,9 +1393,17 @@ body:not(.dark-theme) .team-name-text.team-tbd {
 .theme-toggle-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
     margin-right: 0;
+    padding: 0.55rem 0.65rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
     transition: var(--transition-smooth);
+}
+
+.theme-toggle-btn i {
+    font-size: 1.05rem;
+    line-height: 1;
 }
 
 /* Groups Layout Grid */
@@ -2062,17 +2070,6 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     .header-actions {
         width: 100%;
         justify-content: flex-end;
-    }
-
-    .theme-toggle-btn .btn-label {
-        display: none;
-    }
-
-    .theme-toggle-btn {
-        min-width: 2.75rem;
-        min-height: 2.75rem;
-        padding: 0.5rem;
-        justify-content: center;
     }
 
     .header-title-section h2 {

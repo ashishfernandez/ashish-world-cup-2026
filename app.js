@@ -1012,6 +1012,18 @@ function setupAdminReset() {
     });
 }
 
+function updateThemeToggleButton(btn, isDark) {
+    if (isDark) {
+        btn.innerHTML = '<i class="fa-solid fa-sun" aria-hidden="true"></i>';
+        btn.setAttribute('aria-label', 'Switch to light mode');
+        btn.title = 'Light mode';
+    } else {
+        btn.innerHTML = '<i class="fa-solid fa-moon" aria-hidden="true"></i>';
+        btn.setAttribute('aria-label', 'Switch to dark mode');
+        btn.title = 'Dark mode';
+    }
+}
+
 function setupThemeToggle() {
     const btn = document.getElementById('btn-theme-toggle');
     if (!btn) return;
@@ -1020,21 +1032,21 @@ function setupThemeToggle() {
     const savedTheme = localStorage.getItem('wc-theme');
     if (savedTheme === 'light') {
         document.body.classList.remove('dark-theme');
-        btn.innerHTML = `<i class="fa-solid fa-moon"></i> <span>Dark Mode</span>`;
+        updateThemeToggleButton(btn, false);
     } else {
         document.body.classList.add('dark-theme');
-        btn.innerHTML = `<i class="fa-solid fa-sun"></i> <span>Light Mode</span>`;
+        updateThemeToggleButton(btn, true);
     }
 
     btn.addEventListener('click', () => {
         document.body.classList.toggle('dark-theme');
-        
+
         if (document.body.classList.contains('dark-theme')) {
             localStorage.setItem('wc-theme', 'dark');
-            btn.innerHTML = `<i class="fa-solid fa-sun"></i> <span>Light Mode</span>`;
+            updateThemeToggleButton(btn, true);
         } else {
             localStorage.setItem('wc-theme', 'light');
-            btn.innerHTML = `<i class="fa-solid fa-moon"></i> <span>Dark Mode</span>`;
+            updateThemeToggleButton(btn, false);
         }
     });
 }
