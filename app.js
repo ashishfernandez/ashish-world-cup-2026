@@ -13,7 +13,7 @@ let _lastCloudSyncOk = false;
 /** Stripe entry fee — set required: false only for local dev without Edge Functions */
 const PAYMENT_CONFIG = {
     required: true,
-    entryFeeDisplay: '$20.00',
+    entryFeeDisplay: '$0.05',
     productLabel: "Ash's WC Tourney Pool Entry",
 };
 
