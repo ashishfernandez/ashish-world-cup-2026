@@ -1061,13 +1061,28 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
 
 .bracket-canvas {
     display: inline-flex;
-    gap: 3.5rem;
-    padding: 5rem 0 2rem 0;
-    min-width: max(2800px, 100%);
+    gap: 0;
+    padding: 3.5rem 1.5rem 2rem;
+    min-width: max(2400px, 100%);
     width: max-content;
     justify-content: flex-start;
     vertical-align: top;
     position: relative;
+    align-items: stretch;
+}
+
+.bracket-canvas.fifa-bracket {
+    --fifa-bracket-gap: 52px;
+    --fifa-pair-gap: 8px;
+    --fifa-match-bg: #e9edf2;
+    --fifa-slot-bg: #ffffff;
+    --fifa-line: #b8c2ce;
+}
+
+body.dark-theme .bracket-canvas.fifa-bracket {
+    --fifa-match-bg: #2d3548;
+    --fifa-slot-bg: #1a2030;
+    --fifa-line: #5a6a82;
 }
 
 .bracket-connectors-svg {
@@ -1080,15 +1095,249 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
 }
 
 .bracket-connectors-svg line {
-    stroke: var(--bracket-line-color);
-    stroke-width: 2;
-    stroke-linecap: square;
+    stroke: var(--fifa-line, var(--bracket-line-color));
+    stroke-width: 1.5;
+    stroke-linecap: butt;
 }
 
-.bracket-canvas > .round-column,
-.bracket-canvas > .champ-column {
+.bracket-canvas > .bracket-col {
     position: relative;
     z-index: 1;
+}
+
+/* FIFA column layout */
+.bracket-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 168px;
+    padding: 2.75rem 26px 1rem;
+    box-sizing: border-box;
+}
+
+.bracket-col-left { padding-right: calc(var(--fifa-bracket-gap) / 2); }
+.bracket-col-right { padding-left: calc(var(--fifa-bracket-gap) / 2); }
+.bracket-col-center {
+    min-width: 200px;
+    padding: 2.75rem 20px 1rem;
+    align-items: center;
+}
+
+.bracket-col-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 1.25rem;
+    flex-shrink: 0;
+}
+
+.bracket-pairs-stack {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex: 1;
+    min-height: 100%;
+}
+
+.bracket-pair {
+    display: flex;
+    flex-direction: column;
+    gap: var(--fifa-pair-gap);
+    margin: 0.35rem 0;
+    position: relative;
+}
+
+.bracket-match-wrap {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.bracket-match-side-left { flex-direction: row; }
+.bracket-match-side-right { flex-direction: row-reverse; }
+.bracket-match-side-center {
+    flex-direction: column;
+    align-items: center;
+}
+
+.bracket-match-side-center .bracket-match-id {
+    margin-bottom: 4px;
+}
+
+.bracket-match-id {
+    font-family: var(--font-heading);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    min-width: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bracket-match-inner {
+    flex: 1;
+    min-width: 0;
+    background: var(--fifa-match-bg);
+    border: 1px solid var(--fifa-line);
+    border-radius: 8px;
+    padding: 6px 8px 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.bracket-match-date {
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: center;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    white-space: nowrap;
+}
+
+body.dark-theme .bracket-match-date {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.bracket-team-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--fifa-slot-bg);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 5px;
+    padding: 5px 7px;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    min-height: 28px;
+}
+
+body.dark-theme .bracket-team-row {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+.bracket-flag-box {
+    width: 20px;
+    height: 14px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 2px;
+}
+
+.bracket-flag-box:empty {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.bracket-team-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bracket-pick-check {
+    color: var(--accent-emerald);
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+.bracket-match-box.match-card {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.bracket-match-box.correct-prediction .bracket-match-inner {
+    border-color: rgba(16, 185, 129, 0.45);
+}
+
+.bracket-match-box.incorrect-prediction .bracket-match-inner {
+    border-color: rgba(239, 68, 68, 0.45);
+}
+
+.bracket-center-stack {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+    flex: 1;
+}
+
+.bracket-center-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bracket-center-title {
+    font-family: var(--font-heading);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.65rem;
+    text-align: center;
+}
+
+.bracket-podium {
+    margin-top: 1.25rem;
+    width: 100%;
+    max-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.bracket-podium-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.68rem;
+    padding: 0.4rem 0.55rem;
+    border-radius: 6px;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--card-border);
+}
+
+.bracket-podium-row span {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+}
+
+.bracket-podium-row strong {
+    margin-left: auto;
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-align: right;
+}
+
+.bracket-podium-row.gold i { color: var(--accent-gold); }
+.bracket-podium-row.silver i { color: #94a3b8; }
+.bracket-podium-row.bronze i { color: #d97706; }
+
+.fifa-bracket .bracket-team-row.predicted-winner {
+    background-color: var(--bracket-pick-bg);
+    color: var(--bracket-pick-text);
+}
+
+.fifa-bracket .bracket-team-row:hover {
+    background-color: var(--primary-glow);
 }
 
 .round-column {

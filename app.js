@@ -211,47 +211,56 @@ const KNOCKOUTS_SCHEMA = {
     13: { round: 'R32', label: 'M86', name: 'M13', venue: 'Miami', date: 'Jul 03', defaultHome: '1J', defaultAway: '2H', nextMatch: 23, slot: 'home' },
     14: { round: 'R32', label: 'M88', name: 'M14', venue: 'Dallas', date: 'Jul 03', defaultHome: '2D', defaultAway: '2G', nextMatch: 23, slot: 'away' },
     15: { round: 'R32', label: 'M85', name: 'M15', venue: 'Vancouver', date: 'Jul 02', defaultHome: '1B', defaultAway: '3EFGIJ', nextMatch: 24, slot: 'home' },
-    16: { round: 'R32', label: 'M87', name: 'M16', venue: 'Kansas City', date: 'Jul 03', defaultHome: '1K', defaultAway: '3DEIJL', nextMatch: 24, slot: 'away' },
+    16: { round: 'R32', label: 'M87', name: 'M16', venue: 'Kansas City', date: 'Jul 03', kickoff: '07/03/2026 18:30', defaultHome: '1K', defaultAway: '3DEIJL', nextMatch: 24, slot: 'away' },
 
     // Round of 16 (17–24 → FIFA M89–M96)
-    17: { round: 'R16', label: 'M89', name: 'M17', venue: 'Philadelphia', date: 'Jul 04', nextMatch: 25, slot: 'home' },
-    18: { round: 'R16', label: 'M90', name: 'M18', venue: 'Houston', date: 'Jul 04', nextMatch: 25, slot: 'away' },
-    19: { round: 'R16', label: 'M93', name: 'M19', venue: 'Dallas', date: 'Jul 05', nextMatch: 26, slot: 'home' },
-    20: { round: 'R16', label: 'M94', name: 'M20', venue: 'Seattle', date: 'Jul 06', nextMatch: 26, slot: 'away' },
-    21: { round: 'R16', label: 'M91', name: 'M21', venue: 'New York', date: 'Jul 05', nextMatch: 27, slot: 'home' },
-    22: { round: 'R16', label: 'M92', name: 'M22', venue: 'Mexico City', date: 'Jul 05', nextMatch: 27, slot: 'away' },
-    23: { round: 'R16', label: 'M95', name: 'M23', venue: 'Atlanta', date: 'Jul 07', nextMatch: 28, slot: 'home' },
-    24: { round: 'R16', label: 'M96', name: 'M24', venue: 'Vancouver', date: 'Jul 07', nextMatch: 28, slot: 'away' },
+    17: { round: 'R16', label: 'M89', name: 'M17', venue: 'Philadelphia', date: 'Jul 04', kickoff: '07/04/2026 14:00', defaultHome: 'W74', defaultAway: 'W77', nextMatch: 25, slot: 'home' },
+    18: { round: 'R16', label: 'M90', name: 'M18', venue: 'Houston', date: 'Jul 04', kickoff: '07/04/2026 10:00', defaultHome: 'W73', defaultAway: 'W75', nextMatch: 25, slot: 'away' },
+    19: { round: 'R16', label: 'M93', name: 'M19', venue: 'Dallas', date: 'Jul 05', kickoff: '07/05/2026 12:00', defaultHome: 'W83', defaultAway: 'W84', nextMatch: 26, slot: 'home' },
+    20: { round: 'R16', label: 'M94', name: 'M20', venue: 'Seattle', date: 'Jul 06', kickoff: '07/06/2026 17:00', defaultHome: 'W81', defaultAway: 'W82', nextMatch: 26, slot: 'away' },
+    21: { round: 'R16', label: 'M91', name: 'M21', venue: 'New York', date: 'Jul 05', kickoff: '07/05/2026 13:00', defaultHome: 'W76', defaultAway: 'W78', nextMatch: 27, slot: 'home' },
+    22: { round: 'R16', label: 'M92', name: 'M22', venue: 'Mexico City', date: 'Jul 05', kickoff: '07/05/2026 17:00', defaultHome: 'W79', defaultAway: 'W80', nextMatch: 27, slot: 'away' },
+    23: { round: 'R16', label: 'M95', name: 'M23', venue: 'Atlanta', date: 'Jul 07', kickoff: '07/07/2026 09:00', defaultHome: 'W86', defaultAway: 'W88', nextMatch: 28, slot: 'home' },
+    24: { round: 'R16', label: 'M96', name: 'M24', venue: 'Vancouver', date: 'Jul 07', kickoff: '07/07/2026 13:00', defaultHome: 'W85', defaultAway: 'W87', nextMatch: 28, slot: 'away' },
 
     // Quarterfinals (25–28 → FIFA M97–M100)
-    25: { round: 'QF', label: 'M97', name: 'M25', venue: 'Boston', date: 'Jul 09', nextMatch: 29, slot: 'home' },
-    26: { round: 'QF', label: 'M98', name: 'M26', venue: 'Los Angeles', date: 'Jul 10', nextMatch: 29, slot: 'away' },
-    27: { round: 'QF', label: 'M99', name: 'M27', venue: 'Miami', date: 'Jul 11', nextMatch: 30, slot: 'home' },
-    28: { round: 'QF', label: 'M100', name: 'M28', venue: 'Kansas City', date: 'Jul 11', nextMatch: 30, slot: 'away' },
+    25: { round: 'QF', label: 'M97', name: 'M25', venue: 'Boston', date: 'Jul 09', kickoff: '07/09/2026 13:00', defaultHome: 'W89', defaultAway: 'W90', nextMatch: 29, slot: 'home' },
+    26: { round: 'QF', label: 'M98', name: 'M26', venue: 'Los Angeles', date: 'Jul 10', kickoff: '07/10/2026 12:00', defaultHome: 'W93', defaultAway: 'W94', nextMatch: 29, slot: 'away' },
+    27: { round: 'QF', label: 'M99', name: 'M27', venue: 'Miami', date: 'Jul 11', kickoff: '07/11/2026 14:00', defaultHome: 'W91', defaultAway: 'W92', nextMatch: 30, slot: 'home' },
+    28: { round: 'QF', label: 'M100', name: 'M28', venue: 'Kansas City', date: 'Jul 11', kickoff: '07/11/2026 18:00', defaultHome: 'W95', defaultAway: 'W96', nextMatch: 30, slot: 'away' },
 
     // Semifinals (29–30 → FIFA M101–M102)
-    29: { round: 'SF', label: 'M101', name: 'M29', venue: 'Dallas', date: 'Jul 14', nextMatch: 32, slot: 'home' },
-    30: { round: 'SF', label: 'M102', name: 'M30', venue: 'Atlanta', date: 'Jul 15', nextMatch: 32, slot: 'away' },
+    29: { round: 'SF', label: 'M101', name: 'M29', venue: 'Dallas', date: 'Jul 14', kickoff: '07/14/2026 12:00', defaultHome: 'W97', defaultAway: 'W98', nextMatch: 32, slot: 'home' },
+    30: { round: 'SF', label: 'M102', name: 'M30', venue: 'Atlanta', date: 'Jul 15', kickoff: '07/15/2026 12:00', defaultHome: 'W99', defaultAway: 'W100', nextMatch: 32, slot: 'away' },
 
     // 3rd place & final (31–32 → FIFA M103–M104)
-    31: { round: '3RD', label: 'M103', name: 'M31', venue: 'Miami', date: 'Jul 18' },
-    32: { round: 'F', label: 'M104', name: 'M32', venue: 'New York', date: 'Jul 19' }
+    31: { round: '3RD', label: 'M103', name: 'M31', venue: 'Miami', date: 'Jul 18', kickoff: '07/18/2026 14:00', defaultHome: 'RU101', defaultAway: 'RU102' },
+    32: { round: 'F', label: 'M104', name: 'M32', venue: 'New York', date: 'Jul 19', kickoff: '07/19/2026 12:00', defaultHome: 'W101', defaultAway: 'W102' }
 };
 
-// Split-bracket column order (official FIFA WC26 knockout paths).
-// Left half R32 = M73–M80 (ids 3,1,4,9,2,10,11,12). Right half R32 = M81–M88 (ids 5–8,13–16).
-// R16/QF/SF nextMatch links in KNOCKOUTS_SCHEMA must stay aligned with this split.
+const R32_KICKOFFS = {
+    1: '06/29/2026 13:30', 2: '06/30/2026 14:00', 3: '06/28/2026 12:00', 4: '06/29/2026 18:00',
+    5: '07/02/2026 16:00', 6: '07/02/2026 12:00', 7: '07/01/2026 17:00', 8: '07/01/2026 13:00',
+    9: '06/29/2026 10:00', 10: '06/30/2026 10:00', 11: '06/30/2026 18:00', 12: '07/01/2026 09:00',
+    13: '07/03/2026 15:00', 14: '07/03/2026 11:00', 15: '07/02/2026 20:00'
+};
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].forEach((id) => {
+    if (!KNOCKOUTS_SCHEMA[id].kickoff && R32_KICKOFFS[id]) {
+        KNOCKOUTS_SCHEMA[id].kickoff = R32_KICKOFFS[id];
+    }
+});
+
+// Official FIFA WC26 column layout (pair groupings + center finals).
 const BRACKET_ROUNDS_LAYOUT = [
-    { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 9, 10, 11, 12], side: 'left' },
-    { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20], side: 'left' },
-    { key: 'QF', title: 'Quarters', matches: [25, 26], side: 'left' },
-    { key: 'SF', title: 'Semis', matches: [29], side: 'left' },
-    { key: 'F', title: 'Gold & Bronze', matches: [32, 31], side: 'center' },
-    { key: 'CHAMP', title: 'Champion', side: 'center' },
-    { key: 'SF', title: 'Semis', matches: [30], side: 'right' },
-    { key: 'QF', title: 'Quarters', matches: [27, 28], side: 'right' },
-    { key: 'R16', title: 'Round of 16', matches: [21, 22, 23, 24], side: 'right' },
-    { key: 'R32', title: 'Round of 32', matches: [5, 6, 7, 8, 13, 14, 15, 16], side: 'right' }
+    { key: 'R32', title: 'Round of 32', side: 'left', pairs: [[1, 2], [3, 4], [9, 10], [11, 12]] },
+    { key: 'R16', title: 'Round of 16', side: 'left', pairs: [[17, 18], [19, 20]] },
+    { key: 'QF', title: 'Quarter-final', side: 'left', pairs: [[25, 26]] },
+    { key: 'SF', title: 'Semi-final', side: 'left', singles: [29] },
+    { key: 'CTR', type: 'center', finals: [{ section: 'Final', matchId: 32 }, { section: 'Play-off for third place', matchId: 31 }] },
+    { key: 'SF', title: 'Semi-final', side: 'right', singles: [30] },
+    { key: 'QF', title: 'Quarter-final', side: 'right', pairs: [[27, 28]] },
+    { key: 'R16', title: 'Round of 16', side: 'right', pairs: [[21, 22], [23, 24]] },
+    { key: 'R32', title: 'Round of 32', side: 'right', pairs: [[5, 6], [7, 8], [13, 14], [15, 16]] }
 ];
 
 // 3. Complete State: Contains Official Simulated Outcomes & Predictions
@@ -1314,21 +1323,38 @@ function renderRankingsTable(scores) {
 let _bracketConnectorRaf = null;
 
 function getBracketMatchCard(canvas, matchId) {
-    const slot = canvas.querySelector(`.team-slot[data-match="${matchId}"]`);
-    return slot ? slot.closest('.match-card') : null;
+    return canvas.querySelector(`.bracket-match-box[data-match-id="${matchId}"]`)
+        || canvas.querySelector(`.team-slot[data-match="${matchId}"]`)?.closest('.match-card, .bracket-match-box');
 }
 
+function getMatchKickoff(schema) {
+    return schema.kickoff || `${schema.date}, 2026`;
+}
+
+function isResolvedTeamCode(code) {
+    return Boolean(code && /^[A-Z]{3}$/.test(code));
+}
+
+function formatBracketSlotLabel(p, matchId, slot, schema) {
+    const code = getKnockoutParticipant(p, matchId, slot);
+    const fallback = slot === 'home' ? schema.defaultHome : schema.defaultAway;
+    if (isResolvedTeamCode(code)) {
+        const team = getTeamByCode(code);
+        if (team.name && team.name !== code) {
+            return { flag: team.flag, text: team.name, code: fallback || '' };
+        }
+    }
+    return { flag: '', text: fallback || code || 'TBD', code: '' };
+}
+
+/** Anchor in canvas-local px (parent scroll container moves canvas; do not add scroll offsets). */
 function getBracketAnchor(canvas, el, side) {
     const canvasRect = canvas.getBoundingClientRect();
     const elRect = el.getBoundingClientRect();
     return {
-        x: (side === 'right' ? elRect.right : elRect.left) - canvasRect.left + canvas.scrollLeft,
-        y: elRect.top + elRect.height / 2 - canvasRect.top + canvas.scrollTop
+        x: (side === 'right' ? elRect.right : elRect.left) - canvasRect.left,
+        y: elRect.top + elRect.height / 2 - canvasRect.top
     };
-}
-
-function getChampCardAnchor(canvas, card, side) {
-    return getBracketAnchor(canvas, card, side);
 }
 
 function getFeederMatchIds(matchId) {
@@ -1346,8 +1372,8 @@ function ensureBracketConnectorSvg(canvas) {
         svg.setAttribute('aria-hidden', 'true');
         canvas.insertBefore(svg, canvas.firstChild);
     }
-    const w = Math.max(canvas.scrollWidth, canvas.offsetWidth);
-    const h = Math.max(canvas.scrollHeight, canvas.offsetHeight);
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
     svg.setAttribute('width', String(w));
     svg.setAttribute('height', String(h));
     svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
@@ -1357,6 +1383,9 @@ function ensureBracketConnectorSvg(canvas) {
 
 function drawBracketSvgLine(svg, x1, y1, x2, y2) {
     if (!Number.isFinite(x1 + y1 + x2 + y2)) return;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    if (dx * dx + dy * dy < 4) return;
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     line.setAttribute('x1', String(Math.round(x1 * 10) / 10));
     line.setAttribute('y1', String(Math.round(y1 * 10) / 10));
@@ -1365,8 +1394,7 @@ function drawBracketSvgLine(svg, x1, y1, x2, y2) {
     svg.appendChild(line);
 }
 
-/** Horizontal then vertical elbow */
-function drawBracketElbow(svg, x1, y1, x2, y2) {
+function drawBracketOrtho(svg, x1, y1, x2, y2) {
     if (Math.abs(x1 - x2) < 0.5) {
         drawBracketSvgLine(svg, x1, y1, x2, y2);
         return;
@@ -1379,112 +1407,97 @@ function drawBracketElbow(svg, x1, y1, x2, y2) {
     drawBracketSvgLine(svg, x2, y1, x2, y2);
 }
 
-function connectFeederPairToMatch(canvas, svg, feederIds, targetMatchId) {
-    if (feederIds.length !== 2) return;
+function getColumnMidlineX(canvas, fromCol, toCol) {
+    const canvasRect = canvas.getBoundingClientRect();
+    const a = fromCol.getBoundingClientRect();
+    const b = toCol.getBoundingClientRect();
+    const left = Math.min(a.left, b.left);
+    const right = Math.max(a.right, b.right);
+    return (left + right) / 2 - canvasRect.left;
+}
+
+function getBracketColEl(el) {
+    return el?.closest('.bracket-col');
+}
+
+function connectBracketPairToTarget(canvas, svg, pairEl, targetMatchId) {
     const targetCard = getBracketMatchCard(canvas, targetMatchId);
-    const feederA = getBracketMatchCard(canvas, feederIds[0]);
-    const feederB = getBracketMatchCard(canvas, feederIds[1]);
-    if (!targetCard || !feederA || !feederB) return;
+    if (!pairEl || !targetCard) return;
 
-    const targetCol = targetCard.closest('.round-column');
-    const enterSide = targetCol?.classList.contains('bracket-side-right') ? 'right' : 'left';
-    const exitSide = enterSide === 'left' ? 'right' : 'left';
+    const feederCol = getBracketColEl(pairEl);
+    const targetCol = getBracketColEl(targetCard);
+    if (!feederCol || !targetCol) return;
 
-    const pA = getBracketAnchor(canvas, feederA, exitSide);
-    const pB = getBracketAnchor(canvas, feederB, exitSide);
-    const pT = getBracketAnchor(canvas, targetCard, enterSide);
+    const isFeedRight = feederCol.classList.contains('bracket-col-right');
+    const isTargetRight = targetCol.classList.contains('bracket-col-right');
+    const exitSide = isFeedRight ? 'left' : 'right';
+    const enterSide = isTargetRight ? 'right' : 'left';
 
-    const stub = Math.min(28, Math.abs(pT.x - pA.x) * 0.35, Math.abs(pT.x - pB.x) * 0.35);
-    const junctionX = enterSide === 'left'
-        ? Math.max(pA.x, pB.x) + stub
-        : Math.min(pA.x, pB.x) - stub;
-    const junctionY = (pA.y + pB.y) / 2;
+    const cards = pairEl.querySelectorAll('.bracket-match-box');
+    const junctionX = getColumnMidlineX(canvas, feederCol, targetCol);
 
-    drawBracketSvgLine(svg, pA.x, pA.y, junctionX, pA.y);
-    drawBracketSvgLine(svg, pB.x, pB.y, junctionX, pB.y);
-    drawBracketSvgLine(svg, junctionX, pA.y, junctionX, pB.y);
-    drawBracketElbow(svg, junctionX, junctionY, pT.x, pT.y);
-}
-
-function connectMatchPairOnSide(canvas, svg, matchIdA, matchIdB, side) {
-    const cardA = getBracketMatchCard(canvas, matchIdA);
-    const cardB = getBracketMatchCard(canvas, matchIdB);
-    if (!cardA || !cardB) return null;
-
-    const pA = getBracketAnchor(canvas, cardA, side);
-    const pB = getBracketAnchor(canvas, cardB, side);
-    const stub = 14;
-    const spineX = side === 'right' ? Math.max(pA.x, pB.x) + stub : Math.min(pA.x, pB.x) - stub;
-
-    drawBracketSvgLine(svg, pA.x, pA.y, spineX, pA.y);
-    drawBracketSvgLine(svg, pB.x, pB.y, spineX, pB.y);
-    drawBracketSvgLine(svg, spineX, pA.y, spineX, pB.y);
-
-    return { x: spineX, y: (pA.y + pB.y) / 2, yTop: pA.y, yBottom: pB.y };
-}
-
-function connectSemisToFinalColumn(canvas, svg) {
-    const sf29 = getBracketMatchCard(canvas, 29);
-    const sf30 = getBracketMatchCard(canvas, 30);
-    const finalCard = getBracketMatchCard(canvas, 32);
-    if (!sf29 || !sf30 || !finalCard) return;
-
-    const p29 = getBracketAnchor(canvas, sf29, 'right');
-    const p30 = getBracketAnchor(canvas, sf30, 'left');
-    const pFinal = getBracketAnchor(canvas, finalCard, 'left');
-
-    const junctionX = (p29.x + p30.x) / 2;
-    const junctionY = (p29.y + p30.y) / 2;
-
-    drawBracketSvgLine(svg, p29.x, p29.y, junctionX, p29.y);
-    drawBracketSvgLine(svg, p30.x, p30.y, junctionX, p30.y);
-    drawBracketSvgLine(svg, junctionX, p29.y, junctionX, p30.y);
-
-    drawBracketElbow(svg, junctionX, junctionY, pFinal.x, pFinal.y);
-}
-
-function connectFinalColumnToChampion(canvas, svg) {
-    const finalCard = getBracketMatchCard(canvas, 32);
-    const thirdCard = getBracketMatchCard(canvas, 31);
-    const champCol = canvas.querySelector('.champ-column');
-    if (!finalCard || !thirdCard || !champCol) return;
-
-    const champCard = champCol.querySelector('.champ-card:not(.silver-card):not(.bronze-card)');
-    const bronzeCard = champCol.querySelector('.champ-card.bronze-card');
-    if (!champCard || !bronzeCard) return;
-
-    const pairSpine = connectMatchPairOnSide(canvas, svg, 32, 31, 'right');
-    if (!pairSpine) return;
-
-    const pChamp = getChampCardAnchor(canvas, champCard, 'left');
-    const pBronze = getChampCardAnchor(canvas, bronzeCard, 'left');
-
-    drawBracketElbow(svg, pairSpine.x, pairSpine.yTop, pChamp.x, pChamp.y);
-    drawBracketElbow(svg, pairSpine.x, pairSpine.yBottom, pBronze.x, pBronze.y);
-
-    const silverCard = champCol.querySelector('.champ-card.silver-card');
-    if (silverCard) {
-        const pSilver = getChampCardAnchor(canvas, silverCard, 'left');
-        drawBracketSvgLine(svg, pairSpine.x, pairSpine.y, pSilver.x, pairSpine.y);
+    if (cards.length >= 2) {
+        const pA = getBracketAnchor(canvas, cards[0], exitSide);
+        const pB = getBracketAnchor(canvas, cards[1], exitSide);
+        const pT = getBracketAnchor(canvas, targetCard, enterSide);
+        const junctionY = (pA.y + pB.y) / 2;
+        drawBracketSvgLine(svg, pA.x, pA.y, junctionX, pA.y);
+        drawBracketSvgLine(svg, pB.x, pB.y, junctionX, pB.y);
+        drawBracketSvgLine(svg, junctionX, pA.y, junctionX, pB.y);
+        drawBracketSvgLine(svg, junctionX, junctionY, pT.x, junctionY);
+        if (Math.abs(junctionY - pT.y) > 0.5) {
+            drawBracketSvgLine(svg, pT.x, junctionY, pT.x, pT.y);
+        }
+        return;
     }
+
+    if (cards.length === 1) {
+        const pA = getBracketAnchor(canvas, cards[0], exitSide);
+        const pT = getBracketAnchor(canvas, targetCard, enterSide);
+        drawBracketOrtho(svg, pA.x, pA.y, junctionX, pA.y);
+        drawBracketSvgLine(svg, junctionX, pA.y, junctionX, pT.y);
+        drawBracketSvgLine(svg, junctionX, pT.y, pT.x, pT.y);
+    }
+}
+
+function connectCrossSemisToFinal(canvas, svg) {
+    const card29 = getBracketMatchCard(canvas, 29);
+    const card30 = getBracketMatchCard(canvas, 30);
+    const finalCard = getBracketMatchCard(canvas, 32);
+    if (!card29 || !card30 || !finalCard) return;
+
+    const col29 = getBracketColEl(card29);
+    const col30 = getBracketColEl(card30);
+    const colF = getBracketColEl(finalCard);
+    if (!col29 || !col30 || !colF) return;
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const fRect = finalCard.getBoundingClientRect();
+    const yTop = fRect.top - canvasRect.top + fRect.height * 0.32;
+    const yBot = fRect.top - canvasRect.top + fRect.height * 0.68;
+    const pT = getBracketAnchor(canvas, finalCard, 'left');
+
+    const p29 = getBracketAnchor(canvas, card29, 'right');
+    const p30 = getBracketAnchor(canvas, card30, 'left');
+    const jx29 = getColumnMidlineX(canvas, col29, colF);
+    const jx30 = getColumnMidlineX(canvas, col30, colF);
+
+    drawBracketOrtho(svg, p29.x, p29.y, jx29, yTop);
+    drawBracketSvgLine(svg, jx29, yTop, pT.x, yTop);
+    drawBracketOrtho(svg, p30.x, p30.y, jx30, yBot);
+    drawBracketSvgLine(svg, jx30, yBot, pT.x, yBot);
 }
 
 function drawBracketConnectors(canvas) {
     if (!canvas) return;
     const svg = ensureBracketConnectorSvg(canvas);
 
-    for (const matchId in KNOCKOUTS_SCHEMA) {
-        const schema = KNOCKOUTS_SCHEMA[matchId];
-        const id = parseInt(matchId, 10);
-        if (schema.round === 'R32' || schema.round === '3RD' || schema.round === 'F') continue;
-        const feeders = getFeederMatchIds(id);
-        if (feeders.length === 2) {
-            connectFeederPairToMatch(canvas, svg, feeders, id);
-        }
-    }
+    canvas.querySelectorAll('.bracket-pair[data-next-match]').forEach((pairEl) => {
+        const targetId = parseInt(pairEl.getAttribute('data-next-match'), 10);
+        if (targetId) connectBracketPairToTarget(canvas, svg, pairEl, targetId);
+    });
 
-    connectSemisToFinalColumn(canvas, svg);
-    connectFinalColumnToChampion(canvas, svg);
+    connectCrossSemisToFinal(canvas, svg);
 }
 
 function scheduleBracketConnectorSync() {
@@ -1505,93 +1518,113 @@ function setupBracketConnectorSync() {
     });
 }
 
-function formatKnockoutSlotLine(schema) {
-    if (!schema?.defaultHome || !schema?.defaultAway) return '';
-    return `${schema.defaultHome} vs ${schema.defaultAway}`;
-}
+function buildFifaTeamRowHtml(matchId, slot, p, schema, options) {
+    const { nameHtml, predictedWinner, officialWinner, cursorStyle } = options;
+    const code = getKnockoutParticipant(p, matchId, slot);
+    const slotInfo = formatBracketSlotLabel(p, matchId, slot, schema);
+    const isWinner = predictedWinner === code && Boolean(code);
+    const check = officialWinner && code && officialWinner === code
+        ? '<i class="fa-solid fa-circle-check bracket-pick-check"></i>' : '';
 
-function buildMatchCardMetaHtml(matchSchema, matchId) {
-    const dateLine = `${matchSchema.date} · ${matchSchema.venue}`;
-    const slotLine = matchSchema.round === 'R32' ? formatKnockoutSlotLine(matchSchema) : '';
-    if (slotLine) {
-        return `
-            <div class="match-info-meta">
-                <span>${matchSchema.label}</span>
-                <span class="match-slot-codes">${slotLine}</span>
-            </div>
-            <div class="match-info-meta match-info-sub">
-                <span>${dateLine}</span>
-            </div>`;
-    }
     return `
-        <div class="match-info-meta">
-            <span>${matchSchema.label}</span>
-            <span>${dateLine}</span>
+        <div class="bracket-team-row team-slot ${isWinner ? 'predicted-winner' : ''}"
+             data-match="${matchId}" data-team="${code || ''}" style="${cursorStyle}">
+            <span class="bracket-flag-box">${slotInfo.flag ? `<span class="team-flag">${slotInfo.flag}</span>` : ''}</span>
+            <span class="bracket-team-label">${nameHtml(slotInfo.text)}</span>
+            ${check}
         </div>`;
 }
 
-function appendChampionColumn(col, p, options) {
-    const results = options.results || STATE.officialResults;
-    const nameHtml = options.nameHtml || teamNameSpanHtml;
-    const showResultBorders = options.showResultBorders === true;
+function createFifaMatchBox(matchId, p, schema, side, options) {
+    const { nameHtml, results, mode, sheetInteractive } = options;
+    const predictedWinner = p.bracketPicks[matchId] || '';
+    const officialWinner = results.matches[matchId] || '';
+    const cursorStyle = sheetInteractive || mode === 'wizard'
+        ? 'cursor: pointer;'
+        : 'cursor: default !important;';
 
+    const box = document.createElement('div');
+    box.className = 'bracket-match-box match-card';
+    box.dataset.matchId = String(matchId);
+    if (mode === 'sheet' && officialWinner) {
+        box.classList.add(predictedWinner === officialWinner ? 'correct-prediction' : 'incorrect-prediction');
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = `bracket-match-wrap bracket-match-side-${side}`;
+
+    const idLabel = document.createElement('span');
+    idLabel.className = 'bracket-match-id';
+    idLabel.textContent = schema.label;
+
+    const inner = document.createElement('div');
+    inner.className = 'bracket-match-inner';
+    inner.innerHTML = `
+        <div class="bracket-match-date">${getMatchKickoff(schema)}</div>
+        ${buildFifaTeamRowHtml(matchId, 'home', p, schema, { nameHtml, predictedWinner, officialWinner, cursorStyle })}
+        ${buildFifaTeamRowHtml(matchId, 'away', p, schema, { nameHtml, predictedWinner, officialWinner, cursorStyle })}
+    `;
+
+    if (side === 'right') {
+        wrap.append(inner, idLabel);
+    } else {
+        wrap.append(idLabel, inner);
+    }
+    box.appendChild(wrap);
+
+    if (sheetInteractive) {
+        box.querySelectorAll('.team-slot').forEach((slot) => {
+            slot.addEventListener('click', () => {
+                const mId = parseInt(slot.getAttribute('data-match'), 10);
+                const team = slot.getAttribute('data-team');
+                if (!team || team === 'TBD') return;
+                p.bracketPicks[mId] = team;
+                if (mId === 32) p.champ = team;
+                propagateWinner(p, mId, team);
+                renderBracket();
+                renderLeaderboard();
+            });
+        });
+    }
+
+    return box;
+}
+
+function appendBracketPodium(col, p, options) {
+    const nameHtml = options.nameHtml || teamNameSpanHtml;
     const champCode = p.bracketPicks[32] || '';
     const champTeam = getTeamByCode(champCode);
-    let borderStyle = 'border: 2px solid rgba(245,158,11,0.4)';
-    if (showResultBorders) {
-        const isWinnerCorrect = results.matches[32] && results.matches[32] === champCode;
-        const isWinnerIncorrect = results.matches[32] && results.matches[32] !== champCode;
-        if (isWinnerCorrect) borderStyle = 'border: 2px solid var(--accent-emerald)';
-        if (isWinnerIncorrect) borderStyle = 'border: 2px solid var(--accent-crimson)';
-    }
-
-    const champCard = document.createElement('div');
-    champCard.className = 'champ-card';
-    champCard.style = borderStyle;
-    champCard.innerHTML = `
-        <i class="fa-solid fa-trophy crown-icon"></i>
-        <div class="champ-title">CHAMPION</div>
-        <div class="champ-team-spot">
-            <span class="team-flag">${champTeam.flag}</span>
-            ${nameHtml(champTeam.name)}
-        </div>
-    `;
-    col.appendChild(champCard);
-
     let silverCode = '';
-    const homeCode32 = getKnockoutParticipant(p, 32, 'home');
-    const awayCode32 = getKnockoutParticipant(p, 32, 'away');
-    if (champCode && homeCode32 && awayCode32) {
-        silverCode = (champCode === homeCode32) ? awayCode32 : homeCode32;
+    const home32 = getKnockoutParticipant(p, 32, 'home');
+    const away32 = getKnockoutParticipant(p, 32, 'away');
+    if (champCode && home32 && away32) {
+        silverCode = champCode === home32 ? away32 : home32;
     }
-    const silverTeam = getTeamByCode(silverCode);
-    const silverCard = document.createElement('div');
-    silverCard.className = 'champ-card silver-card';
-    silverCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(203, 213, 225, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(203, 213, 225, 0.1) 100%); box-shadow: 0 10px 30px rgba(203, 213, 225, 0.05);';
-    silverCard.innerHTML = `
-        <i class="fa-solid fa-medal crown-icon" style="color: #cbd5e1; filter: drop-shadow(0 0 12px rgba(203, 213, 225, 0.2));"></i>
-        <div class="champ-title" style="color: #cbd5e1;">2ND PLACE / SILVER</div>
-        <div class="champ-team-spot">
-            <span class="team-flag">${silverTeam.flag}</span>
-            ${nameHtml(silverTeam.name)}
-        </div>
-    `;
-    col.appendChild(silverCard);
-
     const bronzeCode = p.bracketPicks[31] || '';
-    const bronzeTeam = getTeamByCode(bronzeCode);
-    const bronzeCard = document.createElement('div');
-    bronzeCard.className = 'champ-card bronze-card';
-    bronzeCard.style = 'margin-top: 1.5rem; border: 2px solid rgba(245, 158, 11, 0.4); background: linear-gradient(185deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.1) 100%); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05);';
-    bronzeCard.innerHTML = `
-        <i class="fa-solid fa-medal crown-icon" style="color: #fbbf24; filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.2));"></i>
-        <div class="champ-title" style="color: #fbbf24;">3RD PLACE / BRONZE</div>
-        <div class="champ-team-spot">
-            <span class="team-flag">${bronzeTeam.flag}</span>
-            ${nameHtml(bronzeTeam.name)}
-        </div>
+
+    const podium = document.createElement('div');
+    podium.className = 'bracket-podium';
+    podium.innerHTML = `
+        <div class="bracket-podium-row gold"><i class="fa-solid fa-trophy"></i><span>Champion</span><strong>${nameHtml(champTeam.name)}</strong></div>
+        <div class="bracket-podium-row silver"><i class="fa-solid fa-medal"></i><span>2nd</span><strong>${nameHtml(getTeamByCode(silverCode).name)}</strong></div>
+        <div class="bracket-podium-row bronze"><i class="fa-solid fa-medal"></i><span>3rd</span><strong>${nameHtml(getTeamByCode(bronzeCode).name)}</strong></div>
     `;
-    col.appendChild(bronzeCard);
+    col.appendChild(podium);
+}
+
+function appendBracketPair(col, pairIds, p, side, options) {
+    const nextMatch = KNOCKOUTS_SCHEMA[pairIds[0]]?.nextMatch;
+    const pairEl = document.createElement('div');
+    pairEl.className = 'bracket-pair' + (pairIds.length === 1 ? ' bracket-pair-single' : '');
+    if (nextMatch && !(pairIds.length === 1 && (pairIds[0] === 29 || pairIds[0] === 30))) {
+        pairEl.setAttribute('data-next-match', String(nextMatch));
+    }
+
+    pairIds.forEach((matchId) => {
+        const schema = KNOCKOUTS_SCHEMA[matchId];
+        pairEl.appendChild(createFifaMatchBox(matchId, p, schema, side, options));
+    });
+    col.querySelector('.bracket-pairs-stack').appendChild(pairEl);
 }
 
 function renderBracketColumns(canvas, p, options = {}) {
@@ -1599,83 +1632,59 @@ function renderBracketColumns(canvas, p, options = {}) {
     const results = options.results || STATE.officialResults;
     const nameHtml = mode === 'wizard' ? wizardTeamNameSpanHtml : teamNameSpanHtml;
     const sheetInteractive = mode === 'sheet' && !p.submitted;
+    const renderOpts = { mode, results, nameHtml, sheetInteractive };
+
+    canvas.classList.add('fifa-bracket');
 
     BRACKET_ROUNDS_LAYOUT.forEach((round, colIndex) => {
         const col = document.createElement('div');
-        if (round.key === 'CHAMP') {
-            col.className = 'champ-column';
-        } else {
-            col.className = 'round-column' + (round.side === 'right' ? ' bracket-side-right' : '');
-        }
         col.style.zIndex = String(colIndex + 1);
 
-        const header = document.createElement('div');
-        header.className = 'round-column-title';
-        header.innerText = round.title;
-        col.appendChild(header);
+        if (round.type === 'center') {
+            col.className = 'bracket-col bracket-col-center';
+            const stack = document.createElement('div');
+            stack.className = 'bracket-center-stack';
 
-        if (round.key === 'CHAMP') {
-            appendChampionColumn(col, p, {
-                results,
-                nameHtml,
-                showResultBorders: mode === 'sheet'
+            round.finals.forEach((finalSpec) => {
+                const section = document.createElement('div');
+                section.className = 'bracket-center-section';
+                const title = document.createElement('div');
+                title.className = 'bracket-center-title';
+                title.textContent = finalSpec.section;
+                section.appendChild(title);
+
+                const singleCol = document.createElement('div');
+                singleCol.className = 'bracket-pairs-stack';
+                const schema = KNOCKOUTS_SCHEMA[finalSpec.matchId];
+                const pair = document.createElement('div');
+                pair.className = 'bracket-pair bracket-pair-single';
+                pair.appendChild(createFifaMatchBox(finalSpec.matchId, p, schema, 'center', renderOpts));
+                singleCol.appendChild(pair);
+                section.appendChild(singleCol);
+                stack.appendChild(section);
             });
+
+            col.appendChild(stack);
+            appendBracketPodium(col, p, { nameHtml });
         } else {
-            round.matches.forEach((matchId, idx) => {
-                const matchSchema = KNOCKOUTS_SCHEMA[matchId];
-                const matchCard = document.createElement('div');
-                matchCard.className = 'match-card';
+            const side = round.side;
+            col.className = 'bracket-col' + (side === 'right' ? ' bracket-col-right' : ' bracket-col-left');
 
-                const homeCode = getKnockoutParticipant(p, matchId, 'home');
-                const awayCode = getKnockoutParticipant(p, matchId, 'away');
-                const homeTeam = getTeamByCode(homeCode);
-                const awayTeam = getTeamByCode(awayCode);
-                const predictedWinner = p.bracketPicks[matchId] || '';
-                const officialWinner = results.matches[matchId] || '';
+            const header = document.createElement('div');
+            header.className = 'bracket-col-title';
+            header.textContent = round.title;
+            col.appendChild(header);
 
-                if (mode === 'sheet' && officialWinner) {
-                    matchCard.classList.add(predictedWinner === officialWinner ? 'correct-prediction' : 'incorrect-prediction');
-                }
+            const pairsStack = document.createElement('div');
+            pairsStack.className = 'bracket-pairs-stack';
+            col.appendChild(pairsStack);
 
-                const cursorStyle = sheetInteractive || mode === 'wizard'
-                    ? 'cursor: pointer;'
-                    : 'cursor: default !important;';
-
-                matchCard.innerHTML = `
-                    ${buildMatchCardMetaHtml(matchSchema, matchId)}
-                    <div class="team-slot ${predictedWinner === homeCode && homeCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${homeCode}" style="${cursorStyle}">
-                        <div class="team-slot-info">
-                            <span class="team-flag">${homeTeam.flag}</span>
-                            ${nameHtml(homeTeam.name)}
-                        </div>
-                        <span class="team-score">${mode === 'sheet' && homeCode && officialWinner === homeCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
-                    </div>
-                    <div class="team-slot ${predictedWinner === awayCode && awayCode ? 'predicted-winner' : ''}" data-match="${matchId}" data-team="${awayCode}" style="${cursorStyle}">
-                        <div class="team-slot-info">
-                            <span class="team-flag">${awayTeam.flag}</span>
-                            ${nameHtml(awayTeam.name)}
-                        </div>
-                        <span class="team-score">${mode === 'sheet' && awayCode && officialWinner === awayCode ? '<i class="fa-solid fa-circle-check"></i>' : ''}</span>
-                    </div>
-                `;
-
-                if (sheetInteractive) {
-                    matchCard.querySelectorAll('.team-slot').forEach(slot => {
-                        slot.addEventListener('click', () => {
-                            const mId = parseInt(slot.getAttribute('data-match'), 10);
-                            const team = slot.getAttribute('data-team');
-                            if (!team || team === 'TBD') return;
-                            p.bracketPicks[mId] = team;
-                            if (mId === 32) p.champ = team;
-                            propagateWinner(p, mId, team);
-                            renderBracket();
-                            renderLeaderboard();
-                        });
-                    });
-                }
-
-                col.appendChild(matchCard);
-            });
+            if (round.pairs) {
+                round.pairs.forEach((pairIds) => appendBracketPair(col, pairIds, p, side, renderOpts));
+            }
+            if (round.singles) {
+                round.singles.forEach((matchId) => appendBracketPair(col, [matchId], p, side, renderOpts));
+            }
         }
 
         canvas.appendChild(col);
@@ -2944,14 +2953,20 @@ function getBracketMatchesToRefreshAfterPick(matchId) {
     return Array.from(ids).sort((a, b) => a - b);
 }
 
-function updateWizardTeamSlotElement(slot, teamCode, team, predictedWinner) {
+function updateWizardTeamSlotElement(slot, teamCode, team, predictedWinner, schema, slotName) {
     const code = teamCode || '';
     slot.setAttribute('data-team', code);
     slot.classList.toggle('predicted-winner', !!code && predictedWinner === code);
-    const info = slot.querySelector('.team-slot-info');
-    if (info) {
-        info.innerHTML = `<span class="team-flag">${team.flag}</span>${wizardTeamNameSpanHtml(team.name)}`;
-    }
+    const slotInfo = formatBracketSlotLabel(
+        STATE.participants.draft,
+        parseInt(slot.getAttribute('data-match'), 10),
+        slotName,
+        schema
+    );
+    const label = slot.querySelector('.bracket-team-label');
+    const flagBox = slot.querySelector('.bracket-flag-box');
+    if (label) label.innerHTML = wizardTeamNameSpanHtml(slotInfo.text);
+    if (flagBox) flagBox.innerHTML = slotInfo.flag ? `<span class="team-flag">${slotInfo.flag}</span>` : '';
     slot.style.cursor = code && code !== 'TBD' ? 'pointer' : 'default';
 }
 
@@ -2962,14 +2977,13 @@ function updateWizardMatchCardSlots(p, matchId) {
     const slots = canvas.querySelectorAll(`.team-slot[data-match="${matchId}"]`);
     if (!slots.length) return;
 
+    const schema = KNOCKOUTS_SCHEMA[matchId];
     const predictedWinner = p.bracketPicks[matchId] || '';
     const homeCode = getKnockoutParticipant(p, matchId, 'home');
     const awayCode = getKnockoutParticipant(p, matchId, 'away');
-    const homeTeam = getTeamByCode(homeCode);
-    const awayTeam = getTeamByCode(awayCode);
 
-    updateWizardTeamSlotElement(slots[0], homeCode, homeTeam, predictedWinner);
-    updateWizardTeamSlotElement(slots[1], awayCode, awayTeam, predictedWinner);
+    updateWizardTeamSlotElement(slots[0], homeCode, getTeamByCode(homeCode), predictedWinner, schema, 'home');
+    updateWizardTeamSlotElement(slots[1], awayCode, getTeamByCode(awayCode), predictedWinner, schema, 'away');
 }
 
 function refreshWizardChampColumn() {
@@ -2977,34 +2991,20 @@ function refreshWizardChampColumn() {
     const p = STATE.participants.draft;
     if (!canvas || !p) return;
 
-    const col = canvas.querySelector('.champ-column');
-    if (!col) return;
+    const podium = canvas.querySelector('.bracket-podium');
+    if (!podium) return;
 
     const champCode = p.bracketPicks[32] || '';
-    const champTeam = getTeamByCode(champCode);
-    const homeCode32 = getKnockoutParticipant(p, 32, 'home');
-    const awayCode32 = getKnockoutParticipant(p, 32, 'away');
+    const home32 = getKnockoutParticipant(p, 32, 'home');
+    const away32 = getKnockoutParticipant(p, 32, 'away');
     let silverCode = '';
-    if (champCode && homeCode32 && awayCode32) {
-        silverCode = champCode === homeCode32 ? awayCode32 : homeCode32;
+    if (champCode && home32 && away32) {
+        silverCode = champCode === home32 ? away32 : home32;
     }
-    const silverTeam = getTeamByCode(silverCode);
-    const bronzeCode = p.bracketPicks[31] || '';
-    const bronzeTeam = getTeamByCode(bronzeCode);
-
-    const champSpot = col.querySelector('.champ-card:not(.silver-card):not(.bronze-card) .champ-team-spot');
-    const silverSpot = col.querySelector('.silver-card .champ-team-spot');
-    const bronzeSpot = col.querySelector('.bronze-card .champ-team-spot');
-
-    if (champSpot) {
-        champSpot.innerHTML = `<span class="team-flag">${champTeam.flag}</span>${wizardTeamNameSpanHtml(champTeam.name)}`;
-    }
-    if (silverSpot) {
-        silverSpot.innerHTML = `<span class="team-flag">${silverTeam.flag}</span>${wizardTeamNameSpanHtml(silverTeam.name)}`;
-    }
-    if (bronzeSpot) {
-        bronzeSpot.innerHTML = `<span class="team-flag">${bronzeTeam.flag}</span>${wizardTeamNameSpanHtml(bronzeTeam.name)}`;
-    }
+    const rows = podium.querySelectorAll('.bracket-podium-row');
+    if (rows[0]) rows[0].querySelector('strong').innerHTML = wizardTeamNameSpanHtml(getTeamByCode(champCode).name);
+    if (rows[1]) rows[1].querySelector('strong').innerHTML = wizardTeamNameSpanHtml(getTeamByCode(silverCode).name);
+    if (rows[2]) rows[2].querySelector('strong').innerHTML = wizardTeamNameSpanHtml(getTeamByCode(p.bracketPicks[31] || '').name);
 }
 
 function refreshWizardBracketAfterPick(startMatchId) {
