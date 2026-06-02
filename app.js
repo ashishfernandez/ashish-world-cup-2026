@@ -320,6 +320,74 @@ const STATE = {
 };
 
 // 4. Progressive Point Constants
+/** FIFA World Cup 2026 Annex C: 495 third-place group combinations → R32 away slots */
+let ANNEX_C_COMBINATIONS = null;
+const ANNEX_C_SLOT_ORDER = ['1A', '1B', '1D', '1E', '1G', '1I', '1K', '1L'];
+const ANNEX_C_SLOT_TO_R32_MATCH = { '1A': 11, '1B': 15, '1D': 7, '1E': 1, '1G': 8, '1I': 2, '1K': 16, '1L': 12 };
+const R32_THIRD_PLACE_MATCH_IDS = [1, 2, 7, 8, 11, 12, 15, 16];
+
+async function loadAnnexCCombinations() {
+    if (ANNEX_C_COMBINATIONS) return;
+    try {
+        const res = await fetch('annex-c-combinations.json?v=20260607a');
+        if (res.ok) {
+            ANNEX_C_COMBINATIONS = await res.json();
+        } else {
+            console.warn('Annex C combinations: HTTP', res.status);
+            ANNEX_C_COMBINATIONS = {};
+        }
+    } catch (err) {
+        console.warn('Annex C combinations failed to load', err);
+        ANNEX_C_COMBINATIONS = {};
+    }
+}
+
+function getGroupLetterForTeamCode(code, groupStandings) {
+    if (!code) return null;
+    if (groupStandings) {
+        for (const group in groupStandings) {
+            if (groupStandings[group].includes(code)) return group;
+        }
+    }
+    for (const group in GROUPS_DATA) {
+        if (GROUPS_DATA[group].some(t => t.code === code)) return group;
+    }
+    return null;
+}
+
+function assignThirdPlaceTeamsAnnexC(p, selectedThirdCodes) {
+    R32_THIRD_PLACE_MATCH_IDS.forEach(id => {
+        KNOCKOUTS_SCHEMA[id].awayTeamCode = '';
+    });
+    if (!selectedThirdCodes || selectedThirdCodes.length !== 8) return;
+
+    const qualifyingGroups = [];
+    for (const code of selectedThirdCodes) {
+        const g = getGroupLetterForTeamCode(code, p.groupStandings);
+        if (g && !qualifyingGroups.includes(g)) qualifyingGroups.push(g);
+    }
+    if (qualifyingGroups.length !== 8) return;
+
+    const key = qualifyingGroups.sort().join('');
+    const assigns = ANNEX_C_COMBINATIONS?.[key];
+    if (!assigns || assigns.length !== 8) {
+        console.warn('Annex C: no mapping for qualifying groups', key);
+        return;
+    }
+
+    const thirdByGroup = {};
+    for (const group in p.groupStandings) {
+        thirdByGroup[group] = p.groupStandings[group][2];
+    }
+
+    ANNEX_C_SLOT_ORDER.forEach((slot, i) => {
+        const thirdGroup = assigns[i].charAt(1);
+        const matchId = ANNEX_C_SLOT_TO_R32_MATCH[slot];
+        KNOCKOUTS_SCHEMA[matchId].awayTeamCode = thirdByGroup[thirdGroup] || '';
+    });
+}
+
+// 4. Progressive Point Constants
 const POINTS_SCALE = {
     groupAdvancement: 5,   // Correct team to advance (Max 32 * 5 = 160 pts)
     roundOf32Winner: 10,   // R16 participants (Max 16 * 10 = 160 pts)
@@ -333,6 +401,7 @@ const POINTS_SCALE = {
 // 5. Initialization: Load static configurations and predictions state
 async function init() {
     applyBracketSizingCssVars();
+    await loadAnnexCCombinations();
     setupTabListeners();
     setupDropdownListeners();
     setupAdminReset();
@@ -2064,20 +2133,12 @@ function buildBracketFromStandings(username) {
         }
     }
 
-    // Determine 3rd place advancers based on user's selection, fallback to A-H defaults
+    // Third-place R32 away teams: FIFA Annex C (which 8 groups qualify, not pick order)
     let selectedThirds = p.selectedThirds;
     if (!selectedThirds || selectedThirds.length !== 8) {
         selectedThirds = groupThirds.slice(0, 8).map(item => item.code);
     }
-
-    KNOCKOUTS_SCHEMA[1].awayTeamCode = selectedThirds[0] || ''; // 1st choice
-    KNOCKOUTS_SCHEMA[2].awayTeamCode = selectedThirds[1] || ''; // 2nd choice
-    KNOCKOUTS_SCHEMA[7].awayTeamCode = selectedThirds[2] || ''; // 3rd choice
-    KNOCKOUTS_SCHEMA[8].awayTeamCode = selectedThirds[3] || ''; // 4th choice
-    KNOCKOUTS_SCHEMA[11].awayTeamCode = selectedThirds[4] || ''; // 5th choice
-    KNOCKOUTS_SCHEMA[12].awayTeamCode = selectedThirds[5] || ''; // 6th choice
-    KNOCKOUTS_SCHEMA[15].awayTeamCode = selectedThirds[6] || ''; // 7th choice
-    KNOCKOUTS_SCHEMA[16].awayTeamCode = selectedThirds[7] || ''; // 8th choice
+    assignThirdPlaceTeamsAnnexC(p, selectedThirds);
 
     // Per-user snapshot so draft/actuals rebuilds do not overwrite each other's R32 teams
     p.knockoutR32Slots = {};
