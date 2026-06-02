@@ -5,7 +5,7 @@ import { handleOptions, jsonResponse } from '../_shared/cors.ts';
 const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const entryFeeCents = parseInt(Deno.env.get('STRIPE_ENTRY_FEE_CENTS') || '2000', 10);
+const entryFeeCents = parseInt(Deno.env.get('STRIPE_ENTRY_FEE_CENTS') || '1500', 10);
 const productName = Deno.env.get('STRIPE_PRODUCT_NAME') || "Ash's WC Tourney Pool Entry";
 
 Deno.serve(async (req) => {

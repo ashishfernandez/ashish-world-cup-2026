@@ -35,7 +35,7 @@ In **SQL Editor**, run:
 |--------|--------|
 | `STRIPE_SECRET_KEY` | `sk_test_...` or `sk_live_...` |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` |
-| `STRIPE_ENTRY_FEE_CENTS` | `2000` (= $20.00) |
+| `STRIPE_ENTRY_FEE_CENTS` | `1500` (= $15.00) |
 | `STRIPE_PRODUCT_NAME` | `Ash's WC Tourney Pool Entry` (optional) |
 
 `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically in Edge Functions.
@@ -57,7 +57,7 @@ Edit `PAYMENT_CONFIG` in `app.js`:
 ```javascript
 const PAYMENT_CONFIG = {
     required: true,
-    entryFeeDisplay: '$20.00',
+    entryFeeDisplay: '$15.00',
     productLabel: "Ash's WC Tourney Pool Entry",
 };
 ```
