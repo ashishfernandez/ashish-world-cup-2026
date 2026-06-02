@@ -2828,10 +2828,16 @@ body.dark-theme .wizard-card {
 .wizard-submit-banner {
     text-align: center;
     margin-top: 1rem;
-    padding: 1.5rem 1rem;
+    padding: 1.25rem 1rem;
     border-radius: var(--radius-sm);
     background: linear-gradient(180deg, transparent, rgba(59, 130, 246, 0.04));
     border: 1px dashed var(--card-border);
+}
+
+/* Review step: text only — action lives in the footer */
+.wizard-submit-banner .btn,
+.wizard-submit-banner button {
+    display: none !important;
 }
 
 .wizard-submit-banner h3 {
