@@ -2539,10 +2539,17 @@ body:not(.dark-theme) .theme-toggle-btn i {
     }
 
     .wizard-card.step-1-active,
+    .wizard-card.step-4-active,
     .wizard-card.step-5-active,
     .wizard-card.step-6-active {
         min-height: auto;
         max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    }
+
+    .wizard-card.step-4-active {
+        width: 100%;
+        max-width: 100%;
+        height: min(96dvh, 100%);
     }
 
     .close-wizard-btn {
@@ -2810,6 +2817,53 @@ body.dark-theme .wizard-card {
     height: auto;
     min-height: 540px;
     max-height: min(92vh, 880px);
+}
+
+/* Bracket step — near full-screen so the knockout tree is readable */
+.wizard-card.step-4-active {
+    max-width: min(98vw, 1720px);
+    width: min(98vw, 1720px);
+    height: min(94vh, 980px);
+    max-height: 94vh;
+    padding: 1.25rem 1.5rem 1rem;
+}
+
+.wizard-card.step-4-active .wizard-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.wizard-card.step-4-active .wizard-step-panel[data-step="4"].active {
+    flex: 1;
+    min-height: 0;
+}
+
+.wizard-card.step-4-active .step-intro-wrapper {
+    margin-bottom: 0.65rem;
+    flex-shrink: 0;
+}
+
+.wizard-card.step-4-active .step-intro-wrapper h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.2rem;
+}
+
+.wizard-card.step-4-active .step-intro-wrapper p {
+    font-size: 0.82rem;
+    margin: 0;
+}
+
+.wizard-card.step-4-active .wizard-bracket-scroll-area {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+.wizard-card.step-4-active .wizard-bracket-scroll-area .bracket-scroll-container {
+    min-height: 100%;
 }
 
 .wizard-card.step-5-active .wizard-content,

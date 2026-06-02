@@ -2719,9 +2719,11 @@ function goToWizardStep(step) {
     // Dynamically adjust modal scaling sizes
     const wizardCard = document.querySelector('.wizard-card');
     if (wizardCard) {
-        wizardCard.classList.remove('step-1-active', 'step-5-active', 'step-6-active');
+        wizardCard.classList.remove('step-1-active', 'step-4-active', 'step-5-active', 'step-6-active');
         if (step === 1) {
             wizardCard.classList.add('step-1-active');
+        } else if (step === 4) {
+            wizardCard.classList.add('step-4-active');
         } else if (step === 5) {
             wizardCard.classList.add('step-5-active');
         } else if (step === WIZARD_PAYMENT_STEP) {
