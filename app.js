@@ -1377,6 +1377,22 @@ function isResolvedTeamCode(code) {
     return Boolean(code && /^[A-Z]{3}$/.test(code));
 }
 
+/** Bracket Sheet vs user picks: only score/display result when official matchup is fully known. */
+function isOfficialMatchDecided(matchId) {
+    const mid = Number(matchId);
+    const officialWinner = STATE.officialResults.matches[mid];
+    if (!isResolvedTeamCode(officialWinner)) return false;
+
+    const actuals = STATE.participants.actuals;
+    if (!actuals) return false;
+
+    const home = getKnockoutParticipant(actuals, mid, 'home');
+    const away = getKnockoutParticipant(actuals, mid, 'away');
+    if (!isResolvedTeamCode(home) || !isResolvedTeamCode(away)) return false;
+
+    return officialWinner === home || officialWinner === away;
+}
+
 function formatBracketSlotLabel(p, matchId, slot, schema, mode = 'sheet') {
     const code = getKnockoutParticipant(p, matchId, slot);
     if (isResolvedTeamCode(code)) {
@@ -1552,11 +1568,11 @@ function setupBracketConnectorSync() {
 }
 
 function buildFifaTeamRowHtml(matchId, slot, p, schema, options) {
-    const { nameHtml, predictedWinner, officialWinner, cursorStyle, mode } = options;
+    const { nameHtml, predictedWinner, officialWinner, officialDecided, cursorStyle, mode } = options;
     const code = getKnockoutParticipant(p, matchId, slot);
     const slotInfo = formatBracketSlotLabel(p, matchId, slot, schema, mode);
     const isWinner = predictedWinner === code && Boolean(code);
-    const check = mode === 'sheet' && officialWinner && code && officialWinner === code
+    const check = mode === 'sheet' && officialDecided && officialWinner && code && officialWinner === code
         ? '<i class="fa-solid fa-circle-check bracket-pick-check"></i>' : '';
 
     return `
@@ -1572,6 +1588,8 @@ function createFifaMatchBox(matchId, p, schema, side, options) {
     const { nameHtml, results, mode, sheetInteractive } = options;
     const predictedWinner = p.bracketPicks[matchId] || '';
     const officialWinner = results.matches[matchId] || '';
+    const officialDecided = mode === 'sheet' && !p.isActuals && isOfficialMatchDecided(matchId);
+    const rowOpts = { nameHtml, predictedWinner, officialWinner, officialDecided, mode };
     const cursorStyle = sheetInteractive || mode === 'wizard'
         ? 'cursor: pointer;'
         : 'cursor: default !important;';
@@ -1579,7 +1597,7 @@ function createFifaMatchBox(matchId, p, schema, side, options) {
     const box = document.createElement('div');
     box.className = 'bracket-match-box match-card';
     box.dataset.matchId = String(matchId);
-    if (mode === 'sheet' && officialWinner) {
+    if (officialDecided) {
         box.classList.add(predictedWinner === officialWinner ? 'correct-prediction' : 'incorrect-prediction');
     }
 
@@ -1594,8 +1612,8 @@ function createFifaMatchBox(matchId, p, schema, side, options) {
     inner.className = 'bracket-match-inner';
     inner.innerHTML = `
         <div class="bracket-match-date">${getMatchKickoff(schema)}</div>
-        ${buildFifaTeamRowHtml(matchId, 'home', p, schema, { nameHtml, predictedWinner, officialWinner, cursorStyle, mode })}
-        ${buildFifaTeamRowHtml(matchId, 'away', p, schema, { nameHtml, predictedWinner, officialWinner, cursorStyle, mode })}
+        ${buildFifaTeamRowHtml(matchId, 'home', p, schema, { ...rowOpts, cursorStyle })}
+        ${buildFifaTeamRowHtml(matchId, 'away', p, schema, { ...rowOpts, cursorStyle })}
     `;
 
     if (side === 'right') {
