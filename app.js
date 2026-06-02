@@ -250,6 +250,17 @@ const R32_KICKOFFS = {
     }
 });
 
+/** Internal match ids sorted by FIFA label (M73 … M104) for admin lists. */
+function getKnockoutMatchIdsByFifaOrder() {
+    return Object.keys(KNOCKOUTS_SCHEMA)
+        .map((id) => parseInt(id, 10))
+        .sort((a, b) => {
+            const fa = parseInt(String(KNOCKOUTS_SCHEMA[a].label).replace(/\D/g, ''), 10);
+            const fb = parseInt(String(KNOCKOUTS_SCHEMA[b].label).replace(/\D/g, ''), 10);
+            return fa - fb || a - b;
+        });
+}
+
 // Official FIFA WC26 column layout (pair groupings + center finals).
 const BRACKET_ROUNDS_LAYOUT = [
     { key: 'R32', title: 'Round of 32', side: 'left', pairs: [[1, 2], [3, 4], [9, 10], [11, 12]] },
@@ -481,6 +492,10 @@ function applyOfficialResultsFields(parsed) {
     STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
     STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
     STATE.officialResults.stripePaymentRequired = parsed.stripePaymentRequired !== false;
+    if (STATE.participants.actuals) {
+        // Keep actuals.bracketPicks aligned with officialResults.matches (same object reference).
+        STATE.participants.actuals.bracketPicks = STATE.officialResults.matches;
+    }
     if (parsed.groupStandings && STATE.participants.actuals) {
         STATE.participants.actuals.groupStandings = parsed.groupStandings;
     }
@@ -1750,47 +1765,66 @@ function ensureBracketSheetScrollReady() {
     });
 }
 
+/** Bracket winner picks — actuals always read/write officialResults.matches. */
+function getBracketPicks(participant) {
+    if (!participant) return {};
+    if (participant.isActuals) return STATE.officialResults.matches;
+    return participant.bracketPicks || {};
+}
+
+/** Parent R32–SF match ids that feed a knockout match (home feeder first). */
+function getKnockoutParentMatchIds(matchId) {
+    const target = Number(matchId);
+    return Object.keys(KNOCKOUTS_SCHEMA)
+        .map((k) => parseInt(k, 10))
+        .filter((id) => KNOCKOUTS_SCHEMA[id].nextMatch === target)
+        .sort((a, b) => {
+            const slotA = KNOCKOUTS_SCHEMA[a].slot;
+            const slotB = KNOCKOUTS_SCHEMA[b].slot;
+            if (slotA === 'home' && slotB !== 'home') return -1;
+            if (slotA !== 'home' && slotB === 'home') return 1;
+            return a - b;
+        });
+}
+
 // Logic to pull which team code occupies a home/away knockout slot based on user's parent predictions
 function getKnockoutParticipant(participant, matchId, slot) {
-    if (!participant || !participant.bracketPicks) return '';
+    if (!participant) return '';
+
+    const picks = getBracketPicks(participant);
+    const mid = Number(matchId);
 
     // If viewing official results and third-place choices are incomplete, force all R32 teams to TBD
     if (participant.isActuals && (!participant.selectedThirds || participant.selectedThirds.length < 8)) {
-        if (KNOCKOUTS_SCHEMA[matchId].round === 'R32') {
+        if (KNOCKOUTS_SCHEMA[mid].round === 'R32') {
             return '';
         }
     }
 
-    const schema = KNOCKOUTS_SCHEMA[matchId];
+    const schema = KNOCKOUTS_SCHEMA[mid];
+    if (!schema) return '';
+
     if (schema.round === 'R32') {
         return slot === 'home' ? schema.homeTeamCode || schema.defaultHome : slot === 'away' ? schema.awayTeamCode || schema.defaultAway : '';
     }
 
-    // Special Case: 3rd Place Match (Match 31) participants are the losers of the Semifinals
-    if (matchId === 31) {
+    // 3rd place (M103): semifinal losers
+    if (mid === 31) {
         const sfMatchId = slot === 'home' ? 29 : 30;
-        const sfWinner = participant.bracketPicks[sfMatchId];
+        const sfWinner = picks[sfMatchId];
         if (!sfWinner) return '';
-        
+
         const sfHome = getKnockoutParticipant(participant, sfMatchId, 'home');
         const sfAway = getKnockoutParticipant(participant, sfMatchId, 'away');
-        
+
         if (sfWinner === sfHome) return sfAway;
         if (sfWinner === sfAway) return sfHome;
         return '';
     }
 
-    // Knockout rounds: derive teams dynamically from the winners of parent matches
-    const parentMatches = Object.values(KNOCKOUTS_SCHEMA)
-        .filter(m => m.nextMatch === matchId)
-        .sort((a, b) => parseInt(a.name.replace('M', ''), 10) - parseInt(b.name.replace('M', ''), 10));
-
-    if (slot === 'home') {
-        const parentMatch = parentMatches[0];
-        return parentMatch ? participant.bracketPicks[parseInt(parentMatch.name.replace('M', ''), 10)] : '';
-    }
-    const parentMatch = parentMatches[1];
-    return parentMatch ? participant.bracketPicks[parseInt(parentMatch.name.replace('M', ''), 10)] : '';
+    const parentIds = getKnockoutParentMatchIds(mid);
+    const parentId = slot === 'home' ? parentIds[0] : parentIds[1];
+    return parentId != null ? (picks[parentId] || '') : '';
 }
 
 // Keep predicted brackets logically clean on selection changes
@@ -1798,10 +1832,11 @@ function propagateWinner(participant, matchId, teamCode) {
     const schema = KNOCKOUTS_SCHEMA[matchId];
     if (!schema || !schema.nextMatch) return;
 
+    const picks = getBracketPicks(participant);
     const nextId = schema.nextMatch;
 
     // Check if the participant's prediction for the next round is invalid
-    const nextPick = participant.bracketPicks[nextId];
+    const nextPick = picks[nextId];
     if (nextPick && nextPick !== teamCode) {
         // Clear all subsequent nodes that match the old parent
         clearChildMatchPicks(participant, nextId, nextPick);
@@ -1809,8 +1844,9 @@ function propagateWinner(participant, matchId, teamCode) {
 }
 
 function clearChildMatchPicks(participant, matchId, oldTeamCode) {
-    if (participant.bracketPicks[matchId] === oldTeamCode) {
-        delete participant.bracketPicks[matchId];
+    const picks = getBracketPicks(participant);
+    if (picks[matchId] === oldTeamCode) {
+        delete picks[matchId];
         if (matchId === 32) participant.champ = '';
     }
 
@@ -2044,7 +2080,7 @@ function renderAdminSimulator() {
 
             let currentRound = '';
 
-            for (const matchId in KNOCKOUTS_SCHEMA) {
+            for (const matchId of getKnockoutMatchIdsByFifaOrder()) {
                 const m = KNOCKOUTS_SCHEMA[matchId];
                 
                 // Add round dividers
@@ -3422,9 +3458,10 @@ window.removeWizardThird = function(index) {
 
 // Invalidate subsequent predicted predicted bracket picks that depend on third places
 function resetSubsequentBracketPicks(p) {
+    const picks = getBracketPicks(p);
     const thirdPlaceMatches = [1, 2, 7, 8, 11, 12, 15, 16];
     thirdPlaceMatches.forEach(mId => {
-        p.bracketPicks[mId] = '';
+        delete picks[mId];
         propagateWinner(p, mId, '');
     });
     p.champ = '';
