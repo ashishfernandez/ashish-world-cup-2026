@@ -1406,6 +1406,23 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     line-height: 1;
 }
 
+/* Light mode: moon on black button */
+body:not(.dark-theme) .theme-toggle-btn {
+    background-color: #000000;
+    border-color: #000000;
+    color: #ffffff;
+}
+
+body:not(.dark-theme) .theme-toggle-btn:hover {
+    background-color: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #ffffff;
+}
+
+body:not(.dark-theme) .theme-toggle-btn i {
+    color: #ffffff;
+}
+
 /* Groups Layout Grid */
 .groups-grid {
     display: grid;
