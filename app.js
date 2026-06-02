@@ -1361,8 +1361,11 @@ function formatBracketSlotLabel(p, matchId, slot, schema, mode = 'sheet') {
         }
     }
     if (mode === 'wizard') {
+        if (schema.round !== 'R32') {
+            return { flag: '', text: WIZARD_UNPICKED_LABEL };
+        }
         const fallback = slot === 'home' ? schema.defaultHome : schema.defaultAway;
-        return { flag: '', text: fallback || code || '' };
+        return { flag: '', text: fallback || code || WIZARD_UNPICKED_LABEL };
     }
     return { flag: '', text: 'TBD' };
 }
@@ -1809,6 +1812,10 @@ function getKnockoutParticipant(participant, matchId, slot) {
     if (!schema) return '';
 
     if (schema.round === 'R32') {
+        const frozen = participant.knockoutR32Slots?.[mid];
+        if (frozen) {
+            return slot === 'home' ? (frozen.home || '') : slot === 'away' ? (frozen.away || '') : '';
+        }
         return slot === 'home' ? schema.homeTeamCode || schema.defaultHome : slot === 'away' ? schema.awayTeamCode || schema.defaultAway : '';
     }
 
@@ -1838,11 +1845,12 @@ function propagateWinner(participant, matchId, teamCode) {
 
     const picks = getBracketPicks(participant);
     const nextId = schema.nextMatch;
-
-    // Check if the participant's prediction for the next round is invalid
     const nextPick = picks[nextId];
-    if (nextPick && nextPick !== teamCode) {
-        // Clear all subsequent nodes that match the old parent
+    if (!nextPick) return;
+
+    const home = getKnockoutParticipant(participant, nextId, 'home');
+    const away = getKnockoutParticipant(participant, nextId, 'away');
+    if (nextPick !== home && nextPick !== away) {
         clearChildMatchPicks(participant, nextId, nextPick);
     }
 }
@@ -2027,6 +2035,16 @@ function buildBracketFromStandings(username) {
     KNOCKOUTS_SCHEMA[12].awayTeamCode = selectedThirds[5] || ''; // 6th choice
     KNOCKOUTS_SCHEMA[15].awayTeamCode = selectedThirds[6] || ''; // 7th choice
     KNOCKOUTS_SCHEMA[16].awayTeamCode = selectedThirds[7] || ''; // 8th choice
+
+    // Per-user snapshot so draft/actuals rebuilds do not overwrite each other's R32 teams
+    p.knockoutR32Slots = {};
+    for (let r32Id = 1; r32Id <= 16; r32Id++) {
+        const s = KNOCKOUTS_SCHEMA[r32Id];
+        p.knockoutR32Slots[r32Id] = {
+            home: s.homeTeamCode || s.defaultHome || '',
+            away: s.awayTeamCode || s.defaultAway || ''
+        };
+    }
 }
 
 // 11. Render Admin simulator matches panel
@@ -2975,11 +2993,14 @@ window.moveWizardTeam = function(groupName, currentIndex, direction) {
 let _wizardBracketPickBound = false;
 
 function getBracketMatchesToRefreshAfterPick(matchId) {
-    const ids = new Set([matchId, 31]);
+    const ids = new Set([matchId]);
     let nextId = KNOCKOUTS_SCHEMA[matchId]?.nextMatch;
     while (nextId) {
         ids.add(nextId);
         nextId = KNOCKOUTS_SCHEMA[nextId]?.nextMatch;
+    }
+    if (ids.has(29) || ids.has(30) || matchId === 29 || matchId === 30) {
+        ids.add(31);
     }
     return Array.from(ids).sort((a, b) => a - b);
 }
@@ -3012,6 +3033,16 @@ function updateWizardMatchCardSlots(p, matchId) {
 
     const schema = KNOCKOUTS_SCHEMA[matchId];
     const predictedWinner = p.bracketPicks[matchId] || '';
+
+    // R32 teams are fixed from group/3rd-place picks — only update winner highlight
+    if (schema.round === 'R32') {
+        slots.forEach((slot) => {
+            const code = slot.getAttribute('data-team') || '';
+            slot.classList.toggle('predicted-winner', Boolean(predictedWinner && code && predictedWinner === code));
+        });
+        return;
+    }
+
     const homeCode = getKnockoutParticipant(p, matchId, 'home');
     const awayCode = getKnockoutParticipant(p, matchId, 'away');
 
