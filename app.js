@@ -251,7 +251,8 @@ const STATE = {
     officialResults: {
         matches: {}, // key: matchId (1 to 32), value: winningTeamCode
         advancingTeams: [], // Explicit list of 32 teams who reached knockout stage
-        groupScoringActive: true // Admin toggle: group column on leaderboard (max 160)
+        groupScoringActive: true, // Admin toggle: group column on leaderboard (max 160)
+        stripePaymentRequired: true // Admin toggle: wizard step 6 + Stripe checkout
     },
 
     // User profiles & predicted selections (Brackets, Groups)
@@ -275,6 +276,7 @@ async function init() {
     setupDropdownListeners();
     setupAdminReset();
     setupAdminGroupScoringToggle();
+    setupAdminStripePaymentToggle();
     setupThemeToggle();
     setupDragScroll();
     setupBracketConnectorSync();
@@ -436,11 +438,16 @@ function isGroupScoringActive() {
     return STATE.officialResults.groupScoringActive !== false;
 }
 
+function isStripePaymentRequired() {
+    return PAYMENT_CONFIG.required && STATE.officialResults.stripePaymentRequired !== false;
+}
+
 function getOfficialResultsPayload() {
     return {
         matches: STATE.officialResults.matches,
         advancingTeams: STATE.officialResults.advancingTeams,
         groupScoringActive: isGroupScoringActive(),
+        stripePaymentRequired: STATE.officialResults.stripePaymentRequired !== false,
         groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
         selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
     };
@@ -450,6 +457,7 @@ function applyOfficialResultsFields(parsed) {
     STATE.officialResults.matches = parsed.matches || {};
     STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
     STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
+    STATE.officialResults.stripePaymentRequired = parsed.stripePaymentRequired !== false;
     if (parsed.groupStandings && STATE.participants.actuals) {
         STATE.participants.actuals.groupStandings = parsed.groupStandings;
     }
@@ -471,6 +479,8 @@ function applyOfficialResultsFromCloud(resData) {
     applyOfficialResultsFields(parsed);
     localStorage.setItem('wc-official-results', JSON.stringify(getOfficialResultsPayload()));
     syncGroupScoringToggleUI();
+    syncStripePaymentToggleUI();
+    syncWizardPaymentUI();
     return true;
 }
 
@@ -549,6 +559,8 @@ async function refreshFromCloudAndRender() {
 
     ensureStandardStandings();
     syncGroupScoringToggleUI();
+    syncStripePaymentToggleUI();
+    syncWizardPaymentUI();
     populateUserDropdowns();
     renderAll();
     updateActivePlayersCount();
@@ -638,6 +650,7 @@ function loadStateFromStorage() {
         STATE.officialResults.matches = parsed.matches || {};
         STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
         STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
+        STATE.officialResults.stripePaymentRequired = parsed.stripePaymentRequired !== false;
         loadedGroupStandings = parsed.groupStandings || null;
         loadedSelectedThirds = parsed.selectedThirds || null;
     }
@@ -929,6 +942,49 @@ function setupAdminGroupScoringToggle() {
         setGroupScoringActive(false);
     });
     syncGroupScoringToggleUI();
+}
+
+function syncStripePaymentToggleUI() {
+    const on = isStripePaymentRequired();
+    document.getElementById('btn-stripe-payment-on')?.classList.toggle('active', on);
+    document.getElementById('btn-stripe-payment-off')?.classList.toggle('active', !on);
+    const statusEl = document.getElementById('stripe-payment-status-text');
+    if (statusEl) {
+        statusEl.textContent = on
+            ? 'New entries must pay via Stripe before joining the pool.'
+            : 'Submit picks skip payment and go straight to the leaderboard (testing / comp entries).';
+    }
+}
+
+function syncWizardPaymentUI() {
+    const on = isStripePaymentRequired();
+    const hintEl = document.getElementById('wizard-review-payment-hint');
+    if (hintEl) {
+        hintEl.textContent = on
+            ? 'Confirm your champion, silver, and bronze picks above. On the next step you will complete payment to lock your entry on the leaderboard.'
+            : 'Confirm your champion, silver, and bronze picks above, then submit to add your entry to the leaderboard.';
+    }
+    document.querySelectorAll('.wizard-progress-tracker .progress-step[data-step="6"]').forEach((el) => {
+        el.classList.toggle('progress-step-skipped', !on);
+    });
+}
+
+function setStripePaymentRequired(required) {
+    STATE.officialResults.stripePaymentRequired = required;
+    syncStripePaymentToggleUI();
+    syncWizardPaymentUI();
+    saveStateToStorage();
+}
+
+function setupAdminStripePaymentToggle() {
+    document.getElementById('btn-stripe-payment-on')?.addEventListener('click', () => {
+        setStripePaymentRequired(true);
+    });
+    document.getElementById('btn-stripe-payment-off')?.addEventListener('click', () => {
+        setStripePaymentRequired(false);
+    });
+    syncStripePaymentToggleUI();
+    syncWizardPaymentUI();
 }
 
 function setupAdminReset() {
@@ -2250,7 +2306,7 @@ async function handlePaymentReturn() {
         window.history.replaceState({}, '', getPaymentReturnBaseUrl());
         const modal = document.getElementById('onboarding-modal');
         if (modal) {
-            goToWizardStep(WIZARD_PAYMENT_STEP);
+            goToWizardStep(isStripePaymentRequired() ? WIZARD_PAYMENT_STEP : 5);
             modal.classList.add('active');
         }
         return;
@@ -2334,7 +2390,7 @@ function setupOnboarding() {
 
     // 4. Navigation - Next Button
     if (nextBtn) {
-        nextBtn.addEventListener('click', (e) => {
+        nextBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             const step = STATE.wizardStep;
             
@@ -2379,7 +2435,11 @@ function setupOnboarding() {
                 }
                 goToWizardStep(5);
             } else if (step === 5) {
-                goToWizardStep(WIZARD_PAYMENT_STEP);
+                if (isStripePaymentRequired()) {
+                    goToWizardStep(WIZARD_PAYMENT_STEP);
+                } else {
+                    await submitWithoutPayment();
+                }
             }
         });
     }
@@ -2387,7 +2447,7 @@ function setupOnboarding() {
     if (payBtn) {
         payBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            if (PAYMENT_CONFIG.required) {
+            if (isStripePaymentRequired()) {
                 await startStripeCheckout();
             } else {
                 await submitWithoutPayment();
@@ -2449,10 +2509,14 @@ function goToWizardStep(step) {
     // Toggle Next button visibility
     const nextBtn = document.getElementById('btn-wizard-next');
     if (nextBtn) {
-        const hideNext = step === 5 || step === WIZARD_PAYMENT_STEP;
+        const hideNext = step === WIZARD_PAYMENT_STEP;
         nextBtn.style.display = hideNext ? 'none' : 'inline-flex';
         if (step === 5) {
-            nextBtn.innerHTML = 'Continue to Payment <i class="fa-solid fa-chevron-right"></i>';
+            if (isStripePaymentRequired()) {
+                nextBtn.innerHTML = 'Continue to Payment <i class="fa-solid fa-chevron-right"></i>';
+            } else {
+                nextBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Submit Entry';
+            }
         } else {
             nextBtn.innerHTML = 'Next <i class="fa-solid fa-chevron-right"></i>';
         }
@@ -2490,6 +2554,7 @@ function goToWizardStep(step) {
         const bronzeCode = draft.bracketPicks[31] || '';
         const bronzeTeam = getTeamByCode(bronzeCode);
         setWizardReviewAward(document.getElementById('wizard-review-bronze'), bronzeTeam, !!bronzeCode);
+        syncWizardPaymentUI();
     } else if (step === WIZARD_PAYMENT_STEP) {
         const draft = STATE.participants.draft;
         const amountEl = document.getElementById('wizard-payment-amount');
@@ -2501,10 +2566,10 @@ function goToWizardStep(step) {
         if (nameEl) nameEl.textContent = draft.name || '—';
         if (payBtn) {
             payBtn.disabled = false;
-            if (PAYMENT_CONFIG.required) {
+            if (isStripePaymentRequired()) {
                 payBtn.innerHTML = '<i class="fa-brands fa-stripe"></i> <span>Pay &amp; Submit Entry</span>';
             } else {
-                payBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> <span>Submit Entry (dev)</span>';
+                payBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> <span>Submit Entry</span>';
             }
         }
         if (statusEl) {

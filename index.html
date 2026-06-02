@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260603b">
+    <link rel="stylesheet" href="styles.css?v=20260603c">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -316,6 +316,24 @@
                                     <!-- Dynamic list of users with delete buttons -->
                                 </div>
                             </div>
+
+                            <!-- Stripe payment step toggle -->
+                            <div class="premium-card admin-payment-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-brands fa-stripe text-primary"></i> Pool Entry Payment</h3>
+                                    <p>Require Stripe checkout before new picks appear on the leaderboard.</p>
+                                </div>
+                                <div class="group-scoring-control-bar">
+                                    <div class="group-scoring-control-text">
+                                        <span class="group-scoring-toggle-label">Stripe payment step</span>
+                                        <p id="stripe-payment-status-text" class="group-scoring-status-text">New entries must pay via Stripe before joining the pool.</p>
+                                    </div>
+                                    <div class="group-scoring-toggle" role="group" aria-label="Stripe payment step">
+                                        <button type="button" id="btn-stripe-payment-on" class="scoring-toggle-btn active">On</button>
+                                        <button type="button" id="btn-stripe-payment-off" class="scoring-toggle-btn">Off</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -462,7 +480,7 @@
 
                     <div class="wizard-submit-banner">
                         <h3>Review Your Predictions</h3>
-                        <p>Confirm your champion, silver, and bronze picks above. On the next step you will complete payment to lock your entry on the leaderboard.</p>
+                        <p id="wizard-review-payment-hint">Confirm your champion, silver, and bronze picks above. On the next step you will complete payment to lock your entry on the leaderboard.</p>
                     </div>
                 </div>
 
@@ -507,6 +525,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260603b"></script>
+    <script src="app.js?v=20260603c"></script>
 </body>
 </html>

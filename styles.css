@@ -1509,6 +1509,14 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     gap: 2rem;
 }
 
+.admin-payment-card .group-scoring-control-bar {
+    margin-top: 1rem;
+}
+
+.wizard-progress-tracker .progress-step.progress-step-skipped {
+    opacity: 0.35;
+}
+
 .group-scoring-control-bar {
     display: flex;
     align-items: center;
