@@ -2849,14 +2849,12 @@ body.dark-theme .wizard-card {
     line-height: 1.5;
 }
 
-.wizard-submit-btn,
-.wizard-continue-payment-btn {
+.wizard-submit-btn {
     width: 100%;
     max-width: 320px;
     padding: 0.9rem 1.25rem;
     font-size: 1rem;
     justify-content: center;
-    margin-top: 1.25rem;
 }
 
 /* Wizard Footer */
