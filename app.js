@@ -238,9 +238,11 @@ const KNOCKOUTS_SCHEMA = {
     32: { round: 'F', label: 'M104', name: 'M32', venue: 'New York', date: 'Jul 19' }
 };
 
-// Split-bracket column order: left R32 → center → right R32 (official WC26 draw)
+// Split-bracket column order (official FIFA WC26 knockout paths).
+// Left half R32 = M73–M80 (ids 3,1,4,9,2,10,11,12). Right half R32 = M81–M88 (ids 5–8,13–16).
+// R16/QF/SF nextMatch links in KNOCKOUTS_SCHEMA must stay aligned with this split.
 const BRACKET_ROUNDS_LAYOUT = [
-    { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 5, 6, 7, 8], side: 'left' },
+    { key: 'R32', title: 'Round of 32', matches: [1, 2, 3, 4, 9, 10, 11, 12], side: 'left' },
     { key: 'R16', title: 'Round of 16', matches: [17, 18, 19, 20], side: 'left' },
     { key: 'QF', title: 'Quarters', matches: [25, 26], side: 'left' },
     { key: 'SF', title: 'Semis', matches: [29], side: 'left' },
@@ -249,7 +251,7 @@ const BRACKET_ROUNDS_LAYOUT = [
     { key: 'SF', title: 'Semis', matches: [30], side: 'right' },
     { key: 'QF', title: 'Quarters', matches: [27, 28], side: 'right' },
     { key: 'R16', title: 'Round of 16', matches: [21, 22, 23, 24], side: 'right' },
-    { key: 'R32', title: 'Round of 32', matches: [9, 10, 11, 12, 13, 14, 15, 16], side: 'right' }
+    { key: 'R32', title: 'Round of 32', matches: [5, 6, 7, 8, 13, 14, 15, 16], side: 'right' }
 ];
 
 // 3. Complete State: Contains Official Simulated Outcomes & Predictions
