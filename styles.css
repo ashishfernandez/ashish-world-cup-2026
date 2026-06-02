@@ -2420,6 +2420,13 @@ body.dark-theme .onboarding-card {
     box-shadow: 0 0 10px var(--primary-glow);
 }
 
+.input-field-hint {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
 .onboarding-select {
     width: 100%;
 }
