@@ -304,19 +304,8 @@
 
                         </div>
 
-                        <!-- Right column: Participant management -->
+                        <!-- Right column: Payment + participant management -->
                         <div class="admin-right-col">
-                            <!-- Participant Deletion / Management Card -->
-                            <div class="premium-card admin-users-card">
-                                <div class="card-header">
-                                    <h3><i class="fa-solid fa-users-gear text-danger"></i> Manage Participants</h3>
-                                    <p>Permanently remove user prediction entries from the pool.</p>
-                                </div>
-                                <div id="admin-user-list-container" style="max-height: 300px; overflow-y: auto; margin-top: 1rem; border: 1px solid var(--card-border); border-radius: var(--radius-sm); background: var(--bg-sidebar);">
-                                    <!-- Dynamic list of users with delete buttons -->
-                                </div>
-                            </div>
-
                             <!-- Stripe payment step toggle -->
                             <div class="premium-card admin-payment-card">
                                 <div class="card-header">
@@ -332,6 +321,17 @@
                                         <button type="button" id="btn-stripe-payment-on" class="scoring-toggle-btn active">On</button>
                                         <button type="button" id="btn-stripe-payment-off" class="scoring-toggle-btn">Off</button>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Participant Deletion / Management Card -->
+                            <div class="premium-card admin-users-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-users-gear text-danger"></i> Manage Participants</h3>
+                                    <p>Permanently remove user prediction entries from the pool.</p>
+                                </div>
+                                <div id="admin-user-list-container" style="max-height: 300px; overflow-y: auto; margin-top: 1rem; border: 1px solid var(--card-border); border-radius: var(--radius-sm); background: var(--bg-sidebar);">
+                                    <!-- Dynamic list of users with delete buttons -->
                                 </div>
                             </div>
                         </div>
