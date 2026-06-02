@@ -1446,34 +1446,18 @@ function isResolvedTeamCode(code) {
     return Boolean(code && /^[A-Z]{3}$/.test(code));
 }
 
-/**
- * Bracket Sheet: per-slot status vs official actuals (home/away boxes, not winner pick).
- * pending — official slot empty/TBD; correct/incorrect — official has a team code in that slot.
- */
-function getBracketSlotMatchupStatus(matchId, slot, userP) {
-    if (!userP || userP.isActuals) return null;
+/** Bracket Sheet: green check when user's team in this slot matches official actuals (same match, same side). */
+function userSlotMatchesOfficialActuals(matchId, slot, userP) {
+    if (!userP || userP.isActuals) return false;
 
     const actuals = STATE.participants.actuals;
-    if (!actuals) return null;
+    if (!actuals) return false;
 
     const officialCode = getKnockoutParticipant(actuals, Number(matchId), slot);
-    if (!isResolvedTeamCode(officialCode)) return 'pending';
+    if (!isResolvedTeamCode(officialCode)) return false;
 
     const userCode = getKnockoutParticipant(userP, Number(matchId), slot);
-    return isResolvedTeamCode(userCode) && userCode === officialCode ? 'correct' : 'incorrect';
-}
-
-function applyBracketMatchBoxMatchupStatus(box, homeStatus, awayStatus) {
-    box.classList.remove('correct-prediction', 'incorrect-prediction', 'pending-outcome');
-    if (!homeStatus && !awayStatus) return;
-
-    if (homeStatus === 'pending' || awayStatus === 'pending') {
-        box.classList.add('pending-outcome');
-    } else if (homeStatus === 'incorrect' || awayStatus === 'incorrect') {
-        box.classList.add('incorrect-prediction');
-    } else if (homeStatus === 'correct' && awayStatus === 'correct') {
-        box.classList.add('correct-prediction');
-    }
+    return isResolvedTeamCode(userCode) && userCode === officialCode;
 }
 
 function formatBracketSlotLabel(p, matchId, slot, schema, mode = 'sheet') {
@@ -1651,16 +1635,15 @@ function setupBracketConnectorSync() {
 }
 
 function buildFifaTeamRowHtml(matchId, slot, p, schema, options) {
-    const { nameHtml, predictedWinner, officialWinner, officialWinnerResolved, slotMatchupStatus, cursorStyle, mode } = options;
+    const { nameHtml, predictedWinner, cursorStyle, mode, sheetShowChecks } = options;
     const code = getKnockoutParticipant(p, matchId, slot);
     const slotInfo = formatBracketSlotLabel(p, matchId, slot, schema, mode);
     const isWinner = predictedWinner === code && Boolean(code);
-    const check = mode === 'sheet' && officialWinnerResolved && officialWinner && code && officialWinner === code
+    const check = sheetShowChecks && userSlotMatchesOfficialActuals(matchId, slot, p)
         ? '<i class="fa-solid fa-circle-check bracket-pick-check"></i>' : '';
-    const slotStatusClass = slotMatchupStatus ? `slot-matchup-${slotMatchupStatus}` : '';
 
     return `
-        <div class="bracket-team-row team-slot ${isWinner ? 'predicted-winner' : ''} ${slotStatusClass}"
+        <div class="bracket-team-row team-slot ${isWinner ? 'predicted-winner' : ''}"
              data-match="${matchId}" data-team="${code || ''}" style="${cursorStyle}">
             <span class="bracket-flag-box">${slotInfo.flag ? `<span class="team-flag">${slotInfo.flag}</span>` : ''}</span>
             <span class="bracket-team-label">${nameHtml(slotInfo.text)}</span>
@@ -1671,18 +1654,8 @@ function buildFifaTeamRowHtml(matchId, slot, p, schema, options) {
 function createFifaMatchBox(matchId, p, schema, side, options) {
     const { nameHtml, results, mode, sheetInteractive } = options;
     const predictedWinner = p.bracketPicks[matchId] || '';
-    const officialWinner = results.matches[matchId] || '';
-    const officialWinnerResolved = isResolvedTeamCode(officialWinner);
-    const homeSlotStatus = mode === 'sheet' && !p.isActuals ? getBracketSlotMatchupStatus(matchId, 'home', p) : null;
-    const awaySlotStatus = mode === 'sheet' && !p.isActuals ? getBracketSlotMatchupStatus(matchId, 'away', p) : null;
-    const rowOpts = {
-        nameHtml,
-        predictedWinner,
-        officialWinner,
-        officialWinnerResolved,
-        mode,
-        slotMatchupStatus: null
-    };
+    const sheetShowChecks = mode === 'sheet' && !p.isActuals;
+    const rowOpts = { nameHtml, predictedWinner, mode, sheetShowChecks };
     const cursorStyle = sheetInteractive || mode === 'wizard'
         ? 'cursor: pointer;'
         : 'cursor: default !important;';
@@ -1690,9 +1663,6 @@ function createFifaMatchBox(matchId, p, schema, side, options) {
     const box = document.createElement('div');
     box.className = 'bracket-match-box match-card';
     box.dataset.matchId = String(matchId);
-    if (mode === 'sheet' && !p.isActuals) {
-        applyBracketMatchBoxMatchupStatus(box, homeSlotStatus, awaySlotStatus);
-    }
 
     const wrap = document.createElement('div');
     wrap.className = `bracket-match-wrap bracket-match-side-${side}`;
