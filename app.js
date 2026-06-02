@@ -964,9 +964,23 @@ function syncWizardPaymentUI() {
             ? 'Confirm your champion, silver, and bronze picks above. On the next step you will complete payment to lock your entry on the leaderboard.'
             : 'Confirm your champion, silver, and bronze picks above, then submit to add your entry to the leaderboard.';
     }
+    const continueBtn = document.getElementById('btn-wizard-continue-payment');
+    if (continueBtn) {
+        continueBtn.innerHTML = on
+            ? 'Continue to Payment <i class="fa-solid fa-chevron-right"></i>'
+            : '<i class="fa-solid fa-cloud-arrow-up"></i> Submit Entry';
+    }
     document.querySelectorAll('.wizard-progress-tracker .progress-step[data-step="6"]').forEach((el) => {
         el.classList.toggle('progress-step-skipped', !on);
     });
+}
+
+async function advanceFromReviewStep() {
+    if (isStripePaymentRequired()) {
+        goToWizardStep(WIZARD_PAYMENT_STEP);
+    } else {
+        await submitWithoutPayment();
+    }
 }
 
 function setStripePaymentRequired(required) {
@@ -2349,6 +2363,7 @@ function setupOnboarding() {
     const closeBtn = document.getElementById('btn-close-wizard');
     const backBtn = document.getElementById('btn-wizard-back');
     const nextBtn = document.getElementById('btn-wizard-next');
+    const continuePaymentBtn = document.getElementById('btn-wizard-continue-payment');
     const payBtn = document.getElementById('btn-wizard-pay');
 
     // Toggle Submit Button visibility
@@ -2435,11 +2450,16 @@ function setupOnboarding() {
                 }
                 goToWizardStep(5);
             } else if (step === 5) {
-                if (isStripePaymentRequired()) {
-                    goToWizardStep(WIZARD_PAYMENT_STEP);
-                } else {
-                    await submitWithoutPayment();
-                }
+                await advanceFromReviewStep();
+            }
+        });
+    }
+
+    if (continuePaymentBtn) {
+        continuePaymentBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (STATE.wizardStep === 5) {
+                await advanceFromReviewStep();
             }
         });
     }
@@ -2509,8 +2529,7 @@ function goToWizardStep(step) {
     // Toggle Next button visibility
     const nextBtn = document.getElementById('btn-wizard-next');
     if (nextBtn) {
-        const hideNext = step === WIZARD_PAYMENT_STEP;
-        nextBtn.style.display = hideNext ? 'none' : 'inline-flex';
+        nextBtn.classList.toggle('wizard-nav-hidden', step === WIZARD_PAYMENT_STEP);
         if (step === 5) {
             if (isStripePaymentRequired()) {
                 nextBtn.innerHTML = 'Continue to Payment <i class="fa-solid fa-chevron-right"></i>';
@@ -2555,6 +2574,9 @@ function goToWizardStep(step) {
         const bronzeTeam = getTeamByCode(bronzeCode);
         setWizardReviewAward(document.getElementById('wizard-review-bronze'), bronzeTeam, !!bronzeCode);
         syncWizardPaymentUI();
+        if (nextBtn) {
+            nextBtn.classList.remove('wizard-nav-hidden');
+        }
     } else if (step === WIZARD_PAYMENT_STEP) {
         const draft = STATE.participants.draft;
         const amountEl = document.getElementById('wizard-payment-amount');

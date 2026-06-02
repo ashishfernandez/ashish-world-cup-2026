@@ -2226,7 +2226,8 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     }
 
     .wizard-card.step-1-active,
-    .wizard-card.step-5-active {
+    .wizard-card.step-5-active,
+    .wizard-card.step-6-active {
         min-height: auto;
         max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
@@ -2249,12 +2250,11 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     }
 
     .step-label {
-        display: none;
+        font-size: 0.65rem;
     }
 
-    .progress-step.active .step-label {
-        display: inline;
-        font-size: 0.7rem;
+    .progress-line {
+        width: 8px;
     }
 
     .wizard-footer {
@@ -2485,9 +2485,22 @@ body.dark-theme .wizard-card {
 .wizard-card.step-1-active,
 .wizard-card.step-5-active,
 .wizard-card.step-6-active {
-    max-width: 750px;
+    max-width: 900px;
+    width: min(900px, 96vw);
     height: auto;
-    min-height: 480px;
+    min-height: 540px;
+    max-height: min(92vh, 880px);
+}
+
+.wizard-card.step-5-active .wizard-content,
+.wizard-card.step-6-active .wizard-content {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.wizard-step-panel[data-step="5"].active,
+.wizard-step-panel[data-step="6"].active {
+    height: auto;
 }
 
 .wizard-payment-card {
@@ -2595,21 +2608,28 @@ body.dark-theme .wizard-card {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-shrink: 0;
 }
 
 /* Progress Tracker */
 .wizard-progress-tracker {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0.5rem;
 }
 
 .progress-step {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     opacity: 0.5;
     transition: var(--transition-smooth);
+    flex-shrink: 0;
 }
 
 .progress-step.active {
@@ -2647,9 +2667,10 @@ body.dark-theme .wizard-card {
 
 .step-label {
     font-family: var(--font-heading);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     font-weight: 600;
     color: var(--text-muted);
+    white-space: nowrap;
 }
 
 .progress-step.active .step-label {
@@ -2657,9 +2678,10 @@ body.dark-theme .wizard-card {
 }
 
 .progress-line {
-    width: 25px;
+    width: 14px;
     height: 2px;
     background-color: var(--card-border);
+    flex-shrink: 0;
 }
 
 .progress-step.completed + .progress-line {
@@ -2806,12 +2828,14 @@ body.dark-theme .wizard-card {
     line-height: 1.5;
 }
 
-.wizard-submit-btn {
+.wizard-submit-btn,
+.wizard-continue-payment-btn {
     width: 100%;
     max-width: 320px;
-    padding: 0.9rem;
+    padding: 0.9rem 1.25rem;
     font-size: 1rem;
     justify-content: center;
+    margin-top: 1.25rem;
 }
 
 /* Wizard Footer */
@@ -2819,8 +2843,19 @@ body.dark-theme .wizard-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     border-top: 1px solid var(--card-border);
     padding-top: 1.25rem;
+    flex-shrink: 0;
+}
+
+#btn-wizard-next {
+    margin-left: auto;
+    display: inline-flex;
+}
+
+#btn-wizard-next.wizard-nav-hidden {
+    display: none !important;
 }
 
 /* Custom scrollbars inside wizard */
