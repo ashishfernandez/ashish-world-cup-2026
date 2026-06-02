@@ -1206,6 +1206,11 @@ body.dark-theme .bracket-canvas.fifa-bracket {
     margin-bottom: 4px;
 }
 
+/* Column layout: flex-basis must not reuse inner width (that sets height, not width). */
+.bracket-match-side-center .bracket-match-inner {
+    flex: 0 0 auto;
+}
+
 .bracket-match-id {
     font-family: var(--font-heading);
     font-size: 0.68rem;
@@ -1401,6 +1406,17 @@ body.dark-theme .bracket-team-row {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.bracket-center-section .bracket-pairs-stack {
+    flex: 0 0 auto;
+    min-height: auto;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.bracket-center-section .bracket-pair {
+    flex: 0 0 auto;
 }
 
 .bracket-center-title {
