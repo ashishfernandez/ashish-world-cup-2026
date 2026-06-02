@@ -1282,12 +1282,13 @@ body.dark-theme .bracket-team-row {
 }
 
 .bracket-podium {
-    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
     width: 100%;
     max-width: 200px;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
+    align-self: center;
 }
 
 .bracket-podium-row {

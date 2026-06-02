@@ -256,7 +256,7 @@ const BRACKET_ROUNDS_LAYOUT = [
     { key: 'R16', title: 'Round of 16', side: 'left', pairs: [[17, 18], [19, 20]] },
     { key: 'QF', title: 'Quarter-final', side: 'left', pairs: [[25, 26]] },
     { key: 'SF', title: 'Semi-final', side: 'left', singles: [29] },
-    { key: 'CTR', type: 'center', finals: [{ section: 'Final', matchId: 32 }, { section: 'Play-off for third place', matchId: 31 }] },
+    { key: 'CTR', type: 'center', finals: [{ section: 'Final', matchId: 32 }, { section: 'Bronze', matchId: 31 }] },
     { key: 'SF', title: 'Semi-final', side: 'right', singles: [30] },
     { key: 'QF', title: 'Quarter-final', side: 'right', pairs: [[27, 28]] },
     { key: 'R16', title: 'Round of 16', side: 'right', pairs: [[21, 22], [23, 24]] },
@@ -1578,7 +1578,7 @@ function createFifaMatchBox(matchId, p, schema, side, options) {
     return box;
 }
 
-function appendBracketPodium(col, p, options) {
+function appendBracketPodium(parentEl, p, options) {
     const nameHtml = options.nameHtml || teamNameSpanHtml;
     const champCode = p.bracketPicks[32] || '';
     const champTeam = getTeamByCode(champCode);
@@ -1597,7 +1597,7 @@ function appendBracketPodium(col, p, options) {
         <div class="bracket-podium-row silver"><i class="fa-solid fa-medal"></i><span>2nd</span><strong>${nameHtml(getTeamByCode(silverCode).name)}</strong></div>
         <div class="bracket-podium-row bronze"><i class="fa-solid fa-medal"></i><span>3rd</span><strong>${nameHtml(getTeamByCode(bronzeCode).name)}</strong></div>
     `;
-    col.appendChild(podium);
+    parentEl.appendChild(podium);
 }
 
 function appendBracketPair(col, pairIds, p, side, options) {
@@ -1633,6 +1633,8 @@ function renderBracketColumns(canvas, p, options = {}) {
             const stack = document.createElement('div');
             stack.className = 'bracket-center-stack';
 
+            appendBracketPodium(stack, p, { nameHtml });
+
             round.finals.forEach((finalSpec) => {
                 const section = document.createElement('div');
                 section.className = 'bracket-center-section';
@@ -1653,7 +1655,6 @@ function renderBracketColumns(canvas, p, options = {}) {
             });
 
             col.appendChild(stack);
-            appendBracketPodium(col, p, { nameHtml });
         } else {
             const side = round.side;
             col.className = 'bracket-col' + (side === 'right' ? ' bracket-col-right' : ' bracket-col-left');
