@@ -129,6 +129,29 @@ function isTbdLabel(text) {
 
 const WIZARD_UNPICKED_LABEL = 'Please choose';
 
+function isWizardUnpickedLabel(text) {
+    if (isTbdLabel(text)) return true;
+    return String(text || '').trim().toLowerCase() === WIZARD_UNPICKED_LABEL.toLowerCase();
+}
+
+/** Longest team name (or wizard placeholder) — drives fixed bracket match box width via CSS ch units. */
+function getBracketTeamLabelChCount() {
+    let max = WIZARD_UNPICKED_LABEL.length;
+    for (const group in GROUPS_DATA) {
+        GROUPS_DATA[group].forEach((t) => {
+            if (t.name.length > max) max = t.name.length;
+        });
+    }
+    return max;
+}
+
+function applyBracketSizingCssVars() {
+    document.documentElement.style.setProperty(
+        '--bracket-team-label-ch',
+        String(getBracketTeamLabelChCount())
+    );
+}
+
 const BRACKET_PODIUM_RANK_LABELS = { first: '1ST', second: '2ND', third: '3RD' };
 
 /** Bracket sheet: red prominent TBD when slot is unfilled */
@@ -146,10 +169,10 @@ function teamNameSpanHtml(name) {
 
 /** Submit picks wizard only: same styling, different copy */
 function wizardTeamNameSpanHtml(name) {
-    const label = name || 'TBD';
-    if (isTbdLabel(label)) {
+    if (isWizardUnpickedLabel(name)) {
         return `<span class="team-name-text team-tbd">${WIZARD_UNPICKED_LABEL}</span>`;
     }
+    const label = name || 'TBD';
     const safe = String(label)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -309,6 +332,7 @@ const POINTS_SCALE = {
 
 // 5. Initialization: Load static configurations and predictions state
 async function init() {
+    applyBracketSizingCssVars();
     setupTabListeners();
     setupDropdownListeners();
     setupAdminReset();

@@ -1114,6 +1114,8 @@ body.dark-theme #tab-bracket .bracket-scroll-container::-webkit-scrollbar-thumb 
     --fifa-match-bg: #e9edf2;
     --fifa-slot-bg: #ffffff;
     --fifa-line: #b8c2ce;
+    --bracket-team-label-ch: 14;
+    --bracket-match-inner-width: calc((var(--bracket-team-label-ch) * 1ch) + 20px + 6px + 28px);
 }
 
 body.dark-theme .bracket-canvas.fifa-bracket {
@@ -1206,8 +1208,11 @@ body.dark-theme .bracket-canvas.fifa-bracket {
 }
 
 .bracket-match-inner {
-    flex: 1;
-    min-width: 0;
+    flex: 0 0 var(--bracket-match-inner-width);
+    width: var(--bracket-match-inner-width);
+    min-width: var(--bracket-match-inner-width);
+    max-width: var(--bracket-match-inner-width);
+    box-sizing: border-box;
     background: var(--fifa-match-bg);
     border: 1px solid var(--fifa-line);
     border-radius: 8px;
@@ -1264,8 +1269,10 @@ body.dark-theme .bracket-team-row {
 }
 
 .bracket-team-label {
-    flex: 1;
-    min-width: 0;
+    flex: 0 0 calc(var(--bracket-team-label-ch) * 1ch);
+    width: calc(var(--bracket-team-label-ch) * 1ch);
+    min-width: calc(var(--bracket-team-label-ch) * 1ch);
+    max-width: calc(var(--bracket-team-label-ch) * 1ch);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1574,9 +1581,21 @@ body:not(.dark-theme) .fifa-bracket .bracket-team-label .team-name-text.team-tbd
 }
 
 .wizard-bracket-scroll-area .team-name-text.team-tbd,
+.wizard-bracket-scroll-area .bracket-team-label .team-tbd,
 .wizard-step-panel .team-tbd {
+    color: #ef4444 !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.45);
     max-width: none;
-    white-space: normal;
+    white-space: nowrap;
+}
+
+body:not(.dark-theme) .wizard-bracket-scroll-area .team-name-text.team-tbd,
+body:not(.dark-theme) .wizard-bracket-scroll-area .bracket-team-label .team-tbd,
+body:not(.dark-theme) .wizard-step-panel .team-tbd {
+    color: #dc2626 !important;
+    text-shadow: none;
 }
 
 /* Unfilled bracket slots — prominent red TBD */
@@ -1661,6 +1680,12 @@ body:not(.dark-theme) .team-name-text.team-tbd {
     color: #fca5a5;
     border-color: rgba(239, 68, 68, 0.3);
     text-decoration: line-through;
+}
+
+/* Bracket Sheet: highlight incorrect picks without strike-through */
+#tab-bracket .fifa-bracket .match-card.incorrect-prediction .team-slot.predicted-winner,
+#tab-bracket .fifa-bracket .bracket-match-box.incorrect-prediction .bracket-team-row.predicted-winner {
+    text-decoration: none !important;
 }
 
 .match-card.incorrect-prediction .team-slot.predicted-winner .team-score {
