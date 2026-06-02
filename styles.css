@@ -287,6 +287,13 @@ body.dark-theme .ambient-glow {
     font-weight: 800;
 }
 
+.pool-unlimited-entries {
+    margin: 0.65rem 0 0;
+    text-align: center;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
 .meta-row {
     display: flex;
     justify-content: space-between;
@@ -994,6 +1001,10 @@ tr:first-child .points-emphasis {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+.legend-check {
+    font-size: 0.85rem;
 }
 
 .legend-dot {
