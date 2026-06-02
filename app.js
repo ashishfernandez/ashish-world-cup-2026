@@ -1335,16 +1335,19 @@ function isResolvedTeamCode(code) {
     return Boolean(code && /^[A-Z]{3}$/.test(code));
 }
 
-function formatBracketSlotLabel(p, matchId, slot, schema) {
+function formatBracketSlotLabel(p, matchId, slot, schema, mode = 'sheet') {
     const code = getKnockoutParticipant(p, matchId, slot);
-    const fallback = slot === 'home' ? schema.defaultHome : schema.defaultAway;
     if (isResolvedTeamCode(code)) {
         const team = getTeamByCode(code);
         if (team.name && team.name !== code) {
-            return { flag: team.flag, text: team.name, code: fallback || '' };
+            return { flag: team.flag, text: team.name };
         }
     }
-    return { flag: '', text: fallback || code || 'TBD', code: '' };
+    if (mode === 'wizard') {
+        const fallback = slot === 'home' ? schema.defaultHome : schema.defaultAway;
+        return { flag: '', text: fallback || code || '' };
+    }
+    return { flag: '', text: 'TBD' };
 }
 
 /** Anchor in canvas-local px (parent scroll container moves canvas; do not add scroll offsets). */
@@ -1490,38 +1493,23 @@ function connectCrossSemisToFinal(canvas, svg) {
 
 function drawBracketConnectors(canvas) {
     if (!canvas) return;
-    const svg = ensureBracketConnectorSvg(canvas);
-
-    canvas.querySelectorAll('.bracket-pair[data-next-match]').forEach((pairEl) => {
-        const targetId = parseInt(pairEl.getAttribute('data-next-match'), 10);
-        if (targetId) connectBracketPairToTarget(canvas, svg, pairEl, targetId);
-    });
-
-    connectCrossSemisToFinal(canvas, svg);
+    const svg = canvas.querySelector('.bracket-connectors-svg');
+    if (svg) svg.remove();
 }
 
 function scheduleBracketConnectorSync() {
-    if (_bracketConnectorRaf) cancelAnimationFrame(_bracketConnectorRaf);
-    _bracketConnectorRaf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            _bracketConnectorRaf = null;
-            drawBracketConnectors(document.getElementById('bracket-tree'));
-            drawBracketConnectors(document.getElementById('wizard-bracket-tree'));
-        });
-    });
+    drawBracketConnectors(document.getElementById('bracket-tree'));
+    drawBracketConnectors(document.getElementById('wizard-bracket-tree'));
 }
 
 function setupBracketConnectorSync() {
-    window.addEventListener('resize', scheduleBracketConnectorSync);
-    document.querySelectorAll('.bracket-scroll-container, .wizard-bracket-scroll-area').forEach((el) => {
-        el.addEventListener('scroll', scheduleBracketConnectorSync, { passive: true });
-    });
+    /* Connector lines disabled — FIFA layout only */
 }
 
 function buildFifaTeamRowHtml(matchId, slot, p, schema, options) {
-    const { nameHtml, predictedWinner, officialWinner, cursorStyle } = options;
+    const { nameHtml, predictedWinner, officialWinner, cursorStyle, mode } = options;
     const code = getKnockoutParticipant(p, matchId, slot);
-    const slotInfo = formatBracketSlotLabel(p, matchId, slot, schema);
+    const slotInfo = formatBracketSlotLabel(p, matchId, slot, schema, mode);
     const isWinner = predictedWinner === code && Boolean(code);
     const check = officialWinner && code && officialWinner === code
         ? '<i class="fa-solid fa-circle-check bracket-pick-check"></i>' : '';
@@ -2961,7 +2949,8 @@ function updateWizardTeamSlotElement(slot, teamCode, team, predictedWinner, sche
         STATE.participants.draft,
         parseInt(slot.getAttribute('data-match'), 10),
         slotName,
-        schema
+        schema,
+        'wizard'
     );
     const label = slot.querySelector('.bracket-team-label');
     const flagBox = slot.querySelector('.bracket-flag-box');

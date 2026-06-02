@@ -1086,18 +1086,7 @@ body.dark-theme .bracket-canvas.fifa-bracket {
 }
 
 .bracket-connectors-svg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: visible;
-}
-
-.bracket-connectors-svg line {
-    stroke: var(--fifa-line, var(--bracket-line-color));
-    stroke-width: 1.5;
-    stroke-linecap: butt;
+    display: none !important;
 }
 
 .bracket-canvas > .bracket-col {
@@ -1338,6 +1327,17 @@ body.dark-theme .bracket-team-row {
 
 .fifa-bracket .bracket-team-row:hover {
     background-color: var(--primary-glow);
+}
+
+.fifa-bracket .bracket-team-label .team-tbd,
+.fifa-bracket .bracket-team-label .team-name-text.team-tbd {
+    color: #ef4444 !important;
+    font-weight: 800 !important;
+}
+
+body:not(.dark-theme) .fifa-bracket .bracket-team-label .team-tbd,
+body:not(.dark-theme) .fifa-bracket .bracket-team-label .team-name-text.team-tbd {
+    color: #dc2626 !important;
 }
 
 .round-column {
