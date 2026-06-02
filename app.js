@@ -1187,7 +1187,7 @@ function renderUserBadge(scores) {
     // Add ordinal suffix (1st, 2nd, 3rd...)
     const ordinal = (n) => n + (['st', 'nd', 'rd'][((n + 90) % 100 % 10 - 1)] || 'th');
     
-    badge.innerText = `${ordinal(myRank)} Place - ${myScore} Pts`;
+    badge.innerText = `${ordinal(myRank)} Place - ${myScore}`;
 }
 
 function renderRankingsTable(scores) {
@@ -1238,7 +1238,7 @@ function renderRankingsTable(scores) {
                 ? `<strong class="group-pts-inactive-zero">${player.groupPts}</strong>`
                 : player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>
             <td class="text-center font-heading">${player.koPts} <span style="font-size:0.75rem; color:var(--text-dark)">/840</span></td>
-            <td class="text-right points-emphasis">${player.totalScore} Pts</td>
+            <td class="text-right points-emphasis">${player.totalScore}</td>
         `;
 
         // Row click switches to the Bracket sheet view for this specific participant
