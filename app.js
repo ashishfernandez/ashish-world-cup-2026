@@ -1163,12 +1163,46 @@ function renderLeaderboard() {
     updateActivePlayersCount();
 }
 
+const POOL_ENTRY_FEE_USD = 15;
+const POOL_PRIZE_SECOND_USD = 30;
+const POOL_PRIZE_THIRD_USD = 15;
+const POOL_FIRST_PRIZE_DEDUCTION_USD = 45;
+const POOL_MIN_PARTICIPANTS_FOR_FIRST_PRIZE = 6;
+
+function formatPoolPrizeUsd(amount) {
+    return `$${amount} USD`;
+}
+
+function updatePoolWinningsDisplay(participantCount) {
+    const firstEl = document.getElementById('pool-prize-first');
+    const secondEl = document.getElementById('pool-prize-second');
+    const thirdEl = document.getElementById('pool-prize-third');
+    if (!firstEl || !secondEl || !thirdEl) return;
+
+    secondEl.textContent = formatPoolPrizeUsd(POOL_PRIZE_SECOND_USD);
+    secondEl.classList.remove('team-tbd');
+
+    thirdEl.textContent = formatPoolPrizeUsd(POOL_PRIZE_THIRD_USD);
+    thirdEl.classList.remove('team-tbd');
+
+    if (participantCount >= POOL_MIN_PARTICIPANTS_FOR_FIRST_PRIZE) {
+        const firstPrize =
+            participantCount * POOL_ENTRY_FEE_USD - POOL_FIRST_PRIZE_DEDUCTION_USD;
+        firstEl.textContent = formatPoolPrizeUsd(firstPrize);
+        firstEl.classList.remove('team-tbd');
+    } else {
+        firstEl.textContent = 'TBD';
+        firstEl.classList.add('team-tbd');
+    }
+}
+
 function updateActivePlayersCount() {
     const countEl = document.getElementById('active-players-count');
     if (!countEl) return;
 
     const count = getGlobalSubmissionEntries().length;
     countEl.innerText = String(count);
+    updatePoolWinningsDisplay(count);
 }
 
 function renderUserBadge(scores) {

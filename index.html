@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260604h">
+    <link rel="stylesheet" href="styles.css?v=20260604i">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -71,13 +71,16 @@
                     <span class="label">Total participants:</span>
                     <span id="active-players-count" class="value">…</span>
                 </div>
+                <div class="meta-row pool-buy-in-row">
+                    <span class="label">Pool buy in <strong>$15 USD</strong></span>
+                </div>
                 <div class="divider"></div>
                 <div class="pool-winnings-block">
                     <div class="pool-winnings-title">Winnings</div>
                     <ul class="pool-winnings-list">
-                        <li><span class="pool-winnings-place">1st place:</span> <span class="team-tbd">TBD</span></li>
-                        <li><span class="pool-winnings-place">2nd place:</span> <span class="pool-winnings-prize">2X money</span></li>
-                        <li><span class="pool-winnings-place">3rd place:</span> <span class="pool-winnings-prize">Money back</span></li>
+                        <li><span class="pool-winnings-place">1st place:</span> <span id="pool-prize-first" class="pool-winnings-prize team-tbd">TBD</span></li>
+                        <li><span class="pool-winnings-place">2nd place:</span> <span id="pool-prize-second" class="pool-winnings-prize">$30 USD</span></li>
+                        <li><span class="pool-winnings-place">3rd place:</span> <span id="pool-prize-third" class="pool-winnings-prize">$15 USD</span></li>
                     </ul>
                 </div>
                 <div class="divider"></div>
@@ -525,6 +528,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260604h"></script>
+    <script src="app.js?v=20260604i"></script>
 </body>
 </html>
