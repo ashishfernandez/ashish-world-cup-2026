@@ -1608,7 +1608,7 @@ function appendBracketPodium(parentEl, p, options) {
     const podium = document.createElement('div');
     podium.className = 'bracket-podium';
     podium.innerHTML = `
-        <div class="bracket-podium-row gold"><i class="fa-solid fa-trophy"></i><span>Champion</span><strong>${nameHtml(champTeam.name)}</strong></div>
+        <div class="bracket-podium-row gold"><i class="fa-solid fa-trophy"></i><span>1st</span><strong>${nameHtml(champTeam.name)}</strong></div>
         <div class="bracket-podium-row silver"><i class="fa-solid fa-medal"></i><span>2nd</span><strong>${nameHtml(getTeamByCode(silverCode).name)}</strong></div>
         <div class="bracket-podium-row bronze"><i class="fa-solid fa-medal"></i><span>3rd</span><strong>${nameHtml(getTeamByCode(bronzeCode).name)}</strong></div>
     `;
