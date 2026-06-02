@@ -923,7 +923,7 @@ function syncGroupScoringToggleUI() {
     if (statusEl) {
         statusEl.textContent = active
             ? 'Group points are counting toward total scores.'
-            : 'Group (160) shows 0 for everyone — knockout points still count.';
+            : "'Inactive' = Group (160) shows 0 for everyone.";
     }
 }
 
