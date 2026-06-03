@@ -1071,7 +1071,7 @@ function setupTabListeners() {
             // Dynamic header labels
             const titleMap = {
                 leaderboard: { title: "Leaderboard Standings", desc: "Track scores, predictions, and real-time rank movements among friends." },
-                bracket: { title: "Knock-Out Stages View", desc: "Use the dropdown to view different knock-out stages selections." },
+                bracket: { title: "Bracket Knock-Out Stages View", desc: "Use the dropdown to view different knock-out stages selections." },
                 groups: { title: "Group Stages Viewer", desc: "Use the dropdown to view different group stages selections." },
                 points: { title: "Points Outline", desc: "Understand how points are scored for your predictions." },
                 terms: { title: "Tournament Terms", desc: "Rules, buy-in, and payout terms for participating in this friends pool." },
