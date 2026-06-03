@@ -322,16 +322,16 @@ body:not(.dark-theme) .pool-meta-card {
     font-weight: 800;
 }
 
-/* Light mode: darker green, black label + icon */
+/* Light mode: poppy green, black label + icon */
 #sidebar-submit-btn.sidebar-submit-btn {
-    background-color: rgba(4, 120, 87, 0.48);
+    background-color: #34d399;
     color: #000000;
     border: none;
     box-shadow: none;
 }
 
 #sidebar-submit-btn.sidebar-submit-btn:hover {
-    background-color: rgba(4, 120, 87, 0.62);
+    background-color: #2dd4bf;
     color: #000000;
     transform: translateY(-2px);
     box-shadow: none;
