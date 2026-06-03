@@ -332,27 +332,29 @@ body.dark-theme .ambient-glow {
     box-shadow: none;
 }
 
-/* Override global dark-theme .btn (white) — match light-mode submit styling */
+/* Override global dark-theme .btn — lighter green fill, white label + icon */
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn {
-    background-color: rgba(16, 185, 129, 0.16) !important;
-    color: #047857 !important;
+    background-color: rgba(52, 211, 153, 0.55) !important;
+    color: #ffffff !important;
     border: none !important;
     box-shadow: none !important;
 }
 
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover {
-    background-color: rgba(16, 185, 129, 0.24) !important;
-    color: #065f46 !important;
+    background-color: rgba(52, 211, 153, 0.72) !important;
+    color: #ffffff !important;
     border: none !important;
     box-shadow: none !important;
 }
 
-body.dark-theme #sidebar-submit-btn.sidebar-submit-btn i {
-    color: #047857 !important;
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn i,
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn .btn-label {
+    color: #ffffff !important;
 }
 
-body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover i {
-    color: #065f46 !important;
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover i,
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover .btn-label {
+    color: #ffffff !important;
 }
 
 .sidebar-submit-hint {
