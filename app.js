@@ -296,38 +296,39 @@ const KNOCKOUTS_SCHEMA = {
     13: { round: 'R32', label: 'M86', name: 'M13', venue: 'Miami', date: 'Jul 03', defaultHome: '1J', defaultAway: '2H', nextMatch: 23, slot: 'home' },
     14: { round: 'R32', label: 'M88', name: 'M14', venue: 'Dallas', date: 'Jul 03', defaultHome: '2D', defaultAway: '2G', nextMatch: 23, slot: 'away' },
     15: { round: 'R32', label: 'M85', name: 'M15', venue: 'Vancouver', date: 'Jul 02', defaultHome: '1B', defaultAway: '3EFGIJ', nextMatch: 24, slot: 'home' },
-    16: { round: 'R32', label: 'M87', name: 'M16', venue: 'Kansas City', date: 'Jul 03', kickoff: '07/03/2026 18:30', defaultHome: '1K', defaultAway: '3DEIJL', nextMatch: 24, slot: 'away' },
+    16: { round: 'R32', label: 'M87', name: 'M16', venue: 'Kansas City', date: 'Jul 03', kickoff: '07/03/2026 16:30 PT', defaultHome: '1K', defaultAway: '3DEIJL', nextMatch: 24, slot: 'away' },
 
-    // Round of 16 (17–24 → FIFA M89–M96)
-    17: { round: 'R16', label: 'M89', name: 'M17', venue: 'Philadelphia', date: 'Jul 04', kickoff: '07/04/2026 14:00', defaultHome: 'W74', defaultAway: 'W77', nextMatch: 25, slot: 'home' },
-    18: { round: 'R16', label: 'M90', name: 'M18', venue: 'Houston', date: 'Jul 04', kickoff: '07/04/2026 10:00', defaultHome: 'W73', defaultAway: 'W75', nextMatch: 25, slot: 'away' },
-    19: { round: 'R16', label: 'M93', name: 'M19', venue: 'Dallas', date: 'Jul 05', kickoff: '07/05/2026 12:00', defaultHome: 'W83', defaultAway: 'W84', nextMatch: 26, slot: 'home' },
-    20: { round: 'R16', label: 'M94', name: 'M20', venue: 'Seattle', date: 'Jul 06', kickoff: '07/06/2026 17:00', defaultHome: 'W81', defaultAway: 'W82', nextMatch: 26, slot: 'away' },
-    21: { round: 'R16', label: 'M91', name: 'M21', venue: 'New York', date: 'Jul 05', kickoff: '07/05/2026 13:00', defaultHome: 'W76', defaultAway: 'W78', nextMatch: 27, slot: 'home' },
-    22: { round: 'R16', label: 'M92', name: 'M22', venue: 'Mexico City', date: 'Jul 05', kickoff: '07/05/2026 17:00', defaultHome: 'W79', defaultAway: 'W80', nextMatch: 27, slot: 'away' },
-    23: { round: 'R16', label: 'M95', name: 'M23', venue: 'Atlanta', date: 'Jul 07', kickoff: '07/07/2026 09:00', defaultHome: 'W86', defaultAway: 'W88', nextMatch: 28, slot: 'home' },
-    24: { round: 'R16', label: 'M96', name: 'M24', venue: 'Vancouver', date: 'Jul 07', kickoff: '07/07/2026 13:00', defaultHome: 'W85', defaultAway: 'W87', nextMatch: 28, slot: 'away' },
+    // Round of 16 (17–24 → FIFA M89–M96); kickoffs in Pacific Time (PT)
+    17: { round: 'R16', label: 'M89', name: 'M17', venue: 'Philadelphia', date: 'Jul 04', kickoff: '07/04/2026 11:00 PT', defaultHome: 'W74', defaultAway: 'W77', nextMatch: 25, slot: 'home' },
+    18: { round: 'R16', label: 'M90', name: 'M18', venue: 'Houston', date: 'Jul 04', kickoff: '07/04/2026 08:00 PT', defaultHome: 'W73', defaultAway: 'W75', nextMatch: 25, slot: 'away' },
+    19: { round: 'R16', label: 'M93', name: 'M19', venue: 'Dallas', date: 'Jul 05', kickoff: '07/05/2026 10:00 PT', defaultHome: 'W83', defaultAway: 'W84', nextMatch: 26, slot: 'home' },
+    20: { round: 'R16', label: 'M94', name: 'M20', venue: 'Seattle', date: 'Jul 06', kickoff: '07/06/2026 17:00 PT', defaultHome: 'W81', defaultAway: 'W82', nextMatch: 26, slot: 'away' },
+    21: { round: 'R16', label: 'M91', name: 'M21', venue: 'New York', date: 'Jul 05', kickoff: '07/05/2026 10:00 PT', defaultHome: 'W76', defaultAway: 'W78', nextMatch: 27, slot: 'home' },
+    22: { round: 'R16', label: 'M92', name: 'M22', venue: 'Mexico City', date: 'Jul 05', kickoff: '07/05/2026 16:00 PT', defaultHome: 'W79', defaultAway: 'W80', nextMatch: 27, slot: 'away' },
+    23: { round: 'R16', label: 'M95', name: 'M23', venue: 'Atlanta', date: 'Jul 07', kickoff: '07/07/2026 06:00 PT', defaultHome: 'W86', defaultAway: 'W88', nextMatch: 28, slot: 'home' },
+    24: { round: 'R16', label: 'M96', name: 'M24', venue: 'Vancouver', date: 'Jul 07', kickoff: '07/07/2026 13:00 PT', defaultHome: 'W85', defaultAway: 'W87', nextMatch: 28, slot: 'away' },
 
     // Quarterfinals (25–28 → FIFA M97–M100)
-    25: { round: 'QF', label: 'M97', name: 'M25', venue: 'Boston', date: 'Jul 09', kickoff: '07/09/2026 13:00', defaultHome: 'W89', defaultAway: 'W90', nextMatch: 29, slot: 'home' },
-    26: { round: 'QF', label: 'M98', name: 'M26', venue: 'Los Angeles', date: 'Jul 10', kickoff: '07/10/2026 12:00', defaultHome: 'W93', defaultAway: 'W94', nextMatch: 29, slot: 'away' },
-    27: { round: 'QF', label: 'M99', name: 'M27', venue: 'Miami', date: 'Jul 11', kickoff: '07/11/2026 14:00', defaultHome: 'W91', defaultAway: 'W92', nextMatch: 30, slot: 'home' },
-    28: { round: 'QF', label: 'M100', name: 'M28', venue: 'Kansas City', date: 'Jul 11', kickoff: '07/11/2026 18:00', defaultHome: 'W95', defaultAway: 'W96', nextMatch: 30, slot: 'away' },
+    25: { round: 'QF', label: 'M97', name: 'M25', venue: 'Boston', date: 'Jul 09', kickoff: '07/09/2026 10:00 PT', defaultHome: 'W89', defaultAway: 'W90', nextMatch: 29, slot: 'home' },
+    26: { round: 'QF', label: 'M98', name: 'M26', venue: 'Los Angeles', date: 'Jul 10', kickoff: '07/10/2026 12:00 PT', defaultHome: 'W93', defaultAway: 'W94', nextMatch: 29, slot: 'away' },
+    27: { round: 'QF', label: 'M99', name: 'M27', venue: 'Miami', date: 'Jul 11', kickoff: '07/11/2026 11:00 PT', defaultHome: 'W91', defaultAway: 'W92', nextMatch: 30, slot: 'home' },
+    28: { round: 'QF', label: 'M100', name: 'M28', venue: 'Kansas City', date: 'Jul 11', kickoff: '07/11/2026 16:00 PT', defaultHome: 'W95', defaultAway: 'W96', nextMatch: 30, slot: 'away' },
 
     // Semifinals (29–30 → FIFA M101–M102)
-    29: { round: 'SF', label: 'M101', name: 'M29', venue: 'Dallas', date: 'Jul 14', kickoff: '07/14/2026 12:00', defaultHome: 'W97', defaultAway: 'W98', nextMatch: 32, slot: 'home' },
-    30: { round: 'SF', label: 'M102', name: 'M30', venue: 'Atlanta', date: 'Jul 15', kickoff: '07/15/2026 12:00', defaultHome: 'W99', defaultAway: 'W100', nextMatch: 32, slot: 'away' },
+    29: { round: 'SF', label: 'M101', name: 'M29', venue: 'Dallas', date: 'Jul 14', kickoff: '07/14/2026 10:00 PT', defaultHome: 'W97', defaultAway: 'W98', nextMatch: 32, slot: 'home' },
+    30: { round: 'SF', label: 'M102', name: 'M30', venue: 'Atlanta', date: 'Jul 15', kickoff: '07/15/2026 09:00 PT', defaultHome: 'W99', defaultAway: 'W100', nextMatch: 32, slot: 'away' },
 
     // 3rd place & final (31–32 → FIFA M103–M104)
-    31: { round: '3RD', label: 'M103', name: 'M31', venue: 'Miami', date: 'Jul 18', kickoff: '07/18/2026 14:00', defaultHome: 'RU101', defaultAway: 'RU102' },
-    32: { round: 'F', label: 'M104', name: 'M32', venue: 'New York', date: 'Jul 19', kickoff: '07/19/2026 12:00', defaultHome: 'W101', defaultAway: 'W102' }
+    31: { round: '3RD', label: 'M103', name: 'M31', venue: 'Miami', date: 'Jul 18', kickoff: '07/18/2026 11:00 PT', defaultHome: 'RU101', defaultAway: 'RU102' },
+    32: { round: 'F', label: 'M104', name: 'M32', venue: 'New York', date: 'Jul 19', kickoff: '07/19/2026 09:00 PT', defaultHome: 'W101', defaultAway: 'W102' }
 };
 
+/** Round of 32 kickoffs (Pacific Time), converted from FIFA venue-local times. */
 const R32_KICKOFFS = {
-    1: '06/29/2026 13:30', 2: '06/30/2026 14:00', 3: '06/28/2026 12:00', 4: '06/29/2026 18:00',
-    5: '07/02/2026 16:00', 6: '07/02/2026 12:00', 7: '07/01/2026 17:00', 8: '07/01/2026 13:00',
-    9: '06/29/2026 10:00', 10: '06/30/2026 10:00', 11: '06/30/2026 18:00', 12: '07/01/2026 09:00',
-    13: '07/03/2026 15:00', 14: '07/03/2026 11:00', 15: '07/02/2026 20:00'
+    1: '06/29/2026 10:30 PT', 2: '06/30/2026 11:00 PT', 3: '06/28/2026 12:00 PT', 4: '06/29/2026 17:00 PT',
+    5: '07/02/2026 13:00 PT', 6: '07/02/2026 12:00 PT', 7: '07/01/2026 17:00 PT', 8: '07/01/2026 13:00 PT',
+    9: '06/29/2026 08:00 PT', 10: '06/30/2026 08:00 PT', 11: '06/30/2026 17:00 PT', 12: '07/01/2026 06:00 PT',
+    13: '07/03/2026 12:00 PT', 14: '07/03/2026 09:00 PT', 15: '07/02/2026 20:00 PT'
 };
 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].forEach((id) => {
     if (!KNOCKOUTS_SCHEMA[id].kickoff && R32_KICKOFFS[id]) {
@@ -1499,8 +1500,10 @@ function getBracketMatchCard(canvas, matchId) {
         || canvas.querySelector(`.team-slot[data-match="${matchId}"]`)?.closest('.match-card, .bracket-match-box');
 }
 
+/** Bracket box date line — all knockout kickoffs are stored and shown in Pacific Time (PT). */
 function getMatchKickoff(schema) {
-    return schema.kickoff || `${schema.date}, 2026`;
+    if (schema.kickoff) return schema.kickoff;
+    return `${schema.date}, 2026`;
 }
 
 function isResolvedTeamCode(code) {
