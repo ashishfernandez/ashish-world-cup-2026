@@ -251,13 +251,29 @@ function getPredictedMedalists(p) {
     };
 }
 
+function getLongestLeaderboardPickNameCh() {
+    let max = 'TBD'.length;
+    for (const group in GROUPS_DATA) {
+        GROUPS_DATA[group].forEach((t) => {
+            if (t.name.length > max) max = t.name.length;
+        });
+    }
+    return max;
+}
+
+function applyLeaderboardMedalPickWidths() {
+    const table = document.querySelector('.leaderboard-table');
+    if (!table) return;
+    table.style.setProperty('--leaderboard-pick-name-ch', String(getLongestLeaderboardPickNameCh()));
+}
+
 function leaderboardPredictionBadge(team) {
     const t = team || getTeamByCode('');
     if (!t.code || isTbdLabel(t.name)) {
-        return '<span class="badge badge-medal-tbd">TBD</span>';
+        return '<span class="badge badge-medal-tbd leaderboard-pick-slot">TBD</span>';
     }
     const flagHtml = t.flag || buildTeamFlagImgHtml(t.code);
-    return `<span class="badge badge-info leaderboard-pick-badge"><span class="leaderboard-flag-box">${flagHtml}</span><span class="leaderboard-pick-name">${t.name}</span></span>`;
+    return `<span class="badge badge-info leaderboard-pick-slot"><span class="leaderboard-flag-box">${flagHtml}</span><span class="leaderboard-pick-name">${t.name}</span></span>`;
 }
 
 // 2. Bracket Matches Setup Schema (Matches 1-32)
@@ -1405,6 +1421,7 @@ function renderUserBadge(scores) {
 function renderRankingsTable(scores) {
     const tbody = document.getElementById('leaderboard-rows');
     tbody.innerHTML = '';
+    applyLeaderboardMedalPickWidths();
 
     if (scores.length === 0) {
         const tr = document.createElement('tr');
@@ -1443,9 +1460,9 @@ function renderRankingsTable(scores) {
                     </div>
                 </div>
             </td>
-            <td>${leaderboardPredictionBadge(player.champ)}</td>
-            <td>${leaderboardPredictionBadge(player.silver)}</td>
-            <td>${leaderboardPredictionBadge(player.bronze)}</td>
+            <td class="medal-pick-cell">${leaderboardPredictionBadge(player.champ)}</td>
+            <td class="medal-pick-cell">${leaderboardPredictionBadge(player.silver)}</td>
+            <td class="medal-pick-cell">${leaderboardPredictionBadge(player.bronze)}</td>
             <td class="text-center font-heading">${!isGroupScoringActive()
                 ? `<strong class="group-pts-inactive-zero">${player.groupPts}</strong>`
                 : player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>

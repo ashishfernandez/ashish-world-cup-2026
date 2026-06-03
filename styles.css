@@ -828,6 +828,13 @@ body.dark-theme .points-title {
     border-collapse: collapse;
     text-align: left;
     font-size: 0.9rem;
+    --leaderboard-pick-name-ch: 14;
+}
+
+.leaderboard-table th.medal-pick-col,
+.leaderboard-table td.medal-pick-cell {
+    width: 1%;
+    white-space: nowrap;
 }
 
 .leaderboard-table th {
@@ -941,10 +948,18 @@ body:not(.dark-theme) .leaderboard-table .badge-info {
     white-space: nowrap;
 }
 
-.leaderboard-pick-badge {
+.leaderboard-pick-slot {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    box-sizing: border-box;
+    width: calc(26px + 0.4rem + (var(--leaderboard-pick-name-ch) * 1ch) + 1.5rem);
+    max-width: calc(26px + 0.4rem + (var(--leaderboard-pick-name-ch) * 1ch) + 1.5rem);
+    justify-content: flex-start;
+}
+
+.leaderboard-table .badge-medal-tbd.leaderboard-pick-slot {
+    justify-content: center;
 }
 
 .leaderboard-flag-box {
@@ -968,6 +983,9 @@ body:not(.dark-theme) .leaderboard-table .badge-info {
 
 .leaderboard-pick-name {
     line-height: 1.2;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
 }
 
 .leaderboard-table .group-pts-inactive-zero {
