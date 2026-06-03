@@ -319,21 +319,32 @@ body.dark-theme .ambient-glow {
 }
 
 #sidebar-submit-btn.sidebar-submit-btn {
-    background-color: rgba(16, 185, 129, 0.16);
-    color: #047857;
+    background-color: rgba(52, 211, 153, 0.55);
+    color: #ffffff;
     border: none;
     box-shadow: none;
 }
 
 #sidebar-submit-btn.sidebar-submit-btn:hover {
-    background-color: rgba(16, 185, 129, 0.24);
-    color: #065f46;
+    background-color: rgba(52, 211, 153, 0.72);
+    color: #ffffff;
     transform: translateY(-2px);
     box-shadow: none;
 }
 
-/* Override global dark-theme .btn — lighter green fill, white label + icon */
-body.dark-theme #sidebar-submit-btn.sidebar-submit-btn {
+#sidebar-submit-btn.sidebar-submit-btn i,
+#sidebar-submit-btn.sidebar-submit-btn .btn-label {
+    color: #ffffff;
+}
+
+#sidebar-submit-btn.sidebar-submit-btn:hover i,
+#sidebar-submit-btn.sidebar-submit-btn:hover .btn-label {
+    color: #ffffff;
+}
+
+/* Override global dark-theme .btn (forces white default buttons) */
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn,
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover {
     background-color: rgba(52, 211, 153, 0.55) !important;
     color: #ffffff !important;
     border: none !important;
@@ -342,16 +353,10 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn {
 
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover {
     background-color: rgba(52, 211, 153, 0.72) !important;
-    color: #ffffff !important;
-    border: none !important;
-    box-shadow: none !important;
 }
 
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn i,
-body.dark-theme #sidebar-submit-btn.sidebar-submit-btn .btn-label {
-    color: #ffffff !important;
-}
-
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn .btn-label,
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover i,
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover .btn-label {
     color: #ffffff !important;
