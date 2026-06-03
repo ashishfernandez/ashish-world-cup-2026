@@ -589,7 +589,7 @@ body.dark-theme .ambient-glow {
 
 #tab-bracket .bracket-controls {
     flex-shrink: 0;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 /* Points Outline Card Titles */
@@ -938,6 +938,35 @@ body:not(.dark-theme) .leaderboard-table .badge-info {
 
 .leaderboard-table td .badge {
     white-space: nowrap;
+}
+
+.leaderboard-pick-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.leaderboard-flag-box {
+    width: 26px;
+    height: 18px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.leaderboard-flag-box .team-flag-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.leaderboard-pick-name {
+    line-height: 1.2;
 }
 
 .leaderboard-table .group-pts-inactive-zero {
@@ -1325,8 +1354,8 @@ body.dark-theme .bracket-team-row {
 }
 
 .team-flag .team-flag-img {
-    width: 20px;
-    height: 15px;
+    width: 26px;
+    height: 18px;
 }
 
 .bracket-team-label {
@@ -1361,20 +1390,20 @@ body.dark-theme .bracket-team-row {
     flex: 1;
 }
 
-/* Bracket Sheet tab only: ~30% taller vertical layout (wizard unchanged) */
+/* Bracket Sheet tab only: compact gap below controls (wizard unchanged) */
 #tab-bracket .bracket-canvas.fifa-bracket {
     --fifa-pair-gap: 10px;
-    padding-top: 4.55rem;
+    padding-top: 0.75rem;
     padding-bottom: 2.6rem;
 }
 
 #tab-bracket .bracket-col {
-    padding-top: 3.575rem;
+    padding-top: 0.5rem;
     padding-bottom: 1.3rem;
 }
 
 #tab-bracket .bracket-col-title {
-    margin-bottom: 1.625rem;
+    margin-bottom: 0.75rem;
     font-size: 0.94rem;
 }
 

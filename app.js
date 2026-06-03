@@ -133,12 +133,16 @@ function getTeamFlagIso(code) {
     return TEAM_FLAG_ISO[code] || '';
 }
 
+/** Display size for bracket + leaderboard flags (matches #tab-bracket .bracket-flag-box). */
+const BRACKET_FLAG_IMG_W = 26;
+const BRACKET_FLAG_IMG_H = 18;
+
 /** PNG flag image (emoji flags render as two letters on Windows). */
-function buildTeamFlagImgHtml(code, width = 40) {
+function buildTeamFlagImgHtml(code, width = BRACKET_FLAG_IMG_W, height = BRACKET_FLAG_IMG_H) {
     const iso = getTeamFlagIso(code);
     if (!iso) return '';
-    const w = Number(width) || 40;
-    const h = Math.max(10, Math.round(w * 0.75));
+    const w = Number(width) || BRACKET_FLAG_IMG_W;
+    const h = Number(height) || BRACKET_FLAG_IMG_H;
     const src = `https://flagcdn.com/w${w}/${iso}.png`;
     return `<img class="team-flag-img" src="${src}" alt="" width="${w}" height="${h}" loading="lazy" decoding="async" />`;
 }
@@ -152,7 +156,7 @@ function getTeamByCode(code) {
             return {
                 code: team.code,
                 name: team.name,
-                flag: buildTeamFlagImgHtml(team.code, 20) || team.flag || ''
+                flag: buildTeamFlagImgHtml(team.code) || team.flag || ''
             };
         }
     }
@@ -250,7 +254,8 @@ function leaderboardPredictionBadge(team) {
     if (!t.code || isTbdLabel(t.name)) {
         return '<span class="badge badge-medal-tbd">TBD</span>';
     }
-    return `<span class="badge badge-info">${t.flag} ${t.name}</span>`;
+    const flagHtml = t.flag || buildTeamFlagImgHtml(t.code);
+    return `<span class="badge badge-info leaderboard-pick-badge"><span class="leaderboard-flag-box">${flagHtml}</span><span class="leaderboard-pick-name">${t.name}</span></span>`;
 }
 
 // 2. Bracket Matches Setup Schema (Matches 1-32)
