@@ -112,12 +112,49 @@ const GROUPS_DATA = {
     ]
 };
 
+/** FIFA 3-letter code → flagcdn.com slug (ISO 3166-1 alpha-2 or gb-eng / gb-sct). */
+const TEAM_FLAG_ISO = {
+    MEX: 'mx', RSA: 'za', KOR: 'kr', CZE: 'cz',
+    CAN: 'ca', SUI: 'ch', QAT: 'qa', BIH: 'ba',
+    BRA: 'br', MAR: 'ma', SCO: 'gb-sct', HAI: 'ht',
+    USA: 'us', PAR: 'py', AUS: 'au', TUR: 'tr',
+    GER: 'de', CUW: 'cw', CIV: 'ci', ECU: 'ec',
+    NED: 'nl', JPN: 'jp', TUN: 'tn', SWE: 'se',
+    BEL: 'be', EGY: 'eg', IRN: 'ir', NZL: 'nz',
+    ESP: 'es', URU: 'uy', KSA: 'sa', CPV: 'cv',
+    FRA: 'fr', SEN: 'sn', NOR: 'no', IRQ: 'iq',
+    ARG: 'ar', AUT: 'at', ALG: 'dz', JOR: 'jo',
+    POR: 'pt', COL: 'co', UZB: 'uz', COD: 'cd',
+    ENG: 'gb-eng', CRO: 'hr', GHA: 'gh', PAN: 'pa'
+};
+
+function getTeamFlagIso(code) {
+    if (!isResolvedTeamCode(code)) return '';
+    return TEAM_FLAG_ISO[code] || '';
+}
+
+/** PNG flag image (emoji flags render as two letters on Windows). */
+function buildTeamFlagImgHtml(code, width = 40) {
+    const iso = getTeamFlagIso(code);
+    if (!iso) return '';
+    const w = Number(width) || 40;
+    const h = Math.max(10, Math.round(w * 0.75));
+    const src = `https://flagcdn.com/w${w}/${iso}.png`;
+    return `<img class="team-flag-img" src="${src}" alt="" width="${w}" height="${h}" loading="lazy" decoding="async" />`;
+}
+
 // Flatten helper to easily lookup team properties by code
 function getTeamByCode(code) {
     if (!code) return { code: '', name: 'TBD', flag: '' };
     for (const group in GROUPS_DATA) {
         const team = GROUPS_DATA[group].find(t => t.code === code);
-        if (team) return { code: team.code, name: team.name, flag: team.flag || '' };
+        if (team) {
+            return {
+                code: team.code,
+                name: team.name,
+                flag: buildTeamFlagImgHtml(team.code, 20) || team.flag || ''
+            };
+        }
     }
     return { code: code, name: code, flag: '' };
 }
@@ -186,7 +223,7 @@ function setWizardReviewAward(el, team, hasPick) {
         el.innerHTML = `<span class="team-tbd">${WIZARD_UNPICKED_LABEL}</span>`;
         el.classList.add('has-tbd');
     } else {
-        el.textContent = `${team.flag} ${team.name}`.trim();
+        el.innerHTML = `${team.flag}<span class="team-name-text">${team.name}</span>`;
         el.classList.remove('has-tbd');
     }
 }
@@ -1645,7 +1682,7 @@ function buildFifaTeamRowHtml(matchId, slot, p, schema, options) {
     return `
         <div class="bracket-team-row team-slot ${isWinner ? 'predicted-winner' : ''}"
              data-match="${matchId}" data-team="${code || ''}" style="${cursorStyle}">
-            <span class="bracket-flag-box">${slotInfo.flag ? `<span class="team-flag">${slotInfo.flag}</span>` : ''}</span>
+            <span class="bracket-flag-box">${slotInfo.flag || ''}</span>
             <span class="bracket-team-label">${nameHtml(slotInfo.text)}</span>
             ${check}
         </div>`;
@@ -3120,7 +3157,7 @@ function updateWizardTeamSlotElement(slot, teamCode, team, predictedWinner, sche
     const label = slot.querySelector('.bracket-team-label');
     const flagBox = slot.querySelector('.bracket-flag-box');
     if (label) label.innerHTML = wizardTeamNameSpanHtml(slotInfo.text);
-    if (flagBox) flagBox.innerHTML = slotInfo.flag ? `<span class="team-flag">${slotInfo.flag}</span>` : '';
+    if (flagBox) flagBox.innerHTML = slotInfo.flag || '';
     slot.querySelector('.bracket-pick-check')?.remove();
     slot.style.cursor = code && code !== 'TBD' ? 'pointer' : 'default';
 }

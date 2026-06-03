@@ -1284,10 +1284,22 @@ body.dark-theme .bracket-team-row {
     background: rgba(0, 0, 0, 0.06);
 }
 
-.bracket-flag-box .team-flag {
-    font-size: 0.95rem;
-    line-height: 1;
+.team-flag-img {
     display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 2px;
+}
+
+.bracket-flag-box .team-flag-img {
+    width: 100%;
+    height: 100%;
+}
+
+.team-flag .team-flag-img {
+    width: 20px;
+    height: 15px;
 }
 
 .bracket-team-label {
