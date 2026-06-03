@@ -247,10 +247,13 @@ body.dark-theme .ambient-glow {
     transform: scale(1.1);
 }
 
-.admin-nav {
+.nav-menu-divider {
     border-top: 1px solid var(--card-border);
     margin-top: 1.5rem;
-    padding-top: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.admin-nav {
     border-radius: 0;
 }
 
@@ -671,6 +674,82 @@ body.dark-theme .points-title {
     font-size: 0.88rem;
     line-height: 1.6;
     color: var(--text-muted);
+}
+
+/* Tournament Terms tab */
+.tourney-terms-card {
+    margin-top: 1rem;
+    padding: 2rem;
+}
+
+.tourney-terms-header {
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.tourney-terms-title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+}
+
+.tourney-terms-intro {
+    margin: 0.75rem 0 0;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+}
+
+.tourney-terms-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.tourney-terms-section h4 {
+    margin: 0 0 0.65rem;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.tourney-terms-section p {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+}
+
+.tourney-terms-section p:last-child {
+    margin-bottom: 0;
+}
+
+.tourney-terms-ack {
+    margin-top: 0.5rem !important;
+    padding: 1rem 1.1rem;
+    background: rgba(59, 130, 246, 0.06);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary) !important;
+    font-size: 0.85rem !important;
+}
+
+body.dark-theme .tourney-terms-title {
+    color: #ffffff;
+}
+
+body.dark-theme .tourney-terms-section h4 {
+    color: #ffffff;
+}
+
+body.dark-theme .tourney-terms-ack {
+    background: rgba(255, 255, 255, 0.04);
 }
 
 @keyframes fadeIn {
@@ -2477,6 +2556,10 @@ body:not(.dark-theme) .theme-toggle-btn i {
         white-space: nowrap;
     }
     
+    .nav-menu-divider {
+        display: none;
+    }
+
     .admin-nav {
         border-top: none;
         margin-top: 0;

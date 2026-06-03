@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260607q">
+    <link rel="stylesheet" href="styles.css?v=20260607r">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -51,6 +51,11 @@
                     <button class="nav-item" data-tab="points">
                         <i class="fa-solid fa-circle-info"></i>
                         <span>Points Outline</span>
+                    </button>
+                    <div class="nav-menu-divider" aria-hidden="true"></div>
+                    <button class="nav-item" data-tab="terms">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        <span>Tourney Terms</span>
                     </button>
                     <button class="nav-item admin-nav" data-tab="admin">
                         <i class="fa-solid fa-gears"></i>
@@ -243,6 +248,64 @@
                             <p style="margin: 0; font-size: 0.88rem; line-height: 1.6; color: var(--text-muted);">
                                 Points in the knockout rounds are awarded for a correct predicted team <strong>regardless</strong> of whether they got to that stage via your predicted path. If your predicted team reaches a round in the official tournament, you get the progression points for that round!
                             </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tournament Terms -->
+                <section class="tab-panel" id="tab-terms">
+                    <div class="premium-card tourney-terms-card">
+                        <header class="tourney-terms-header">
+                            <h3 class="tourney-terms-title">Tournament Terms</h3>
+                            <p class="tourney-terms-intro">Last updated for the Ash's World Cup 2026 prediction pool. By accessing this site, submitting picks, or paying an entry fee, you agree to these Tournament Terms in full.</p>
+                        </header>
+
+                        <div class="tourney-terms-body">
+                            <section class="tourney-terms-section">
+                                <h4>1. Nature of the Pool</h4>
+                                <p>This World Cup prediction pool (the &ldquo;Pool&rdquo;) is organized solely for <strong>recreational entertainment among friends and invited participants</strong>. It is not a commercial gambling operation, sportsbook, or investment product. Participation is voluntary and intended for social fun tied to the 2026 FIFA World Cup.</p>
+                                <p>By clicking &ldquo;Submit Your Picks,&rdquo; completing checkout, or otherwise entering the Pool, you represent that you have read, understood, and <strong>agree to be bound by these Tournament Terms</strong>, including all financial obligations described below.</p>
+                            </section>
+
+                            <section class="tourney-terms-section">
+                                <h4>2. Buy-In and Entry Fees</h4>
+                                <p>Each valid submission requires a <strong>buy-in payment</strong> before the entry is locked on the leaderboard. The current per-entry buy-in amount is displayed in the sidebar under <strong>Pool Setup</strong> (presently <strong>$15 USD</strong> per submission) and shown again at payment checkout. The pool host may update posted amounts for future entries; the amount charged at the time you pay controls for that submission.</p>
+                                <p>You agree to pay the full buy-in for every entry you submit. Payment is processed through third-party payment services (e.g., Stripe). Failed, reversed, or disputed payments may result in removal or disqualification of the associated entry at the host&rsquo;s discretion.</p>
+                            </section>
+
+                            <section class="tourney-terms-section">
+                                <h4>3. Unlimited Submissions (Paid Per Entry)</h4>
+                                <p>Participants may submit <strong>unlimited separate entries</strong>, subject to the submission deadline announced on this site. <strong>Each entry is a distinct paid submission</strong>: you must complete a separate buy-in for every bracket you submit. There is no bulk discount unless explicitly announced by the pool host.</p>
+                                <p>Entry fees, prize amounts, and pool configuration are summarized in the sidebar (<strong>Pool Setup</strong> and <strong>Winnings</strong>). Those figures are incorporated into these Terms by reference. If sidebar text and checkout differ, the amount shown at checkout for that transaction prevails.</p>
+                            </section>
+
+                            <section class="tourney-terms-section">
+                                <h4>4. Prizes and Payouts (Top Three Only)</h4>
+                                <p>After the tournament concludes and official results are applied, pool prizes are awarded <strong>only to the first-, second-, and third-place finishers</strong> on the leaderboard, according to the point totals and tie-break rules used on this site. Payout amounts for each place are listed under <strong>Winnings</strong> in the sidebar.</p>
+                                <p><strong>All other participants expressly agree that they will not receive any portion of their buy-in back</strong> and that their entry fee is forfeited for pool purposes. Finishing fourth place or lower carries no monetary prize. Non-prize winnings remain in the prize pool for distribution to the top three unless otherwise decided by the host among friends in good faith.</p>
+                            </section>
+
+                            <section class="tourney-terms-section">
+                                <h4>5. Scoring, Deadlines, and Official Results</h4>
+                                <p>Points are calculated according to the <strong>Points Outline</strong> tab and official outcomes entered under <strong>Admin Control</strong>. Late, incomplete, or non-payment submissions may be rejected. The announced pick submission deadline is binding; entries not locked before kick-off of the stated deadline match may be disqualified.</p>
+                                <p>The pool host&rsquo;s recorded official results and scoring logic on this site are final for Pool purposes, subject to obvious clerical correction.</p>
+                            </section>
+
+                            <section class="tourney-terms-section">
+                                <h4>6. Eligibility and Conduct</h4>
+                                <p>You represent that you are legally permitted to participate in a private, social prediction pool in your jurisdiction and that you are of legal age where required. You agree not to submit entries on behalf of others without their consent, manipulate scoring, abuse payment systems, or interfere with site operation.</p>
+                            </section>
+
+                            <section class="tourney-terms-section">
+                                <h4>7. Disclaimers and Limitation of Liability</h4>
+                                <p>This site and Pool are provided <strong>&ldquo;as is&rdquo;</strong> without warranties of any kind. The host and contributors are not liable for technical errors, data loss, payment processor outages, or scoring disputes beyond good-faith correction. Maximum liability to any participant is limited to the buy-in amount that participant paid for the disputed entry.</p>
+                            </section>
+
+                            <section class="tourney-terms-section">
+                                <h4>8. Changes and Acceptance</h4>
+                                <p>The pool host may update these Tournament Terms or pool rules by posting changes on this tab. Continued participation after updates constitutes acceptance. If you do not agree, do not submit picks or pay a buy-in.</p>
+                                <p class="tourney-terms-ack"><strong>Summary:</strong> Friendly recreational pool &bull; agree by participating &bull; pay per entry &bull; unlimited paid submissions &bull; only 1st / 2nd / 3rd win cash &bull; everyone else loses their buy-in.</p>
+                            </section>
                         </div>
                     </div>
                 </section>
@@ -543,6 +606,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260607p"></script>
+    <script src="app.js?v=20260607r"></script>
 </body>
 </html>
