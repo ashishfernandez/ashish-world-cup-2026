@@ -3289,12 +3289,12 @@ function updateSubmitButtonState() {
     const submitPicksBtn = document.getElementById('btn-submit-picks');
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
 
-    // Button always says "Submit Picks" since once submitted, it's locked forever.
-    let labelText = 'Submit Picks';
+    // Button always says "Submit Your Picks" since once submitted, it's locked forever.
+    let labelText = 'Submit Your Picks';
     const iconHtml = '<i class="fa-solid fa-cloud-arrow-up"></i>';
 
     if (sidebarBtn) {
-        sidebarBtn.innerHTML = `${iconHtml} <span>${labelText}</span>`;
+        sidebarBtn.innerHTML = `${iconHtml} <span class="btn-label">${labelText}</span>`;
         sidebarBtn.disabled = false;
         sidebarBtn.style.opacity = '1';
         sidebarBtn.classList.add('glowing-btn');

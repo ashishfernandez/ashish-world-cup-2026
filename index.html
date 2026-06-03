@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260607j">
+    <link rel="stylesheet" href="styles.css?v=20260607k">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -68,10 +68,11 @@
                 </div>
             </div>
 
-            <button id="sidebar-submit-btn" class="btn btn-primary glowing-btn sidebar-submit-btn" style="width: 100%; margin-bottom: 1.25rem; justify-content: center;">
+            <button id="sidebar-submit-btn" class="btn btn-primary glowing-btn sidebar-submit-btn" style="width: 100%; margin-bottom: 0.35rem; justify-content: center;">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
-                <span class="btn-label">Submit Picks</span>
+                <span class="btn-label">Submit Your Picks</span>
             </button>
+            <p class="sidebar-submit-hint">Unlimited entries allowed</p>
 
             <div class="pool-meta-card">
                 <div class="pool-winnings-block">
@@ -88,7 +89,6 @@
                         <span class="label">Pool buy in:</span>
                         <span class="value"><strong>$15 USD</strong></span>
                     </div>
-                    <p class="pool-unlimited-entries">Unlimited entries!</p>
                 </div>
                 <div class="divider"></div>
                 <div class="pool-winnings-block">
@@ -420,7 +420,7 @@
                 <!-- Step 2: Group Stage Standings Builder -->
                 <div class="wizard-step-panel" data-step="2">
                     <div class="step-intro-wrapper">
-                        <h3>Sort Group Standings</h3>
+                        <h3>Sort Group Standings - Order Matters!</h3>
                         <p><i class="fa-solid fa-circle-info"></i> Arrange groups A to L to establish your predicted top 2 and 3rd-place finishers. You will pick which 3rd-place teams advance in the next step!</p>
                     </div>
                     <div class="wizard-groups-scroll-area">
@@ -450,7 +450,7 @@
                         <!-- Right pane: Selected 8 slots -->
                         <div class="thirds-selected-pane" style="display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto;">
                             <h4 style="font-family: var(--font-heading); font-weight: 700; margin: 0; color: var(--text-primary);">Selected 8 Advancing Teams</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Click on a selected team to remove them from advancement.</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">These 8 teams will move to the next round.</p>
                             <div class="thirds-slots-list" id="wizard-thirds-selected-slots" style="display: flex; flex-direction: column; gap: 0.5rem;">
                                 <!-- 8 slots rendered dynamically by JS -->
                             </div>
@@ -542,6 +542,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260607j"></script>
+    <script src="app.js?v=20260607k"></script>
 </body>
 </html>
