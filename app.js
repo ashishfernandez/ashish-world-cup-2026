@@ -136,14 +136,16 @@ function getTeamFlagIso(code) {
 /** Display size for bracket + leaderboard flags (matches #tab-bracket .bracket-flag-box). */
 const BRACKET_FLAG_IMG_W = 26;
 const BRACKET_FLAG_IMG_H = 18;
+/** flagcdn.com only serves standard widths (w20, w40, w80, …) — not w26. */
+const FLAG_CDN_FETCH_W = 40;
 
 /** PNG flag image (emoji flags render as two letters on Windows). */
-function buildTeamFlagImgHtml(code, width = BRACKET_FLAG_IMG_W, height = BRACKET_FLAG_IMG_H) {
+function buildTeamFlagImgHtml(code, displayW = BRACKET_FLAG_IMG_W, displayH = BRACKET_FLAG_IMG_H) {
     const iso = getTeamFlagIso(code);
     if (!iso) return '';
-    const w = Number(width) || BRACKET_FLAG_IMG_W;
-    const h = Number(height) || BRACKET_FLAG_IMG_H;
-    const src = `https://flagcdn.com/w${w}/${iso}.png`;
+    const w = Number(displayW) || BRACKET_FLAG_IMG_W;
+    const h = Number(displayH) || BRACKET_FLAG_IMG_H;
+    const src = `https://flagcdn.com/w${FLAG_CDN_FETCH_W}/${iso}.png`;
     return `<img class="team-flag-img" src="${src}" alt="" width="${w}" height="${h}" loading="lazy" decoding="async" />`;
 }
 
