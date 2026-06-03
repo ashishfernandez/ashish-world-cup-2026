@@ -185,9 +185,18 @@ body.dark-theme .ambient-glow {
     gap: 0.5rem;
 }
 
+.sidebar-announcements-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    width: 100%;
+}
+
 .sidebar-announcements-card {
-    margin-top: auto;
-    margin-bottom: 1.25rem;
+    width: 100%;
+    margin: 0;
 }
 
 .sidebar-announcement-text {
