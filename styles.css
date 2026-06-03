@@ -705,8 +705,13 @@ body.dark-theme .points-title {
     color: var(--text-primary);
 }
 
+.tourney-terms-ack-header {
+    margin-top: 0 !important;
+    margin-bottom: 0.85rem;
+}
+
 .tourney-terms-intro {
-    margin: 0.75rem 0 0;
+    margin: 0;
     font-size: 0.92rem;
     line-height: 1.65;
     color: var(--text-muted);
