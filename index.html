@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260607g">
+    <link rel="stylesheet" href="styles.css?v=20260607h">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -34,28 +34,37 @@
                 </div>
             </div>
 
-            <nav class="nav-menu">
-                <button class="nav-item active" data-tab="leaderboard">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Leaderboard</span>
-                </button>
-                <button class="nav-item" data-tab="groups">
-                    <i class="fa-solid fa-table-cells-large"></i>
-                    <span>Group Stages</span>
-                </button>
-                <button class="nav-item" data-tab="bracket">
-                    <i class="fa-solid fa-diagram-project"></i>
-                    <span>Bracket Sheet</span>
-                </button>
-                <button class="nav-item" data-tab="points">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <span>Points Outline</span>
-                </button>
-                <button class="nav-item admin-nav" data-tab="admin">
-                    <i class="fa-solid fa-gears"></i>
-                    <span>Admin Control</span>
-                </button>
-            </nav>
+            <div class="sidebar-spacer">
+                <nav class="nav-menu">
+                    <button class="nav-item active" data-tab="leaderboard">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Leaderboard</span>
+                    </button>
+                    <button class="nav-item" data-tab="groups">
+                        <i class="fa-solid fa-table-cells-large"></i>
+                        <span>Group Stages</span>
+                    </button>
+                    <button class="nav-item" data-tab="bracket">
+                        <i class="fa-solid fa-diagram-project"></i>
+                        <span>Bracket Sheet</span>
+                    </button>
+                    <button class="nav-item" data-tab="points">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Points Outline</span>
+                    </button>
+                    <button class="nav-item admin-nav" data-tab="admin">
+                        <i class="fa-solid fa-gears"></i>
+                        <span>Admin Control</span>
+                    </button>
+                </nav>
+
+                <div class="pool-meta-card sidebar-announcements-card">
+                    <div class="pool-winnings-block">
+                        <div class="pool-winnings-title">Ash's Announcements</div>
+                        <p class="sidebar-announcement-text">Pick submission deadline is June 11 before kick-off!</p>
+                    </div>
+                </div>
+            </div>
 
             <button id="sidebar-submit-btn" class="btn btn-primary glowing-btn sidebar-submit-btn" style="width: 100%; margin-bottom: 1.25rem; justify-content: center;">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
