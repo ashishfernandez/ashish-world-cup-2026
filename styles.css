@@ -1284,6 +1284,12 @@ body.dark-theme .bracket-team-row {
     background: rgba(0, 0, 0, 0.06);
 }
 
+.bracket-flag-box .team-flag {
+    font-size: 0.95rem;
+    line-height: 1;
+    display: block;
+}
+
 .bracket-team-label {
     flex: 0 0 calc(var(--bracket-team-label-ch) * 1ch);
     width: calc(var(--bracket-team-label-ch) * 1ch);

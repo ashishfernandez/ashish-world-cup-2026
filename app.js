@@ -117,7 +117,7 @@ function getTeamByCode(code) {
     if (!code) return { code: '', name: 'TBD', flag: '' };
     for (const group in GROUPS_DATA) {
         const team = GROUPS_DATA[group].find(t => t.code === code);
-        if (team) return { code: team.code, name: team.name, flag: '' };
+        if (team) return { code: team.code, name: team.name, flag: team.flag || '' };
     }
     return { code: code, name: code, flag: '' };
 }
