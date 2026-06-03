@@ -1072,7 +1072,7 @@ function setupTabListeners() {
             const titleMap = {
                 leaderboard: { title: "Leaderboard Standings", desc: "Track scores, predictions, and real-time rank movements among friends." },
                 bracket: { title: "Bracket Knock-Out Stages View", desc: "Use the dropdown to view different knock-out stages selections." },
-                groups: { title: "Group Stages Viewer", desc: "Use the dropdown to view different group stages selections." },
+                groups: { title: "Group Stages View", desc: "Use the dropdown to view different group stages selections." },
                 points: { title: "Points Outline", desc: "Understand how points are scored for your predictions." },
                 terms: { title: "Tournament Terms", desc: "Rules, buy-in, and payout terms for participating in this friends pool." },
                 admin: { title: "Admin Control Panel", desc: "Enter official outcomes to recalculate rankings." }
