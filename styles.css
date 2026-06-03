@@ -273,6 +273,10 @@ body.dark-theme .ambient-glow {
     backdrop-filter: blur(10px);
 }
 
+body:not(.dark-theme) .pool-meta-card {
+    background: var(--bg-main);
+}
+
 .pool-winnings-block {
     margin: 0.25rem 0;
 }
