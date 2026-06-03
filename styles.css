@@ -134,12 +134,16 @@ body.dark-theme .ambient-glow {
     border-right: 1px solid var(--card-border);
     display: flex;
     flex-direction: column;
-    padding: 2rem 1.5rem;
+    padding: 2rem 1.5rem 1.5rem;
     position: fixed;
     left: 0;
     top: 0;
     height: 100vh;
     z-index: 100;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .logo-area {
@@ -147,6 +151,7 @@ body.dark-theme .ambient-glow {
     align-items: center;
     gap: 0.85rem;
     margin-bottom: 3rem;
+    flex-shrink: 0;
 }
 
 .trophy-logo {
@@ -171,9 +176,9 @@ body.dark-theme .ambient-glow {
     font-weight: 500;
 }
 
-/* Sidebar Menu */
+/* Sidebar Menu — natural height so full sidebar scrolls on short laptop screens */
 .sidebar-spacer {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -186,12 +191,10 @@ body.dark-theme .ambient-glow {
 }
 
 .sidebar-announcements-area {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
+    flex: 0 0 auto;
+    display: block;
     width: 100%;
+    margin-top: 1.25rem;
 }
 
 .sidebar-announcements-card {
@@ -326,6 +329,8 @@ body:not(.dark-theme) .pool-meta-card {
 
 /* Light mode: poppy green, black label + icon */
 #sidebar-submit-btn.sidebar-submit-btn {
+    flex-shrink: 0;
+    margin-top: 1.25rem;
     background-color: #34d399;
     color: #000000;
     border: none;
@@ -369,11 +374,17 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover .btn-label {
     color: #ffffff !important;
 }
 
+.sidebar > .pool-meta-card {
+    flex-shrink: 0;
+    margin-top: 0;
+}
+
 .sidebar-submit-hint {
     margin: 0 0 1.25rem;
     text-align: center;
     font-size: 0.75rem;
     color: var(--text-muted);
+    flex-shrink: 0;
 }
 
 .meta-row {
@@ -2559,6 +2570,15 @@ body:not(.dark-theme) .theme-toggle-btn i {
         padding: 1.5rem;
         border-right: none;
         border-bottom: 1px solid var(--card-border);
+        overflow: visible;
+    }
+
+    #sidebar-submit-btn.sidebar-submit-btn {
+        margin-top: 0;
+    }
+
+    .sidebar-announcements-area {
+        margin-top: 1rem;
     }
     
     .logo-area {
@@ -2674,6 +2694,7 @@ body:not(.dark-theme) .theme-toggle-btn i {
         z-index: 500;
         flex-direction: column;
         gap: 0;
+        overflow: visible;
         background-color: var(--bg-sidebar);
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
@@ -2739,7 +2760,7 @@ body:not(.dark-theme) .theme-toggle-btn i {
         padding-top: 0.45rem;
     }
 
-    #sidebar-submit-btn {
+    #sidebar-submit-btn.sidebar-submit-btn {
         position: fixed;
         right: 1rem;
         bottom: calc(4.5rem + env(safe-area-inset-bottom));
