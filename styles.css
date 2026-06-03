@@ -319,25 +319,37 @@ body.dark-theme .ambient-glow {
     background-color: rgba(16, 185, 129, 0.16);
     color: #047857;
     border: none;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+    box-shadow: none;
 }
 
 #sidebar-submit-btn.sidebar-submit-btn:hover {
     background-color: rgba(16, 185, 129, 0.24);
     color: #065f46;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2);
+    box-shadow: none;
 }
 
+/* Override global dark-theme .btn (white) — match light-mode submit styling */
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn {
-    background-color: rgba(16, 185, 129, 0.2);
-    color: #6ee7b7;
-    border: none;
+    background-color: rgba(16, 185, 129, 0.16) !important;
+    color: #047857 !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover {
-    background-color: rgba(16, 185, 129, 0.3);
-    color: #a7f3d0;
+    background-color: rgba(16, 185, 129, 0.24) !important;
+    color: #065f46 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn i {
+    color: #047857 !important;
+}
+
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover i {
+    color: #065f46 !important;
 }
 
 .sidebar-submit-hint {
@@ -2638,7 +2650,7 @@ body:not(.dark-theme) .theme-toggle-btn i {
         border-radius: 2rem;
         justify-content: center;
         gap: 0.45rem;
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.28);
+        box-shadow: none;
     }
 
     #sidebar-submit-btn .btn-label {
