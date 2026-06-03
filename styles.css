@@ -315,6 +315,31 @@ body.dark-theme .ambient-glow {
     font-weight: 800;
 }
 
+#sidebar-submit-btn.sidebar-submit-btn {
+    background-color: rgba(16, 185, 129, 0.16);
+    color: #047857;
+    border: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+}
+
+#sidebar-submit-btn.sidebar-submit-btn:hover {
+    background-color: rgba(16, 185, 129, 0.24);
+    color: #065f46;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.2);
+}
+
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border: none;
+}
+
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover {
+    background-color: rgba(16, 185, 129, 0.3);
+    color: #a7f3d0;
+}
+
 .sidebar-submit-hint {
     margin: 0 0 1.25rem;
     text-align: center;
@@ -2613,7 +2638,7 @@ body:not(.dark-theme) .theme-toggle-btn i {
         border-radius: 2rem;
         justify-content: center;
         gap: 0.45rem;
-        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.28);
     }
 
     #sidebar-submit-btn .btn-label {
