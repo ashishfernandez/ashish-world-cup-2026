@@ -1425,19 +1425,21 @@ function renderRankingsTable(scores) {
     tbody.innerHTML = '';
     applyLeaderboardMedalPickWidths();
 
+    const table = document.querySelector('.leaderboard-table');
+    if (table) table.classList.toggle('leaderboard-table-empty', scores.length === 0);
+
     if (scores.length === 0) {
+        const emptyHint = window.matchMedia('(max-width: 768px)').matches
+            ? 'Be the first to submit your predictions! Tap the green <strong>Submit Your Picks</strong> button above the bottom menu.'
+            : 'Be the first to submit your predictions! Use the green <strong>Submit Your Picks</strong> button in the left sidebar to submit your predictions to the leaderboard.';
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td colspan="10" class="text-center" style="padding: 4rem 1rem; color: var(--text-dark);">
-                <div style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.6; color: var(--accent-gold);">
+            <td colspan="10" class="leaderboard-empty-cell text-center">
+                <div class="leaderboard-empty-icon">
                     <i class="fa-solid fa-users-slash"></i>
                 </div>
-                <div style="font-weight: 600; font-size: 1.15rem; color: var(--text-primary); margin-bottom: 0.5rem;">
-                    No Active Predictions Yet
-                </div>
-                <div style="font-size: 0.9rem; max-width: 440px; margin: 0 auto; line-height: 1.6; color: var(--text-dark);">
-                    Be the first to submit your predictions! Use the green <strong>Submit Your Picks</strong> button in the left sidebar to submit your predictions to the leaderboard.
-                </div>
+                <div class="leaderboard-empty-title">No Active Predictions Yet</div>
+                <div class="leaderboard-empty-msg">${emptyHint}</div>
             </td>
         `;
         tbody.appendChild(tr);
