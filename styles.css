@@ -386,15 +386,17 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover .btn-label {
     margin-top: 0;
 }
 
-.pool-tab-card {
-    padding: 0;
-    overflow: hidden;
+.pool-tab-meta {
+    display: block;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    font-size: 0.85rem;
 }
 
-.pool-tab-meta {
-    border: none;
-    border-radius: 0;
-    background: transparent;
+body:not(.dark-theme) .pool-tab-meta {
+    background: var(--bg-main);
 }
 
 .sidebar-submit-hint {
@@ -2650,8 +2652,8 @@ body:not(.dark-theme) .theme-toggle-btn i {
         padding-top: 0.95rem;
     }
     
-    .pool-meta-card {
-        display: none; /* Hide card info sidebar on tablet/mobile to save space */
+    .sidebar .pool-meta-card {
+        display: none; /* Hide sidebar pool info on tablet/mobile; tab-pool panel shows it */
     }
     
     .main-content {
