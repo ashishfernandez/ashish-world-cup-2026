@@ -268,6 +268,10 @@ body.dark-theme .ambient-glow {
     border-radius: var(--radius-md);
 }
 
+.mobile-only-nav {
+    display: none;
+}
+
 /* Pool Metadata Panel */
 .pool-meta-card {
     background: var(--card-bg);
@@ -380,6 +384,17 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn:hover .btn-label {
 .sidebar > .pool-meta-card {
     flex-shrink: 0;
     margin-top: 0;
+}
+
+.pool-tab-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.pool-tab-meta {
+    border: none;
+    border-radius: 0;
+    background: transparent;
 }
 
 .sidebar-submit-hint {
@@ -2762,6 +2777,14 @@ body:not(.dark-theme) .theme-toggle-btn i {
 
     .nav-menu-divider {
         display: none;
+    }
+
+    .mobile-only-nav {
+        display: flex;
+    }
+
+    .desktop-only-nav {
+        display: none !important;
     }
 
     .nav-item {

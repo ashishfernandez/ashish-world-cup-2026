@@ -516,18 +516,20 @@ function scheduleCloudRetries() {
 }
 
 function updateCloudSyncBanner(mode) {
-    const label = document.getElementById('sync-status-label');
-    const pulse = document.getElementById('sync-pulse');
-    const statusRow = pulse?.closest('.status-row');
+    let labelText = 'Offline / cached';
+    if (mode === 'ok') labelText = 'Live global pool';
+    else if (mode === 'loading') labelText = 'Connecting…';
 
-    if (label) {
-        if (mode === 'ok') label.textContent = 'Live global pool';
-        else if (mode === 'loading') label.textContent = 'Connecting…';
-        else label.textContent = 'Offline / cached';
-    }
-    if (statusRow) {
-        statusRow.classList.toggle('sync-error-row', mode === 'error' || mode === 'warn');
-    }
+    document.querySelectorAll('.pool-sync-label').forEach((label) => {
+        label.textContent = labelText;
+    });
+
+    document.querySelectorAll('.pool-sync-pulse').forEach((pulse) => {
+        const statusRow = pulse.closest('.status-row');
+        if (statusRow) {
+            statusRow.classList.toggle('sync-error-row', mode === 'error' || mode === 'warn');
+        }
+    });
 }
 
 /** Load last known global pool from this browser (fallback when cloud fetch fails) */
@@ -1070,6 +1072,7 @@ function setupTabListeners() {
 
             // Dynamic header labels
             const titleMap = {
+                pool: { title: "Pool Setup & Winnings", desc: "Buy-in, participant count, and estimated prize payouts for this pool." },
                 leaderboard: { title: "Leaderboard Standings", desc: "Track scores, predictions, and real-time rank movements among friends." },
                 bracket: { title: "Bracket Knock-Out Stages View", desc: "Use the dropdown to view different knock-out stages selections." },
                 groups: { title: "Group Stages View", desc: "Use the dropdown to view different group stages selections." },
@@ -1370,34 +1373,44 @@ function formatPoolPrizeUsd(amount) {
 }
 
 function updatePoolWinningsDisplay(participantCount) {
-    const firstEl = document.getElementById('pool-prize-first');
-    const secondEl = document.getElementById('pool-prize-second');
-    const thirdEl = document.getElementById('pool-prize-third');
-    if (!firstEl || !secondEl || !thirdEl) return;
+    const firstEls = document.querySelectorAll('.pool-prize-first');
+    const secondEls = document.querySelectorAll('.pool-prize-second');
+    const thirdEls = document.querySelectorAll('.pool-prize-third');
+    if (!firstEls.length || !secondEls.length || !thirdEls.length) return;
 
-    secondEl.textContent = formatPoolPrizeUsd(POOL_PRIZE_SECOND_USD);
-    secondEl.classList.remove('team-tbd');
+    secondEls.forEach((el) => {
+        el.textContent = formatPoolPrizeUsd(POOL_PRIZE_SECOND_USD);
+        el.classList.remove('team-tbd');
+    });
 
-    thirdEl.textContent = formatPoolPrizeUsd(POOL_PRIZE_THIRD_USD);
-    thirdEl.classList.remove('team-tbd');
+    thirdEls.forEach((el) => {
+        el.textContent = formatPoolPrizeUsd(POOL_PRIZE_THIRD_USD);
+        el.classList.remove('team-tbd');
+    });
 
     if (participantCount >= POOL_MIN_PARTICIPANTS_FOR_FIRST_PRIZE) {
         const firstPrize =
             participantCount * POOL_ENTRY_FEE_USD - POOL_FIRST_PRIZE_DEDUCTION_USD;
-        firstEl.textContent = formatPoolPrizeUsd(firstPrize);
-        firstEl.classList.remove('team-tbd');
+        firstEls.forEach((el) => {
+            el.textContent = formatPoolPrizeUsd(firstPrize);
+            el.classList.remove('team-tbd');
+        });
     } else {
-        firstEl.textContent = 'TBD';
-        firstEl.classList.add('team-tbd');
+        firstEls.forEach((el) => {
+            el.textContent = 'TBD';
+            el.classList.add('team-tbd');
+        });
     }
 }
 
 function updateActivePlayersCount() {
-    const countEl = document.getElementById('active-players-count');
-    if (!countEl) return;
+    const countEls = document.querySelectorAll('.pool-active-count');
+    if (!countEls.length) return;
 
     const count = getGlobalSubmissionEntries().length;
-    countEl.innerText = String(count);
+    countEls.forEach((el) => {
+        el.textContent = String(count);
+    });
     updatePoolWinningsDisplay(count);
 }
 

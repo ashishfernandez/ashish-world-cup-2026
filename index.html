@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260608f">
+    <link rel="stylesheet" href="styles.css?v=20260609a">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -36,6 +36,10 @@
 
             <div class="sidebar-spacer">
                 <nav class="nav-menu">
+                    <button type="button" class="nav-item mobile-only-nav" data-tab="pool" aria-label="Pool Setup and Winnings">
+                        <i class="fa-solid fa-dollar-sign" aria-hidden="true"></i>
+                        <span>Pool &amp; Winnings</span>
+                    </button>
                     <button type="button" class="nav-item active" data-tab="leaderboard" aria-label="Leaderboard">
                         <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
                         <span>Leaderboard</span>
@@ -57,7 +61,7 @@
                         <i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>
                         <span>Tourney Terms</span>
                     </button>
-                    <button type="button" class="nav-item admin-nav" data-tab="admin" aria-label="Admin Control">
+                    <button type="button" class="nav-item admin-nav desktop-only-nav" data-tab="admin" aria-label="Admin Control">
                         <i class="fa-solid fa-gears" aria-hidden="true"></i>
                         <span>Admin Control</span>
                     </button>
@@ -88,7 +92,7 @@
                     </div>
                     <div class="meta-row">
                         <span class="label">Total participants:</span>
-                        <span id="active-players-count" class="value">…</span>
+                        <span id="active-players-count" class="value pool-active-count">…</span>
                     </div>
                     <div class="meta-row">
                         <span class="label">Pool buy in:</span>
@@ -99,15 +103,15 @@
                 <div class="pool-winnings-block">
                     <div class="pool-winnings-title">Winnings</div>
                     <ul class="pool-winnings-list">
-                        <li><span class="pool-winnings-place">1st place:</span> <span id="pool-prize-first" class="pool-winnings-prize team-tbd">TBD</span></li>
-                        <li><span class="pool-winnings-place">2nd place:</span> <span id="pool-prize-second" class="pool-winnings-prize">$30 USD</span></li>
-                        <li><span class="pool-winnings-place">3rd place:</span> <span id="pool-prize-third" class="pool-winnings-prize">$15 USD</span></li>
+                        <li><span class="pool-winnings-place">1st place:</span> <span id="pool-prize-first" class="pool-winnings-prize pool-prize-first team-tbd">TBD</span></li>
+                        <li><span class="pool-winnings-place">2nd place:</span> <span id="pool-prize-second" class="pool-winnings-prize pool-prize-second">$30 USD</span></li>
+                        <li><span class="pool-winnings-place">3rd place:</span> <span id="pool-prize-third" class="pool-winnings-prize pool-prize-third">$15 USD</span></li>
                     </ul>
                 </div>
                 <div class="divider"></div>
                 <div class="meta-row status-row">
-                    <span class="pulse-indicator" id="sync-pulse"></span>
-                    <span class="status-text" id="sync-status-label">Connecting…</span>
+                    <span class="pulse-indicator pool-sync-pulse" id="sync-pulse"></span>
+                    <span class="status-text pool-sync-label" id="sync-status-label">Connecting…</span>
                 </div>
             </div>
         </aside>
@@ -155,6 +159,43 @@
                                     <!-- Rendered dynamically by JavaScript -->
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pool Setup & Winnings (mobile nav) -->
+                <section class="tab-panel" id="tab-pool">
+                    <div class="premium-card pool-tab-card">
+                        <div class="pool-meta-card pool-tab-meta">
+                            <div class="pool-winnings-block">
+                                <div class="pool-winnings-title">Pool Setup</div>
+                                <div class="meta-row">
+                                    <span class="label">Max pool points:</span>
+                                    <span class="value gold-text">1000 Pts</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="label">Total participants:</span>
+                                    <span class="value pool-active-count">…</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="label">Pool buy in:</span>
+                                    <span class="value"><strong>$15 USD</strong></span>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="pool-winnings-block">
+                                <div class="pool-winnings-title">Winnings</div>
+                                <ul class="pool-winnings-list">
+                                    <li><span class="pool-winnings-place">1st place:</span> <span class="pool-winnings-prize pool-prize-first team-tbd">TBD</span></li>
+                                    <li><span class="pool-winnings-place">2nd place:</span> <span class="pool-winnings-prize pool-prize-second">$30 USD</span></li>
+                                    <li><span class="pool-winnings-place">3rd place:</span> <span class="pool-winnings-prize pool-prize-third">$15 USD</span></li>
+                                </ul>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="meta-row status-row">
+                                <span class="pulse-indicator pool-sync-pulse"></span>
+                                <span class="status-text pool-sync-label">Connecting…</span>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -607,6 +648,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260608d"></script>
+    <script src="app.js?v=20260609a"></script>
 </body>
 </html>
