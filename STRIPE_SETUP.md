@@ -92,7 +92,7 @@ Stripe disables endpoints that return non-2xx responses for many days in a row. 
 
 | Stripe delivery response | Likely cause | Fix |
 |--------------------------|--------------|-----|
-| **400** Invalid signature | `STRIPE_WEBHOOK_SECRET` in Supabase does not match the **live** webhook signing secret | Copy `whsec_...` from **Live** → Webhooks → your endpoint → Signing secret; update Supabase secret |
+| **400** Invalid signature | Wrong `whsec_...` **or** webhook code using sync `constructEvent` on Deno (must use `constructEventAsync` + `createSubtleCryptoProvider`) | Match live signing secret in Supabase; redeploy `stripe-webhook` from this repo |
 | **503** Webhook not configured | `STRIPE_WEBHOOK_SECRET` missing in Supabase | Add the secret and redeploy |
 | **500** | Database error promoting `pending_submissions` | Check Supabase logs for `stripe-webhook`; confirm migration `20260602_stripe_payments.sql` was run |
 | Connection / timeout | Function not deployed | Run `scripts/deploy-stripe-functions.ps1` |

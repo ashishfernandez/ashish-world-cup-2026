@@ -1,11 +1,17 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
-import Stripe from 'https://esm.sh/stripe@14.21.0?target=deno';
+import Stripe from 'https://esm.sh/stripe@14?target=denonext';
 import { promotePendingSubmission } from '../_shared/promote.ts';
 
 const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY')!;
 const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+const stripe = new Stripe(stripeSecret, {
+  apiVersion: '2024-11-20',
+  httpClient: Stripe.createFetchHttpClient(),
+});
+const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
@@ -17,7 +23,6 @@ Deno.serve(async (req) => {
     return new Response('Webhook not configured', { status: 503 });
   }
 
-  const stripe = new Stripe(stripeSecret, { apiVersion: '2023-10-16' });
   const signature = req.headers.get('stripe-signature');
   if (!signature) {
     return new Response('Missing stripe-signature', { status: 400 });
@@ -27,10 +32,17 @@ Deno.serve(async (req) => {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    event = await stripe.webhooks.constructEventAsync(
+      body,
+      signature,
+      webhookSecret,
+      undefined,
+      cryptoProvider
+    );
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
-    return new Response('Invalid signature', { status: 400 });
+    const message = err instanceof Error ? err.message : 'Invalid signature';
+    console.error('Webhook signature verification failed:', message);
+    return new Response(message, { status: 400 });
   }
 
   if (event.type === 'checkout.session.completed') {
@@ -44,8 +56,6 @@ Deno.serve(async (req) => {
       const supabase = createClient(supabaseUrl, serviceRoleKey);
       const result = await promotePendingSubmission(supabase, pendingId);
       if (!result.ok) {
-        // Acknowledge to Stripe so disabled endpoints are not caused by retries on
-        // already-processed or missing rows (verify-checkout-session may have run first).
         const retryable =
           !result.error.includes('not found') &&
           !result.error.includes('Invalid pending submission');
