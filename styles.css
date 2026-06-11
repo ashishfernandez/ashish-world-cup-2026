@@ -200,14 +200,33 @@ body.dark-theme .ambient-glow {
 .sidebar-announcements-card {
     width: 100%;
     margin: 0;
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    backdrop-filter: none;
+}
+
+body:not(.dark-theme) .sidebar-announcements-card {
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.sidebar-announcements-card .pool-winnings-title {
+    color: #93c5fd;
+}
+
+body:not(.dark-theme) .sidebar-announcements-card .pool-winnings-title {
+    color: #1e3a8a;
 }
 
 .sidebar-announcement-text {
     margin: 0;
     line-height: 1.55;
-    color: var(--text-primary);
+    color: #93c5fd;
     font-size: 0.82rem;
-    font-style: italic;
+}
+
+body:not(.dark-theme) .sidebar-announcement-text {
+    color: #1e3a8a;
 }
 
 .nav-item {
