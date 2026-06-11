@@ -38,17 +38,31 @@ Deno.serve(async (req) => {
     const pendingId =
       session.metadata?.pending_id || session.client_reference_id || '';
 
-    if (pendingId) {
+    if (!pendingId) {
+      console.warn('checkout.session.completed without pending_id:', session.id);
+    } else {
       const supabase = createClient(supabaseUrl, serviceRoleKey);
       const result = await promotePendingSubmission(supabase, pendingId);
       if (!result.ok) {
-        console.error('Failed to promote pending submission:', result.error);
-        return new Response(result.error, { status: 500 });
+        // Acknowledge to Stripe so disabled endpoints are not caused by retries on
+        // already-processed or missing rows (verify-checkout-session may have run first).
+        const retryable =
+          !result.error.includes('not found') &&
+          !result.error.includes('Invalid pending submission');
+        console.error('Promote pending submission:', result.error, {
+          pendingId,
+          sessionId: session.id,
+          retryable,
+        });
+        if (retryable) {
+          return new Response(result.error, { status: 500 });
+        }
       }
     }
   }
 
   return new Response(JSON.stringify({ received: true }), {
+    status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
 });

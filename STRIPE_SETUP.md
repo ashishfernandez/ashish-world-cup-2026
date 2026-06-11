@@ -73,5 +73,32 @@ Set `required: false` only for local testing without Stripe (submits without pay
 ## 5. Go live
 
 1. Toggle Stripe to **Live mode**.
-2. Update secrets with live `sk_live_...` and a live webhook endpoint.
-3. Confirm `worldcupofash.com` is allowed in Stripe Checkout redirect URLs (same origin as the site).
+2. **Developers → Webhooks → Add endpoint** (live mode has its **own** endpoint and signing secret — test `whsec_` will not work):
+   - URL: `https://ovfmmszhlkedypfveyxj.supabase.co/functions/v1/stripe-webhook`
+   - Event: `checkout.session.completed`
+   - Copy the **live** signing secret (`whsec_...`).
+3. In **Supabase → Project Settings → Edge Functions → Secrets**, set:
+   - `STRIPE_SECRET_KEY` = `sk_live_...`
+   - `STRIPE_WEBHOOK_SECRET` = live `whsec_...` (must match the live webhook endpoint above)
+4. Redeploy: `supabase functions deploy stripe-webhook --no-verify-jwt` (or run `scripts/deploy-stripe-functions.ps1`).
+5. In Stripe, open the webhook endpoint and click **Enable** if Stripe disabled it after failures.
+6. Use **Send test webhook** or **Recent deliveries** on that endpoint — a successful delivery shows **200**.
+
+Confirm `worldcupofash.com` is allowed in Stripe Checkout redirect URLs (same origin as the site).
+
+## 6. Webhook disabled email (troubleshooting)
+
+Stripe disables endpoints that return non-2xx responses for many days in a row. Common causes for this project:
+
+| Stripe delivery response | Likely cause | Fix |
+|--------------------------|--------------|-----|
+| **400** Invalid signature | `STRIPE_WEBHOOK_SECRET` in Supabase does not match the **live** webhook signing secret | Copy `whsec_...` from **Live** → Webhooks → your endpoint → Signing secret; update Supabase secret |
+| **503** Webhook not configured | `STRIPE_WEBHOOK_SECRET` missing in Supabase | Add the secret and redeploy |
+| **500** | Database error promoting `pending_submissions` | Check Supabase logs for `stripe-webhook`; confirm migration `20260602_stripe_payments.sql` was run |
+| Connection / timeout | Function not deployed | Run `scripts/deploy-stripe-functions.ps1` |
+
+**Note:** Payments can still succeed without the webhook. After checkout, the site calls `verify-checkout-session` on redirect, which also promotes the entry. The webhook is a **backup** if the user closes the tab before returning to the site.
+
+**Quick health check:** In Stripe Dashboard → Webhooks → your endpoint → **Recent deliveries**, open a failed event and read the HTTP status and response body.
+
+**Re-enable after fix:** Webhooks → select endpoint → **Enable** → optionally **Resend** a recent `checkout.session.completed` event to confirm **200**.
