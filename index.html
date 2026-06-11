@@ -11,7 +11,7 @@
     <!-- FontAwesome for Premium Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="styles.css?v=20260610h">
+    <link rel="stylesheet" href="styles.css?v=20260611a">
     <!-- Favicon Icon -->
     <link rel="icon" type="image/jpeg" href="favicon.jpg">
     <!-- Cloud Database SDK -->
@@ -448,6 +448,24 @@
                                 </div>
                             </div>
 
+                            <!-- Entry submissions toggle -->
+                            <div class="premium-card admin-submissions-card">
+                                <div class="card-header">
+                                    <h3><i class="fa-solid fa-cloud-arrow-up text-primary"></i> Entry Submissions</h3>
+                                    <p>Allow or block new pick submissions from all visitors.</p>
+                                </div>
+                                <div class="group-scoring-control-bar">
+                                    <div class="group-scoring-control-text">
+                                        <span class="group-scoring-toggle-label">Submit Your Picks</span>
+                                        <p id="submissions-open-status-text" class="group-scoring-status-text">Visitors can submit new entries via Submit Your Picks.</p>
+                                    </div>
+                                    <div class="group-scoring-toggle" role="group" aria-label="Entry submissions">
+                                        <button type="button" id="btn-submissions-on" class="scoring-toggle-btn active">Enabled</button>
+                                        <button type="button" id="btn-submissions-off" class="scoring-toggle-btn">Disabled</button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Participant Deletion / Management Card -->
                             <div class="premium-card admin-users-card">
                                 <div class="card-header">
@@ -650,6 +668,6 @@
     </div>
 
     <!-- Script imports -->
-    <script src="app.js?v=20260610c"></script>
+    <script src="app.js?v=20260611a"></script>
 </body>
 </html>

@@ -2396,8 +2396,22 @@ body:not(.dark-theme) .theme-toggle-btn i {
     align-self: flex-start;
 }
 
-.admin-payment-card .group-scoring-control-bar {
+.admin-payment-card .group-scoring-control-bar,
+.admin-submissions-card .group-scoring-control-bar {
     margin-top: 0;
+}
+
+#sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled,
+#sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled,
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover {
+    opacity: 0.45;
 }
 
 .wizard-progress-tracker .progress-step.progress-step-skipped {

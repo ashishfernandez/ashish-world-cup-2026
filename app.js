@@ -373,7 +373,8 @@ const STATE = {
         matches: {}, // key: matchId (1 to 32), value: winningTeamCode
         advancingTeams: [], // Explicit list of 32 teams who reached knockout stage
         groupScoringActive: true, // Admin toggle: group column on leaderboard (max 160)
-        stripePaymentRequired: true // Admin toggle: wizard step 6 + Stripe checkout
+        stripePaymentRequired: true, // Admin toggle: wizard step 6 + Stripe checkout
+        submissionsOpen: true // Admin toggle: Submit Your Picks wizard open to visitors
     },
 
     // User profiles & predicted selections (Brackets, Groups)
@@ -468,6 +469,7 @@ async function init() {
     setupAdminReset();
     setupAdminGroupScoringToggle();
     setupAdminStripePaymentToggle();
+    setupAdminSubmissionsToggle();
     setupThemeToggle();
     setupDragScroll();
     setupBracketConnectorSync();
@@ -635,12 +637,17 @@ function isStripePaymentRequired() {
     return PAYMENT_CONFIG.required && STATE.officialResults.stripePaymentRequired !== false;
 }
 
+function isSubmissionsOpen() {
+    return STATE.officialResults.submissionsOpen !== false;
+}
+
 function getOfficialResultsPayload() {
     return {
         matches: STATE.officialResults.matches,
         advancingTeams: STATE.officialResults.advancingTeams,
         groupScoringActive: isGroupScoringActive(),
         stripePaymentRequired: STATE.officialResults.stripePaymentRequired !== false,
+        submissionsOpen: isSubmissionsOpen(),
         groupStandings: STATE.participants.actuals ? STATE.participants.actuals.groupStandings : {},
         selectedThirds: STATE.participants.actuals ? STATE.participants.actuals.selectedThirds : []
     };
@@ -651,6 +658,7 @@ function applyOfficialResultsFields(parsed) {
     STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
     STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
     STATE.officialResults.stripePaymentRequired = parsed.stripePaymentRequired !== false;
+    STATE.officialResults.submissionsOpen = parsed.submissionsOpen !== false;
     if (STATE.participants.actuals) {
         // Keep actuals.bracketPicks aligned with officialResults.matches (same object reference).
         STATE.participants.actuals.bracketPicks = STATE.officialResults.matches;
@@ -677,7 +685,9 @@ function applyOfficialResultsFromCloud(resData) {
     localStorage.setItem('wc-official-results', JSON.stringify(getOfficialResultsPayload()));
     syncGroupScoringToggleUI();
     syncStripePaymentToggleUI();
+    syncSubmissionsToggleUI();
     syncWizardPaymentUI();
+    updateSubmitButtonState();
     return true;
 }
 
@@ -757,9 +767,11 @@ async function refreshFromCloudAndRender() {
     ensureStandardStandings();
     syncGroupScoringToggleUI();
     syncStripePaymentToggleUI();
+    syncSubmissionsToggleUI();
     syncWizardPaymentUI();
     populateUserDropdowns();
     renderAll();
+    updateSubmitButtonState();
     updateActivePlayersCount();
 }
 
@@ -848,6 +860,7 @@ function loadStateFromStorage() {
         STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
         STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
         STATE.officialResults.stripePaymentRequired = parsed.stripePaymentRequired !== false;
+        STATE.officialResults.submissionsOpen = parsed.submissionsOpen !== false;
         loadedGroupStandings = parsed.groupStandings || null;
         loadedSelectedThirds = parsed.selectedThirds || null;
     }
@@ -1169,6 +1182,10 @@ function syncWizardPaymentUI() {
 }
 
 async function advanceFromReviewStep() {
+    if (!isSubmissionsOpen()) {
+        alert('Submissions are currently closed. New entries cannot be submitted.');
+        return;
+    }
     if (isStripePaymentRequired()) {
         goToWizardStep(WIZARD_PAYMENT_STEP);
     } else {
@@ -1192,6 +1209,35 @@ function setupAdminStripePaymentToggle() {
     });
     syncStripePaymentToggleUI();
     syncWizardPaymentUI();
+}
+
+function syncSubmissionsToggleUI() {
+    const open = isSubmissionsOpen();
+    document.getElementById('btn-submissions-on')?.classList.toggle('active', open);
+    document.getElementById('btn-submissions-off')?.classList.toggle('active', !open);
+    const statusEl = document.getElementById('submissions-open-status-text');
+    if (statusEl) {
+        statusEl.textContent = open
+            ? 'Visitors can submit new entries via Submit Your Picks.'
+            : 'Submit Your Picks is disabled for everyone; no new entries can be added.';
+    }
+}
+
+function setSubmissionsOpen(open) {
+    STATE.officialResults.submissionsOpen = open;
+    syncSubmissionsToggleUI();
+    updateSubmitButtonState();
+    saveStateToStorage();
+}
+
+function setupAdminSubmissionsToggle() {
+    document.getElementById('btn-submissions-on')?.addEventListener('click', () => {
+        setSubmissionsOpen(true);
+    });
+    document.getElementById('btn-submissions-off')?.addEventListener('click', () => {
+        setSubmissionsOpen(false);
+    });
+    syncSubmissionsToggleUI();
 }
 
 function setupAdminReset() {
@@ -2726,6 +2772,10 @@ function validateDraftReadyForPayment() {
 }
 
 async function startStripeCheckout() {
+    if (!isSubmissionsOpen()) {
+        alert('Submissions are currently closed. New entries cannot be submitted.');
+        return;
+    }
     if (!validateDraftReadyForPayment()) return;
 
     const payBtn = document.getElementById('btn-wizard-pay');
@@ -2796,6 +2846,10 @@ async function finalizePaidSubmission(submissionId, participantName) {
 }
 
 async function submitWithoutPayment() {
+    if (!isSubmissionsOpen()) {
+        alert('Submissions are currently closed. New entries cannot be submitted.');
+        return;
+    }
     if (!validateDraftReadyForPayment()) return;
 
     const newSubmission = buildSubmissionFromDraft();
@@ -2885,6 +2939,8 @@ function setupOnboarding() {
 
     // 1. Wizard Open Trigger
     const openWizard = () => {
+        if (!isSubmissionsOpen()) return;
+
         const draft = STATE.participants.draft;
         nameInput.value = draft.onboarded ? draft.name : '';
 
@@ -3379,26 +3435,28 @@ function renderWizardBracket() {
 function updateSubmitButtonState() {
     const submitPicksBtn = document.getElementById('btn-submit-picks');
     const sidebarBtn = document.getElementById('sidebar-submit-btn');
+    const submissionsOpen = isSubmissionsOpen();
 
-    // Button always says "Submit Your Picks" since once submitted, it's locked forever.
-    let labelText = 'Submit Your Picks';
+    const labelText = submissionsOpen ? 'Submit Your Picks' : 'Submissions Closed';
     const iconHtml = '<i class="fa-solid fa-cloud-arrow-up"></i>';
 
     if (sidebarBtn) {
         sidebarBtn.innerHTML = `${iconHtml} <span class="btn-label">${labelText}</span>`;
-        sidebarBtn.disabled = false;
-        sidebarBtn.style.opacity = '1';
-        sidebarBtn.classList.add('glowing-btn');
+        sidebarBtn.disabled = !submissionsOpen;
+        sidebarBtn.setAttribute('aria-disabled', submissionsOpen ? 'false' : 'true');
+        sidebarBtn.classList.toggle('glowing-btn', submissionsOpen);
+        sidebarBtn.classList.toggle('sidebar-submit-disabled', !submissionsOpen);
     }
 
-    // Only show submit button inside Bracket Sheet tab when editing active draft
     if (submitPicksBtn) {
-        if (STATE.activeBracketUser === 'draft') {
+        if (STATE.activeBracketUser === 'draft' && submissionsOpen) {
             submitPicksBtn.innerHTML = `${iconHtml} <span>Submit My Picks</span>`;
             submitPicksBtn.style.display = 'inline-flex';
+            submitPicksBtn.disabled = false;
             submitPicksBtn.classList.add('glowing-btn');
         } else {
             submitPicksBtn.style.display = 'none';
+            submitPicksBtn.disabled = !submissionsOpen;
         }
     }
 }
