@@ -1004,7 +1004,11 @@ body.dark-theme .tourney-terms-ack {
 
 .leaderboard-table tbody td.ai-exp-cell {
     font-variant-numeric: tabular-nums;
-    color: var(--text-muted);
+    color: #94a3b8;
+}
+
+body.dark-theme .leaderboard-table tbody td.ai-exp-cell {
+    color: #cbd5e1;
 }
 
 .leaderboard-table tbody td {
