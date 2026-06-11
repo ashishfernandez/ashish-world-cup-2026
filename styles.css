@@ -214,8 +214,15 @@ body.dark-theme .ambient-glow {
     font-family: var(--font-heading);
     font-weight: 600;
     font-size: 0.85rem;
-    color: inherit;
     margin-bottom: 0.5rem;
+}
+
+body.dark-theme .announcements-info-title {
+    color: #ffffff;
+}
+
+body:not(.dark-theme) .announcements-info-title {
+    color: #000000;
 }
 
 .announcements-info-text {
@@ -2796,6 +2803,12 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:h
 
 /* Phones: bottom nav, FAB submit, tightened layouts */
 @media (max-width: 768px) {
+    :root {
+        --mobile-bottom-nav-height: calc(3.5rem + 0.8rem + env(safe-area-inset-bottom, 0px));
+        --mobile-submit-gap: 0.65rem;
+        --mobile-submit-height: 2.85rem;
+    }
+
     .ambient-glow {
         display: none;
     }
@@ -2806,7 +2819,10 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:h
     }
 
     .app-container {
-        padding-bottom: calc(8.5rem + env(safe-area-inset-bottom));
+        padding-bottom: calc(
+            var(--mobile-bottom-nav-height) + var(--mobile-submit-gap) +
+            var(--mobile-submit-height) + 0.75rem
+        );
         min-width: 0;
         max-width: 100%;
         overflow-x: hidden;
@@ -2830,14 +2846,9 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:h
         z-index: 500;
         flex-direction: column;
         gap: 0;
-        overflow: hidden;
+        overflow: visible;
         background-color: var(--bg-sidebar);
         box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.12);
-        transform: translateZ(0);
-        -webkit-transform: translateZ(0);
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        isolation: isolate;
     }
 
     body.dark-theme .sidebar {
@@ -2955,23 +2966,27 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:h
         border-radius: 0.65rem;
     }
 
-    /* Full-width strip above bottom nav — no overlap with tab icons */
+    /* Full-width strip above bottom nav — fixed to viewport, not clipped by sidebar */
     #sidebar-submit-btn.sidebar-submit-btn {
         position: fixed;
         left: 0.75rem;
         right: 0.75rem;
-        bottom: calc(4.15rem + env(safe-area-inset-bottom));
-        z-index: 510;
+        bottom: calc(var(--mobile-bottom-nav-height) + var(--mobile-submit-gap));
+        z-index: 600;
         width: auto !important;
         min-width: 0;
         max-width: none;
-        height: 2.85rem !important;
+        height: var(--mobile-submit-height) !important;
         margin: 0 !important;
         padding: 0 1rem !important;
         border-radius: 0.65rem;
         justify-content: center;
         gap: 0.45rem;
-        box-shadow: none;
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+    }
+
+    body.dark-theme #sidebar-submit-btn.sidebar-submit-btn {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
 
     #sidebar-submit-btn .btn-label {
@@ -3291,10 +3306,14 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:h
         padding: 0.45rem 0.1rem;
     }
 
+    :root {
+        --mobile-submit-height: 2.65rem;
+    }
+
     #sidebar-submit-btn.sidebar-submit-btn {
         left: 0.5rem;
         right: 0.5rem;
-        height: 2.65rem !important;
+        height: var(--mobile-submit-height) !important;
     }
 
     .leaderboard-table:not(.leaderboard-table-empty) {
