@@ -1000,19 +1000,29 @@ body.dark-theme .tourney-terms-ack {
 .leaderboard-table th.ai-exp-col,
 .leaderboard-table td.ai-exp-cell {
     white-space: nowrap;
-    font-size: 0.82rem;
-}
-
-.leaderboard-table th.ai-exp-col {
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    line-height: 1.25;
-    max-width: 4.5rem;
 }
 
 .leaderboard-table td.ai-exp-cell {
-    color: var(--text-primary);
     font-variant-numeric: tabular-nums;
+}
+
+.leaderboard-table tbody td {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: inherit;
+    color: var(--text-primary);
+}
+
+.leaderboard-table .leaderboard-score-denom {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.leaderboard-table .points-emphasis {
+    font-size: inherit;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 .leaderboard-table th.medal-pick-col,
@@ -1074,7 +1084,7 @@ body.dark-theme .tourney-terms-ack {
     color: var(--text-dark);
 }
 
-.rank-badge {
+.leaderboard-table .rank-badge {
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -1082,8 +1092,8 @@ body.dark-theme .tourney-terms-ack {
     justify-content: center;
     align-items: center;
     font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 0.85rem;
+    font-weight: 600;
+    font-size: inherit;
     background-color: rgba(255, 255, 255, 0.05);
 }
 
@@ -1121,6 +1131,8 @@ tr:nth-child(3) .rank-badge {
 .player-name {
     font-weight: 600;
     font-family: var(--font-heading);
+    font-size: inherit;
+    color: var(--text-primary);
 }
 
 .badge {
@@ -1157,6 +1169,9 @@ body:not(.dark-theme) .leaderboard-table .badge-info {
 
 .leaderboard-table td .badge {
     white-space: nowrap;
+    font-size: inherit;
+    font-weight: 600;
+    font-family: var(--font-heading);
 }
 
 .leaderboard-pick-slot {

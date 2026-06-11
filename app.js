@@ -1514,7 +1514,7 @@ function renderRankingsTable(scores) {
             <td>
                 <div class="player-cell">
                     <div style="display: flex; flex-direction: column;">
-                        <span class="player-name" style="font-weight: 600; color: var(--text-primary);">${player.name}</span>
+                        <span class="player-name">${player.name}</span>
                         <span style="font-size: 0.72rem; color: var(--text-dark); display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.15rem;">
                             <i class="fa-solid fa-eye" style="font-size: 0.7rem;"></i> Click to view picks
                         </span>
@@ -1522,14 +1522,14 @@ function renderRankingsTable(scores) {
                 </div>
             </td>
             <td class="text-center ai-exp-cell">${aiExp.rank}</td>
-            <td class="text-center ai-exp-cell font-heading">${aiExp.expPts}</td>
+            <td class="text-center ai-exp-cell">${aiExp.expPts}</td>
             <td class="medal-pick-cell">${leaderboardPredictionBadge(player.champ)}</td>
             <td class="medal-pick-cell">${leaderboardPredictionBadge(player.silver)}</td>
             <td class="medal-pick-cell">${leaderboardPredictionBadge(player.bronze)}</td>
-            <td class="text-center font-heading">${!isGroupScoringActive()
+            <td class="text-center leaderboard-score-cell">${!isGroupScoringActive()
                 ? `<strong class="group-pts-inactive-zero">${player.groupPts}</strong>`
-                : player.groupPts} <span style="font-size:0.75rem; color:var(--text-dark)">/160</span></td>
-            <td class="text-center font-heading">${player.koPts} <span style="font-size:0.75rem; color:var(--text-dark)">/840</span></td>
+                : player.groupPts} <span class="leaderboard-score-denom">/160</span></td>
+            <td class="text-center leaderboard-score-cell">${player.koPts} <span class="leaderboard-score-denom">/840</span></td>
             <td class="text-right points-emphasis">${player.totalScore}</td>
         `;
 
