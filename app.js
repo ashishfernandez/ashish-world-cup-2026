@@ -1399,10 +1399,17 @@ const AI_EXP_RANKINGS = {
     'Henry': { rank: 33, expPts: 347.5 }
 };
 
+function roundAiExpPtsUpToFive(value) {
+    return Math.ceil(value / 5) * 5;
+}
+
 function getAiExpStats(participantName) {
     const row = AI_EXP_RANKINGS[participantName];
     if (!row) return { rank: '—', expPts: '—' };
-    return { rank: row.rank, expPts: row.expPts.toFixed(1) };
+    return {
+        rank: row.rank,
+        expPts: String(roundAiExpPtsUpToFive(row.expPts))
+    };
 }
 
 const POOL_ENTRY_FEE_USD = 15;

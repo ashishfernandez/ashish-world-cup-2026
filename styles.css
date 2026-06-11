@@ -1002,8 +1002,9 @@ body.dark-theme .tourney-terms-ack {
     white-space: nowrap;
 }
 
-.leaderboard-table td.ai-exp-cell {
+.leaderboard-table tbody td.ai-exp-cell {
     font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
 }
 
 .leaderboard-table tbody td {
