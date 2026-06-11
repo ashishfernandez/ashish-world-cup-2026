@@ -1362,6 +1362,49 @@ function renderLeaderboard() {
     updateActivePlayersCount();
 }
 
+/** AI pre-tournament expected rank/points — market model, all 33 pool entries (2026-06-10). */
+const AI_EXP_RANKINGS = {
+    'Anders': { rank: 1, expPts: 452.7 },
+    'Felix': { rank: 2, expPts: 452.3 },
+    'Paul M': { rank: 3, expPts: 450.8 },
+    'Tayler': { rank: 4, expPts: 449.8 },
+    'Ashish the Gemini': { rank: 5, expPts: 449.6 },
+    'SE(codex)AN': { rank: 6, expPts: 448.2 },
+    'Trammy': { rank: 7, expPts: 447.8 },
+    'Uma': { rank: 8, expPts: 447.7 },
+    'Ashish the ChatGPT': { rank: 9, expPts: 446.6 },
+    'Ashish the Claude': { rank: 10, expPts: 446.5 },
+    'Anand': { rank: 11, expPts: 445.5 },
+    'Alexander': { rank: 12, expPts: 443.6 },
+    'Humberto': { rank: 13, expPts: 441.9 },
+    'Herman #2': { rank: 14, expPts: 441.7 },
+    'Ben': { rank: 15, expPts: 441.2 },
+    'Herman': { rank: 16, expPts: 439.4 },
+    'D-Wayne': { rank: 17, expPts: 439.3 },
+    'LiLu': { rank: 18, expPts: 438.9 },
+    'Chet R': { rank: 19, expPts: 432.7 },
+    'Gabriel Uma': { rank: 20, expPts: 430.8 },
+    'Sean': { rank: 21, expPts: 428.1 },
+    'Mancini Family': { rank: 22, expPts: 426.4 },
+    'Vimal': { rank: 23, expPts: 425.3 },
+    'Max': { rank: 24, expPts: 425.0 },
+    'Stephan': { rank: 25, expPts: 421.9 },
+    'Kay K_eh': { rank: 26, expPts: 414.0 },
+    'Taheera': { rank: 27, expPts: 411.8 },
+    'Ashish the Human': { rank: 28, expPts: 409.3 },
+    'Bradley': { rank: 29, expPts: 402.2 },
+    'William': { rank: 30, expPts: 395.8 },
+    'Katia': { rank: 31, expPts: 389.5 },
+    'Nacho': { rank: 32, expPts: 357.3 },
+    'Henry': { rank: 33, expPts: 347.5 }
+};
+
+function getAiExpStats(participantName) {
+    const row = AI_EXP_RANKINGS[participantName];
+    if (!row) return { rank: '—', expPts: '—' };
+    return { rank: row.rank, expPts: row.expPts.toFixed(1) };
+}
+
 const POOL_ENTRY_FEE_USD = 15;
 const POOL_PRIZE_SECOND_USD = 30;
 const POOL_PRIZE_THIRD_USD = 15;
@@ -1447,7 +1490,7 @@ function renderRankingsTable(scores) {
             : 'Be the first to submit your predictions! Use the green <strong>Submit Your Picks</strong> button in the left sidebar to submit your predictions to the leaderboard.';
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td colspan="10" class="leaderboard-empty-cell text-center">
+            <td colspan="12" class="leaderboard-empty-cell text-center">
                 <div class="leaderboard-empty-icon">
                     <i class="fa-solid fa-users-slash"></i>
                 </div>
@@ -1462,7 +1505,8 @@ function renderRankingsTable(scores) {
     scores.forEach((player, index) => {
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
-        
+        const aiExp = getAiExpStats(player.name);
+
         tr.innerHTML = `
             <td>
                 <div class="rank-badge">${index + 1}</div>
@@ -1477,6 +1521,8 @@ function renderRankingsTable(scores) {
                     </div>
                 </div>
             </td>
+            <td class="text-center ai-exp-cell">${aiExp.rank}</td>
+            <td class="text-center ai-exp-cell font-heading">${aiExp.expPts}</td>
             <td class="medal-pick-cell">${leaderboardPredictionBadge(player.champ)}</td>
             <td class="medal-pick-cell">${leaderboardPredictionBadge(player.silver)}</td>
             <td class="medal-pick-cell">${leaderboardPredictionBadge(player.bronze)}</td>
