@@ -276,6 +276,15 @@ function leaderboardPredictionBadge(team) {
     return `<span class="badge badge-info leaderboard-pick-slot"><span class="leaderboard-flag-box">${flagHtml}</span><span class="leaderboard-pick-name">${t.name}</span></span>`;
 }
 
+function adminParticipantChampHtml(champCode) {
+    const team = getTeamByCode(champCode);
+    if (!team.code || isTbdLabel(team.name)) {
+        return 'Champ: None';
+    }
+    const flagHtml = team.flag || buildTeamFlagImgHtml(team.code);
+    return `Champ: <span class="admin-user-champ"><span class="leaderboard-flag-box">${flagHtml}</span><span class="admin-user-champ-name">${team.name}</span></span>`;
+}
+
 // 2. Bracket Matches Setup Schema (Matches 1-32)
 // This mirrors the official World Cup 2026 Knockout Path mapping
 const KNOCKOUTS_SCHEMA = {
@@ -2544,7 +2553,7 @@ function renderAdminSimulator() {
             userRow.innerHTML = `
                 <div style="display: flex; flex-direction: column; gap: 0.15rem;">
                     <span style="font-weight: 600; font-size: 0.88rem; color: var(--text-primary);">${p.name}</span>
-                    <span style="font-size: 0.72rem; color: var(--text-dark);">Champ: ${getTeamByCode(p.champ).flag} ${getTeamByCode(p.champ).name || 'None'}</span>
+                    <span class="admin-user-champ-line">${adminParticipantChampHtml(p.champ)}</span>
                 </div>
                 <button class="btn btn-secondary delete-user-btn" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; border-color: rgba(239, 68, 68, 0.3); color: var(--accent-crimson); display: inline-flex; align-items: center; gap: 0.3rem;" data-user="${username}">
                     <i class="fa-solid fa-trash-can"></i> Delete
