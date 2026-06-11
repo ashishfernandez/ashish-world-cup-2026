@@ -2415,15 +2415,34 @@ body:not(.dark-theme) .theme-toggle-btn i {
 
 #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled,
 #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover {
-    opacity: 0.45;
+    background-color: #94a3b8 !important;
+    color: #334155 !important;
+    border: none !important;
+    opacity: 1;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
+    box-shadow: none !important;
+}
+
+#sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled i,
+#sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled .btn-label,
+#sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover i,
+#sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover .btn-label {
+    color: #334155 !important;
 }
 
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled,
 body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover {
-    opacity: 0.45;
+    background-color: #4b5563 !important;
+    color: #9ca3af !important;
+    opacity: 1;
+}
+
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled i,
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled .btn-label,
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover i,
+body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover .btn-label {
+    color: #9ca3af !important;
 }
 
 .wizard-progress-tracker .progress-step.progress-step-skipped {
@@ -2987,6 +3006,11 @@ body.dark-theme #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:h
 
     body.dark-theme #sidebar-submit-btn.sidebar-submit-btn {
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled,
+    #sidebar-submit-btn.sidebar-submit-btn.sidebar-submit-disabled:hover {
+        box-shadow: none !important;
     }
 
     #sidebar-submit-btn .btn-label {

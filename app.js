@@ -656,9 +656,15 @@ function getOfficialResultsPayload() {
 function applyOfficialResultsFields(parsed) {
     STATE.officialResults.matches = parsed.matches || {};
     STATE.officialResults.advancingTeams = parsed.advancingTeams || [];
-    STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
-    STATE.officialResults.stripePaymentRequired = parsed.stripePaymentRequired !== false;
-    STATE.officialResults.submissionsOpen = parsed.submissionsOpen !== false;
+    if ('groupScoringActive' in parsed) {
+        STATE.officialResults.groupScoringActive = parsed.groupScoringActive !== false;
+    }
+    if ('stripePaymentRequired' in parsed) {
+        STATE.officialResults.stripePaymentRequired = parsed.stripePaymentRequired !== false;
+    }
+    if ('submissionsOpen' in parsed) {
+        STATE.officialResults.submissionsOpen = parsed.submissionsOpen !== false;
+    }
     if (STATE.participants.actuals) {
         // Keep actuals.bracketPicks aligned with officialResults.matches (same object reference).
         STATE.participants.actuals.bracketPicks = STATE.officialResults.matches;
@@ -898,6 +904,32 @@ function loadStateFromStorage() {
     }
 }
 
+async function persistOfficialResults() {
+    localStorage.setItem('wc-official-results', JSON.stringify(getOfficialResultsPayload()));
+
+    const db = getDb();
+    if (!db) {
+        console.warn('☁️ Supabase client not available — official results saved locally only');
+        return false;
+    }
+
+    try {
+        const official = getOfficialResultsPayload();
+        const { error } = await db
+            .from('official_results')
+            .upsert({ id: 'current', data: official }, { onConflict: 'id' });
+
+        if (error) {
+            console.error('❌ Failed to sync official results:', error);
+            return false;
+        }
+        return true;
+    } catch (err) {
+        console.error('❌ Failed to sync official results:', err);
+        return false;
+    }
+}
+
 async function saveStateToCloud() {
     const db = getDb();
     if (!db) {
@@ -906,21 +938,27 @@ async function saveStateToCloud() {
     }
 
     try {
-        // 1. Save participant submissions
-        let syncCount = 0;
         let lastError = null;
+
+        // 1. Official results first — admin toggles must reach cloud before the next poll
+        const officialOk = await persistOfficialResults();
+        if (!officialOk) {
+            lastError = new Error('official_results sync failed');
+        }
+
+        // 2. Participant submissions
+        let syncCount = 0;
         for (const username in STATE.participants) {
             if (username !== 'draft' && username !== 'actuals' && STATE.participants[username].submitted) {
                 const participant = STATE.participants[username];
-                
-                // upsert the submission (uses id as primary key)
+
                 const { error } = await db
                     .from('submissions')
                     .upsert(
                         { id: participant.id, data: participant },
                         { onConflict: 'id' }
                     );
-                    
+
                 if (error) {
                     console.error(`❌ Failed to sync submission for ${username}:`, error);
                     lastError = error;
@@ -930,18 +968,6 @@ async function saveStateToCloud() {
             }
         }
         if (syncCount > 0) console.log(`☁️ Synced ${syncCount} submission(s) to Supabase`);
-
-        // 2. Save official results
-        const official = getOfficialResultsPayload();
-        
-        const { error } = await db
-            .from('official_results')
-            .upsert({ id: 'current', data: official }, { onConflict: 'id' });
-            
-        if (error) {
-            console.error('❌ Failed to sync official results:', error);
-            lastError = error;
-        }
 
         return !lastError;
     } catch (err) {
@@ -1223,11 +1249,14 @@ function syncSubmissionsToggleUI() {
     }
 }
 
-function setSubmissionsOpen(open) {
+async function setSubmissionsOpen(open) {
     STATE.officialResults.submissionsOpen = open;
     syncSubmissionsToggleUI();
     updateSubmitButtonState();
-    saveStateToStorage();
+    const cloudOk = await persistOfficialResults();
+    if (!cloudOk) {
+        console.warn('☁️ Submissions toggle saved locally; cloud sync may retry on next save');
+    }
 }
 
 function setupAdminSubmissionsToggle() {
