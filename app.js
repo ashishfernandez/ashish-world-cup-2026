@@ -1446,7 +1446,7 @@ function renderLeaderboard() {
     updateActivePlayersCount();
 }
 
-/** AI pre-tournament expected rank/points — market model, all 33 pool entries (2026-06-10). */
+/** AI pre-tournament expected rank/points — market model, all 34 pool entries (2026-06-10). */
 const AI_EXP_RANKINGS = {
     'Anders': { rank: 1, expPts: 452.7 },
     'Felix': { rank: 2, expPts: 452.3 },
@@ -1479,8 +1479,9 @@ const AI_EXP_RANKINGS = {
     'Bradley': { rank: 29, expPts: 402.2 },
     'William': { rank: 30, expPts: 395.8 },
     'Katia': { rank: 31, expPts: 389.5 },
-    'Nacho': { rank: 32, expPts: 357.3 },
-    'Henry': { rank: 33, expPts: 347.5 }
+    'Marc C.': { rank: 32, expPts: 361.9 },
+    'Nacho': { rank: 33, expPts: 357.3 },
+    'Henry': { rank: 34, expPts: 347.5 }
 };
 
 function roundAiExpPtsUpToFive(value) {
