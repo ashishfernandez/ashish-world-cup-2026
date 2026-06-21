@@ -651,6 +651,7 @@ function isSubmissionsOpen() {
 }
 
 function getOfficialResultsPayload() {
+    recomputeOfficialAdvancingTeams();
     return {
         matches: STATE.officialResults.matches,
         advancingTeams: STATE.officialResults.advancingTeams,
@@ -684,6 +685,7 @@ function applyOfficialResultsFields(parsed) {
     if (parsed.selectedThirds && STATE.participants.actuals) {
         STATE.participants.actuals.selectedThirds = parsed.selectedThirds;
     }
+    recomputeOfficialAdvancingTeams();
 }
 
 function applyOfficialResultsFromCloud(resData) {
@@ -1330,9 +1332,39 @@ function setupThemeToggle() {
 
 // 7. Calculate Scores & Ranks Engine
 // Incorporates the "Any-Path" evaluation rules
+
+function areOfficialThirdPlacesLocked() {
+    const act = STATE.participants.actuals;
+    return !!(act?.selectedThirds && act.selectedThirds.length === 8);
+}
+
+/** Sync advancingTeams from live official group standings (+ 8 thirds once locked). */
+function recomputeOfficialAdvancingTeams() {
+    const act = STATE.participants.actuals;
+    if (!act?.groupStandings) {
+        STATE.officialResults.advancingTeams = [];
+        return;
+    }
+    const list = [];
+    for (const group in act.groupStandings) {
+        const row = act.groupStandings[group];
+        if (row?.[0]) list.push(row[0]);
+        if (row?.[1]) list.push(row[1]);
+    }
+    if (areOfficialThirdPlacesLocked()) {
+        act.selectedThirds.forEach(code => {
+            if (code && !list.includes(code)) list.push(code);
+        });
+    }
+    STATE.officialResults.advancingTeams = list;
+}
+
 function calculateParticipantScores() {
     const scoredList = [];
     const results = STATE.officialResults;
+    recomputeOfficialAdvancingTeams();
+    const actualAdvancers = results.advancingTeams || [];
+    const knockoutsScoringActive = areOfficialThirdPlacesLocked();
 
     for (const p of getGlobalSubmissionEntries()) {
         const username = p.id;
@@ -1340,10 +1372,9 @@ function calculateParticipantScores() {
         let koPts = 0;
 
         // A. Group advancement verification (Top 2 from each group + best 8 third places)
-        // Check how many of the participant's predicted advancing teams actually advanced
+        // Until admin locks 8 official third-place teams, only top-2 finishers count.
         if (isGroupScoringActive()) {
             const userAdvancers = getPredictedAdvancers(username);
-            const actualAdvancers = results.advancingTeams || [];
             userAdvancers.forEach(team => {
                 if (actualAdvancers.includes(team)) {
                     groupPts += POINTS_SCALE.groupAdvancement;
@@ -1351,47 +1382,43 @@ function calculateParticipantScores() {
             });
         }
 
-        // B. Knockout Progression validation ("Any-Path" rule)
-        // Verify Round of 32 winners (advancing to R16)
-        const r32ActualWinners = getActualWinnersForRound('R32');
-        const r32UserPicks = getPicksForRound(p, 'R32');
-        r32UserPicks.forEach(pick => {
-            if (r32ActualWinners.includes(pick)) koPts += POINTS_SCALE.roundOf32Winner;
-        });
+        // B. Knockout Progression validation ("Any-Path" rule) — unlocked after 8 official thirds
+        if (knockoutsScoringActive) {
+            const r32ActualWinners = getActualWinnersForRound('R32');
+            const r32UserPicks = getPicksForRound(p, 'R32');
+            r32UserPicks.forEach(pick => {
+                if (r32ActualWinners.includes(pick)) koPts += POINTS_SCALE.roundOf32Winner;
+            });
 
-        // Verify Round of 16 winners (advancing to QF)
-        const r16ActualWinners = getActualWinnersForRound('R16');
-        const r16UserPicks = getPicksForRound(p, 'R16');
-        r16UserPicks.forEach(pick => {
-            if (r16ActualWinners.includes(pick)) koPts += POINTS_SCALE.roundOf16Winner;
-        });
+            const r16ActualWinners = getActualWinnersForRound('R16');
+            const r16UserPicks = getPicksForRound(p, 'R16');
+            r16UserPicks.forEach(pick => {
+                if (r16ActualWinners.includes(pick)) koPts += POINTS_SCALE.roundOf16Winner;
+            });
 
-        // Verify Quarterfinal winners (advancing to SF)
-        const qfActualWinners = getActualWinnersForRound('QF');
-        const qfUserPicks = getPicksForRound(p, 'QF');
-        qfUserPicks.forEach(pick => {
-            if (qfActualWinners.includes(pick)) koPts += POINTS_SCALE.quarterfinalWinner;
-        });
+            const qfActualWinners = getActualWinnersForRound('QF');
+            const qfUserPicks = getPicksForRound(p, 'QF');
+            qfUserPicks.forEach(pick => {
+                if (qfActualWinners.includes(pick)) koPts += POINTS_SCALE.quarterfinalWinner;
+            });
 
-        // Verify Semifinal winners (advancing to Finals)
-        const sfActualWinners = getActualWinnersForRound('SF');
-        const sfUserPicks = getPicksForRound(p, 'SF');
-        sfUserPicks.forEach(pick => {
-            if (sfActualWinners.includes(pick)) koPts += POINTS_SCALE.semifinalWinner;
-        });
+            const sfActualWinners = getActualWinnersForRound('SF');
+            const sfUserPicks = getPicksForRound(p, 'SF');
+            sfUserPicks.forEach(pick => {
+                if (sfActualWinners.includes(pick)) koPts += POINTS_SCALE.semifinalWinner;
+            });
 
-        // Verify 3rd place winner
-        const thirdActualWinner = results.matches[31];
-        const thirdUserPick = p.bracketPicks[31];
-        if (thirdActualWinner && thirdUserPick === thirdActualWinner) {
-            koPts += POINTS_SCALE.thirdPlaceWinner;
-        }
+            const thirdActualWinner = results.matches[31];
+            const thirdUserPick = p.bracketPicks[31];
+            if (thirdActualWinner && thirdUserPick === thirdActualWinner) {
+                koPts += POINTS_SCALE.thirdPlaceWinner;
+            }
 
-        // Verify Champion winner
-        const champActualWinner = results.matches[32];
-        const champUserPick = p.bracketPicks[32];
-        if (champActualWinner && champUserPick === champActualWinner) {
-            koPts += POINTS_SCALE.finalWinner;
+            const champActualWinner = results.matches[32];
+            const champUserPick = p.bracketPicks[32];
+            if (champActualWinner && champUserPick === champActualWinner) {
+                koPts += POINTS_SCALE.finalWinner;
+            }
         }
 
         const totalScore = groupPts + koPts;
@@ -2384,6 +2411,7 @@ function moveActualTeam(groupName, index, direction) {
 
     // Rebuild bracket slots based on the new official group standings
     buildBracketFromStandings('actuals');
+    recomputeOfficialAdvancingTeams();
 
     saveStateToStorage();
     renderAll();
@@ -2659,6 +2687,7 @@ function renderAdminSimulator() {
                         act.selectedThirds.push(item.code);
                         resetSubsequentBracketPicks(act);
                         buildBracketFromStandings('actuals');
+                        recomputeOfficialAdvancingTeams();
                         saveStateToStorage();
                         renderAll();
                     });
@@ -3559,10 +3588,11 @@ function getPredictedAdvancers(username) {
         list.push(p.groupStandings[group][0]); // 1st
         list.push(p.groupStandings[group][1]); // 2nd
     }
-    // Plus default best 3rd places
-    for (let charCode = 65; charCode <= 72; charCode++) {
-        const group = String.fromCharCode(charCode);
-        if (p.groupStandings[group]) list.push(p.groupStandings[group][2]);
+    // Third-place advancers only count once admin has locked the official top 8
+    if (areOfficialThirdPlacesLocked() && p.selectedThirds?.length === 8) {
+        p.selectedThirds.forEach(code => {
+            if (code && !list.includes(code)) list.push(code);
+        });
     }
     return list;
 }
@@ -3856,6 +3886,7 @@ window.moveAdminThird = function(currentIndex, direction) {
     // Invalidate subsequent picks since order changed
     resetSubsequentBracketPicks(act);
     buildBracketFromStandings('actuals');
+    recomputeOfficialAdvancingTeams();
     saveStateToStorage();
     renderAll();
 };
@@ -3869,6 +3900,7 @@ window.removeAdminThird = function(index) {
     // Invalidate subsequent picks since selected thirds set changed
     resetSubsequentBracketPicks(act);
     buildBracketFromStandings('actuals');
+    recomputeOfficialAdvancingTeams();
     saveStateToStorage();
     renderAll();
 };
