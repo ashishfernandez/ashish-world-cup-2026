@@ -880,6 +880,10 @@ body.dark-theme .tourney-terms-ack {
     flex-wrap: wrap;
 }
 
+.leaderboard-table-header h3 {
+    gap: 1.15rem;
+}
+
 .standings-as-of-badge {
     display: inline-flex;
     align-items: center;
