@@ -488,19 +488,14 @@ async function init() {
     setupOnboarding();
     ensureStandardStandings();
 
-    if (!localStorage.getItem('wc-official-results')) {
-        prepopulateSimulatedResults();
-    }
-
     // Show cached pool immediately (helps desktop browsers with stale tabs)
     loadSubmissionsFromLocalCache();
     populateUserDropdowns();
-    renderAll();
 
     setupCloudSyncControls();
     updateCloudSyncBanner('loading');
 
-    // Global pool from Supabase (overwrites cache when successful)
+    // Global pool + official results from Supabase (first render uses cloud truth, not demo KO data)
     await refreshFromCloudAndRender();
 
     setupCloudSync();
@@ -902,6 +897,7 @@ function loadStateFromStorage() {
             STATE.participants.actuals.groupStandings[group] = GROUPS_DATA[group].map(t => t.code);
         }
     }
+    recomputeOfficialAdvancingTeams();
 
     // Submissions are NOT loaded from localStorage — only from Supabase (see loadStateFromCloud).
     // wc-submissions is a write-through cache updated after each cloud fetch.
